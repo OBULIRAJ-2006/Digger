@@ -1,15 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digger Game</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="script.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Digger Game</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
 </head>
 <body>
-    <h1>Digger Game</h1>
-    <canvas id="gameCanvas"></canvas>
-    <p>Use arrow keys to move the Digger. Collect treasures and avoid enemies!</p>
+  <h1>Digger Game</h1>
+  <canvas id="gameCanvas"></canvas>
+  <!-- Virtual Joystick Container for Mobile -->
+  <div id="joystickContainer">
+    <div id="joystickBase">
+      <div id="joystickHandle"></div>
+    </div>
+  </div>
+  <p id="scoreDisplay">Score: 0</p>
 </body>
 </html>

@@ -1,24 +1,62 @@
+/* Basic Reset & Layout */
 body {
     margin: 0;
+    padding: 0;
+    background-color: #000;
+    color: #fff;
+    font-family: Arial, sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
-    background-color: black;
-    color: white;
-    font-family: Arial, sans-serif;
-}
-
-canvas {
-    border: 2px solid white;
+  }
+  
+  /* Header & Score */
+  h1 {
+    margin: 10px;
+  }
+  
+  #scoreDisplay {
+    font-size: 20px;
+    margin: 10px;
+  }
+  
+  /* Canvas Setup for Pixel Art & Responsiveness */
+  canvas {
+    border: 2px solid #fff;
     background-color: #222;
-}
-
-h1 {
-    margin-bottom: 10px;
-}
-
-p {
-    margin-top: 10px;
-}
+    image-rendering: pixelated;
+    width: 90%;
+    max-width: 800px;
+    height: auto;
+  }
+  
+  /* Virtual Joystick Styles */
+  #joystickContainer {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 100px;
+    height: 100px;
+    z-index: 10;
+    touch-action: none; /* Prevent scrolling on touch */
+  }
+  
+  #joystickBase {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+  }
+  
+  #joystickHandle {
+    position: absolute;
+    left: 35px;
+    top: 35px;
+    width: 30px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    touch-action: none;
+  }
