@@ -1,120 +1,76 @@
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
 canvas.width = 800;
 canvas.height = 600;
 
-const gridSize = 40;
-const rows = canvas.height / gridSize;
-const cols = canvas.width / gridSize;
+const digger = {
+    x: 400,
+    y: 300,
+    width: 32,
+    height: 32,
+    speed: 4,
+    dx: 0,
+    dy: 0,
+    sprite: new Image()
+};
+digger.sprite.src = 'digger.png';
 
-class Digger {
-    constructor() {
-        this.x = 100;
-        this.y = 100;
-        this.speed = 5;
-    }
+const enemies = [];
+const treasures = [];
+const sounds = {
+    move: new Audio('move.mp3'),
+    collect: new Audio('collect.mp3'),
+    hit: new Audio('hit.mp3')
+};
 
-    move(direction) {
-        if (direction === "left" && this.x > 0) this.x -= this.speed;
-        if (direction === "right" && this.x < canvas.width - gridSize) this.x += this.speed;
-        if (direction === "up" && this.y > 0) this.y -= this.speed;
-        if (direction === "down" && this.y < canvas.height - gridSize) this.y += this.speed;
-    }
-
-    draw() {
-        ctx.fillStyle = "yellow";
-        ctx.fillRect(this.x, this.y, gridSize, gridSize);
-    }
+function drawDigger() {
+    ctx.drawImage(digger.sprite, digger.x, digger.y, digger.width, digger.height);
 }
 
-let player = new Digger();
+function drawEnemies() {
+    ctx.fillStyle = 'red';
+    enemies.forEach(enemy => ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height));
+}
 
-document.addEventListener("keydown", (event) => {
-    if (event.key === "ArrowLeft") player.move("left");
-    if (event.key === "ArrowRight") player.move("right");
-    if (event.key === "ArrowUp") player.move("up");
-    if (event.key === "ArrowDown") player.move("down");
+function drawTreasures() {
+    ctx.fillStyle = 'gold';
+    treasures.forEach(treasure => ctx.fillRect(treasure.x, treasure.y, treasure.width, treasure.height));
+}
+
+function update() {
+    digger.x += digger.dx;
+    digger.y += digger.dy;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawTreasures();
+    drawEnemies();
+    drawDigger();
+    requestAnimationFrame(update);
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowUp') { digger.dy = -digger.speed; sounds.move.play(); }
+    if (e.key === 'ArrowDown') { digger.dy = digger.speed; sounds.move.play(); }
+    if (e.key === 'ArrowLeft') { digger.dx = -digger.speed; sounds.move.play(); }
+    if (e.key === 'ArrowRight') { digger.dx = digger.speed; sounds.move.play(); }
 });
 
-let terrain = Array.from({ length: rows }, () => Array(cols).fill(1));
+document.addEventListener('keyup', () => {
+    digger.dx = 0;
+    digger.dy = 0;
+});
 
-function drawTerrain() {
-    for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
-            if (terrain[row][col] === 1) {
-                ctx.fillStyle = "brown";
-                ctx.fillRect(col * gridSize, row * gridSize, gridSize, gridSize);
-            }
-        }
+function spawnEnemies() {
+    for (let i = 0; i < 3; i++) {
+        enemies.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, width: 32, height: 32 });
     }
 }
 
-function dig() {
-    let playerRow = Math.floor(player.y / gridSize);
-    let playerCol = Math.floor(player.x / gridSize);
-    terrain[playerRow][playerCol] = 0;
-}
-
-class Enemy {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.speed = 2;
-    }
-
-    move() {
-        if (this.x < player.x) this.x += this.speed;
-        if (this.x > player.x) this.x -= this.speed;
-        if (this.y < player.y) this.y += this.speed;
-        if (this.y > player.y) this.y -= this.speed;
-    }
-
-    draw() {
-        ctx.fillStyle = "red";
-        ctx.fillRect(this.x, this.y, gridSize, gridSize);
+function spawnTreasures() {
+    for (let i = 0; i < 5; i++) {
+        treasures.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, width: 16, height: 16 });
     }
 }
 
-let enemies = [new Enemy(500, 300)];
-
-function updateEnemies() {
-    enemies.forEach(enemy => {
-        enemy.move();
-        enemy.draw();
-    });
-}
-
-let collectibles = [{ x: 200, y: 200 }];
-let score = 0;
-
-function drawCollectibles() {
-    collectibles.forEach(item => {
-        ctx.fillStyle = "green";
-        ctx.fillRect(item.x, item.y, gridSize / 2, gridSize / 2);
-    });
-}
-
-function checkCollect() {
-    collectibles = collectibles.filter(item => {
-        if (Math.abs(player.x - item.x) < gridSize && Math.abs(player.y - item.y) < gridSize) {
-            score += 10;
-            document.getElementById("score").innerText = `Score: ${score}`;
-            return false;
-        }
-        return true;
-    });
-}
-
-function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawTerrain();
-    dig();
-    player.draw();
-    updateEnemies();
-    drawCollectibles();
-    checkCollect();
-    requestAnimationFrame(gameLoop);
-}
-
-gameLoop();
+spawnEnemies();
+spawnTreasures();
+update();
