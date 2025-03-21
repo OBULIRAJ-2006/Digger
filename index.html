@@ -1,37 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digger Game</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reviving Retro Games: Digger</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="startScreen">
-        <h1>DIGGER GAME</h1>
-        <button id="startButton">Start Game</button>
-    </div>
+  <!-- Start Screen -->
+  <div id="startScreen" class="screen">
+    <h1>Digger Revival</h1>
+    <button id="startButton" class="main-btn">Start Game</button>
+  </div>
 
+  <!-- Game Screen -->
+  <div id="gameScreen" class="screen" style="display:none;">
+    <header>
+      <h2>Digger Game</h2>
+      <p id="scoreDisplay">Score: 0</p>
+    </header>
     <div id="gameContainer">
-        <canvas id="gameCanvas"></canvas>
-        <div class="controls">
-            <button id="fireBtn">🔥 Fire</button>
-            <div class="joystick">
-                <button class="arrow up">▲</button>
-                <div>
-                    <button class="arrow left">◀</button>
-                    <button class="arrow right">▶</button>
-                </div>
-                <button class="arrow down">▼</button>
-            </div>
+      <canvas id="gameCanvas"></canvas>
+    </div>
+    <!-- On-screen Controls for Mobile -->
+    <div id="controls">
+      <div id="joystick">
+        <button id="upBtn" class="control-btn">▲</button>
+        <div class="horz">
+          <button id="leftBtn" class="control-btn">◀</button>
+          <button id="rightBtn" class="control-btn">▶</button>
         </div>
+        <button id="downBtn" class="control-btn">▼</button>
+      </div>
+      <button id="fireBtn" class="control-btn fire">Fire</button>
     </div>
+    <button id="restartButton" class="main-btn" style="display:none;">Restart Game</button>
+  </div>
 
-    <div id="gameOverScreen">
-        <h2>Game Over</h2>
-        <button id="restartButton">Restart</button>
-    </div>
-
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
