@@ -23,6 +23,20 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
     
+    // Generate a random path (tunnel) through the terrain
+    function generateRandomPath() {
+      let currentRow = Math.floor(Math.random() * rows);
+      for (let c = 0; c < cols; c++) {
+        terrain[currentRow][c] = false;
+        // Randomly move the path up or down
+        if (Math.random() < 0.3) {
+          if (currentRow > 0 && Math.random() < 0.5) currentRow--;
+          else if (currentRow < rows - 1) currentRow++;
+        }
+      }
+    }
+    generateRandomPath();
+    
     // Load assets
     const diggerSprite = new Image();
     diggerSprite.src = "digger.png"; // Ensure this file exists
@@ -53,21 +67,30 @@ document.addEventListener("DOMContentLoaded", () => {
     let powerups = [];
     let bullets = [];
     
-    // Spawn Enemies at random positions
-    function spawnEnemies() {
-      enemies = [];
-      for (let i = 0; i < 3; i++) {
+    // Spawn one enemy on the random path after a delay
+    function spawnEnemy() {
+      // Choose a random clear cell from the random path
+      let possible = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (!terrain[r][c]) {
+            possible.push({ r, c });
+          }
+        }
+      }
+      if (possible.length > 0) {
+        const cell = possible[Math.floor(Math.random() * possible.length)];
         enemies.push({
-          x: Math.random() * (canvas.width - 32),
-          y: Math.random() * (canvas.height - 32),
+          x: cell.c * cellSize + (cellSize - 32) / 2,
+          y: cell.r * cellSize + (cellSize - 32) / 2,
           width: 32,
           height: 32,
-          speed: 2
+          speed: 1  // slower speed to mimic original game
         });
       }
     }
     
-    // Spawn Treasures at random positions
+    // Spawn treasures at random positions
     function spawnTreasures() {
       treasures = [];
       for (let i = 0; i < 5; i++) {
@@ -80,10 +103,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
     
-    // Spawn Powerups (e.g., speed boost)
+    // Spawn powerups (e.g., speed boost)
     function spawnPowerup() {
       powerups = [];
-      // 50% chance to spawn a powerup on each restart
       if (Math.random() < 0.5) {
         powerups.push({
           x: Math.random() * (canvas.width - 16),
@@ -109,8 +131,8 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // "Dig" the terrain as the player moves (clear the cell)
     function digTerrain() {
-      let col = Math.floor((player.x + player.width / 2) / cellSize);
-      let row = Math.floor((player.y + player.height / 2) / cellSize);
+      let col = Math.floor((player.x + player.width/2) / cellSize);
+      let row = Math.floor((player.y + player.height/2) / cellSize);
       if (row >= 0 && row < rows && col >= 0 && col < cols) {
         terrain[row][col] = false;
       }
@@ -185,6 +207,19 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
     
+    // Restrict enemy movement: only move if the next cell is clear (dug)
+    function canEnemyMove(enemy, dx, dy) {
+      let nextX = enemy.x + dx + enemy.width/2;
+      let nextY = enemy.y + dy + enemy.height/2;
+      let col = Math.floor(nextX / cellSize);
+      let row = Math.floor(nextY / cellSize);
+      // If within bounds and the terrain is clear, allow movement
+      if (row >= 0 && row < rows && col >= 0 && col < cols) {
+        return terrain[row][col] === false;
+      }
+      return false;
+    }
+    
     // Restart Game Function
     function restartGame() {
       score = 0;
@@ -203,16 +238,19 @@ document.addEventListener("DOMContentLoaded", () => {
           terrain[r][c] = true;
         }
       }
-      spawnEnemies();
+      generateRandomPath();
       spawnTreasures();
       spawnPowerup();
+      enemies = [];
       bullets = [];
+      // Spawn first enemy immediately, then spawn more one-by-one
+      spawnEnemy();
       document.getElementById("restartButton").style.display = "none";
       gameLoop();
     }
     
     // Update game objects
-    function update() {
+    function updateGame() {
       // Update player position
       player.x += player.dx;
       player.y += player.dy;
@@ -230,7 +268,7 @@ document.addEventListener("DOMContentLoaded", () => {
         player.lastDirection.y = player.dy !== 0 ? player.dy / Math.abs(player.dy) : player.lastDirection.y;
       }
     
-      // "Dig" terrain as player moves
+      // Dig terrain as player moves
       digTerrain();
     
       // Check collision with treasures
@@ -255,7 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     
-      // Decrement powerup timer and reset speed when finished
+      // Decrement powerup timer
       if (player.powerupTime > 0) {
         player.powerupTime--;
         if (player.powerupTime === 0) {
@@ -263,14 +301,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
     
-      // Enemies chase the player
+      // Enemies move slowly along dug paths only
       enemies.forEach((enemy) => {
-        if (enemy.x < player.x) enemy.x += enemy.speed;
-        else if (enemy.x > player.x) enemy.x -= enemy.speed;
-        if (enemy.y < player.y) enemy.y += enemy.speed;
-        else if (enemy.y > player.y) enemy.y -= enemy.speed;
+        let dx = 0, dy = 0;
+        if (enemy.x < player.x && canEnemyMove(enemy, enemy.speed, 0)) dx = enemy.speed;
+        else if (enemy.x > player.x && canEnemyMove(enemy, -enemy.speed, 0)) dx = -enemy.speed;
+        if (enemy.y < player.y && canEnemyMove(enemy, 0, enemy.speed)) dy = enemy.speed;
+        else if (enemy.y > player.y && canEnemyMove(enemy, 0, -enemy.speed)) dy = -enemy.speed;
+        enemy.x += dx;
+        enemy.y += dy;
     
-        // Collision with enemy -> game over
+        // Collision with enemy ends the game
         if (checkCollision(player, enemy)) {
           gameOver = true;
           soundEnemyHit.play();
@@ -287,7 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("restartButton").style.display = "block";
         return;
       }
-      update();
+      updateGame();
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawTerrain();
       drawTreasures();
@@ -330,7 +371,7 @@ document.addEventListener("DOMContentLoaded", () => {
         player.dx = player.speed;
         soundMove.play();
       }
-      // Fire with spacebar or 'f'
+      // Fire with spacebar or 'F'
       if (e.key === " " || e.key.toLowerCase() === "f") {
         fireBullet();
       }
@@ -361,9 +402,15 @@ document.addEventListener("DOMContentLoaded", () => {
     // Restart button handler
     document.getElementById("restartButton").addEventListener("click", restartGame);
     
-    // Initialize game objects and start the game loop
-    spawnEnemies();
+    // Spawn initial game objects
     spawnTreasures();
     spawnPowerup();
+    // Spawn the first enemy immediately...
+    spawnEnemy();
+    // ...and then spawn a new enemy every 10 seconds if game is not over
+    setInterval(() => {
+      if (!gameOver) spawnEnemy();
+    }, 10000);
+    
     gameLoop();
   });

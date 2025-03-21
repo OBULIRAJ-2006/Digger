@@ -46,19 +46,19 @@ body {
   .arrowRow {
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 15px;
     margin: 5px;
   }
   
   .arrow-btn {
     background-color: #444;
-    border: 2px solid #fff;
+    border: 3px solid #fff;
     color: #fff;
-    font-size: 20px;
-    padding: 10px;
-    border-radius: 5px;
-    width: 60px;
-    height: 60px;
+    font-size: 28px;
+    padding: 15px;
+    border-radius: 8px;
+    width: 80px;
+    height: 80px;
   }
   
   .arrow-btn:active {
@@ -71,13 +71,13 @@ body {
   
   .fire-btn {
     background-color: #ff4444;
-    border: 2px solid #fff;
+    border: 3px solid #fff;
     color: #fff;
-    font-size: 20px;
-    padding: 10px 20px;
-    border-radius: 5px;
-    width: 120px;
-    height: 60px;
+    font-size: 28px;
+    padding: 15px 30px;
+    border-radius: 8px;
+    width: 140px;
+    height: 80px;
   }
   
   .fire-btn:active {
@@ -87,11 +87,11 @@ body {
   /* Restart Button Style */
   #restartButton {
     background-color: #ff4444;
-    border: 2px solid #fff;
+    border: 3px solid #fff;
     color: #fff;
-    font-size: 16px;
+    font-size: 20px;
     padding: 10px 20px;
-    border-radius: 5px;
+    border-radius: 8px;
     margin-top: 10px;
     cursor: pointer;
   }
