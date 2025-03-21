@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ultimate Digger - Game</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>Ultimate Digger</h1>
+    <p id="scoreDisplay">Score: 0</p>
+  </header>
+  <div class="game-container">
+    <canvas id="gameCanvas"></canvas>
+  </div>
+  
+  <!-- On-screen Mobile Controls (placed in the bottom-right with margin) -->
+  <div id="mobileControls">
+    <div class="controlRow">
+      <button class="arrow-btn" id="upBtn">&#8593;</button>
+    </div>
+    <div class="controlRow">
+      <button class="arrow-btn" id="leftBtn">&#8592;</button>
+      <button class="arrow-btn" id="downBtn">&#8595;</button>
+      <button class="arrow-btn" id="rightBtn">&#8594;</button>
+    </div>
+    <div class="controlRow">
+      <button class="fire-btn" id="fireBtn">Fire</button>
+    </div>
+  </div>
+  
+  <!-- Restart Button (appears on game over) -->
+  <button id="restartButton" style="display:none;">Restart Game</button>
+  
+  <footer>
+    <p>Free &amp; Classic – Enjoy your Ultimate Digger adventure!</p>
+  </footer>
+</body>
+</html>

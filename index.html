@@ -3,39 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ultimate Digger</title>
+  <title>Ultimate Digger - Start</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="script.js" defer></script>
 </head>
 <body>
-  <header>
+  <div class="landing-container">
     <h1>Ultimate Digger</h1>
-    <p id="scoreDisplay">Score: 0</p>
-  </header>
-  <canvas id="gameCanvas"></canvas>
-  
-  <!-- On-screen Mobile Controls -->
-  <div id="controls">
-    <div id="mobileControls">
-      <div class="controlRow">
-        <button class="arrow-btn" id="upBtn">&#8593;</button>
-      </div>
-      <div class="controlRow">
-        <button class="arrow-btn" id="leftBtn">&#8592;</button>
-        <button class="arrow-btn" id="downBtn">&#8595;</button>
-        <button class="arrow-btn" id="rightBtn">&#8594;</button>
-      </div>
-      <div class="controlRow">
-        <button class="fire-btn" id="fireBtn">Fire</button>
-      </div>
-    </div>
+    <button id="startButton">Start Game</button>
   </div>
-  
-  <!-- Restart Button (shown when game over) -->
-  <button id="restartButton" style="display:none;">Restart Game</button>
-  
   <footer>
-    <p>Free &amp; Classic – Enjoy the Ultimate Digger Experience!</p>
+    <p>Enjoy the ultimate digging adventure!</p>
   </footer>
+  <script>
+    document.getElementById('startButton').addEventListener('click', function() {
+      window.location.href = 'game.html';
+    });
+  </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-/* Reset & Base Styles */
+/* Global Styles */
 * {
   box-sizing: border-box;
 }
@@ -25,23 +25,52 @@ h1 {
   margin-top: 5px;
 }
 
-/* Canvas Styles for Pixel Art & Responsiveness */
-canvas {
-  border: 4px solid #fff;
+/* Landing Page */
+.landing-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+}
+#startButton {
+  padding: 15px 30px;
+  font-size: 20px;
+  border: 3px solid #fff;
+  border-radius: 10px;
+  background: #ff4444;
+  color: #fff;
+  cursor: pointer;
+  margin-top: 20px;
+}
+#startButton:hover {
+  background: #ff6666;
+}
+
+/* Game Page Container */
+.game-container {
+  position: relative;
+  border: 5px solid #fff;
+  padding: 10px;
   background: url('classic-bg.png') no-repeat center center;
   background-size: cover;
+  margin: 20px;
+}
+
+/* Canvas Styles */
+canvas {
   image-rendering: pixelated;
-  width: 90%;
-  max-width: 800px;
-  height: auto;
+  width: 800px;
+  height: 600px;
   display: block;
 }
 
-/* Mobile Controls – Big and Comfortable */
-#controls {
-  margin-top: 10px;
-}
+/* Mobile Controls – Larger and positioned in bottom-right with margin */
 #mobileControls {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 100;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -49,29 +78,30 @@ canvas {
 .controlRow {
   display: flex;
   gap: 15px;
-  margin: 10px;
+  margin: 10px 0;
 }
 .arrow-btn, .fire-btn {
   background: #444;
   border: 3px solid #fff;
   color: #fff;
-  font-size: 28px;
-  padding: 15px;
+  font-size: 32px;
+  padding: 20px;
   border-radius: 10px;
-  width: 90px;
-  height: 90px;
+  width: 100px;
+  height: 100px;
 }
 .arrow-btn:active {
   background: #666;
 }
 .fire-btn {
   background: #ff4444;
-  width: 120px;
-  height: 90px;
+  width: 130px;
+  height: 100px;
 }
 .fire-btn:active {
   background: #ff6666;
 }
+
 /* Restart Button */
 #restartButton {
   background: #ff4444;
@@ -83,7 +113,33 @@ canvas {
   margin: 15px;
   cursor: pointer;
 }
-footer p {
-  font-size: 14px;
-  margin: 10px;
+
+/* Media Queries for Responsiveness */
+@media (max-width: 900px) {
+  canvas {
+    width: 100%;
+    height: auto;
+  }
+  .arrow-btn, .fire-btn {
+    font-size: 28px;
+    width: 80px;
+    height: 80px;
+    padding: 15px;
+  }
+  .fire-btn {
+    width: 100px;
+  }
+}
+
+@media (max-width: 600px) {
+  h1 {
+    font-size: 20px;
+  }
+  #scoreDisplay {
+    font-size: 16px;
+  }
+  #startButton {
+    font-size: 18px;
+    padding: 10px 20px;
+  }
 }

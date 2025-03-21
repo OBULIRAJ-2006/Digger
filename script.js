@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let gameOver = false;
   document.getElementById("scoreDisplay").innerText = "Score: " + score;
   
-  // Terrain grid setup (each cell 40x40)
+  // Terrain grid: cells of 40x40 pixels
   const cellSize = 40;
   const cols = canvas.width / cellSize;
   const rows = canvas.height / cellSize;
@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
   for (let r = 0; r < rows; r++) {
     terrain[r] = [];
     for (let c = 0; c < cols; c++) {
-      terrain[r][c] = true; // true means "dirt" exists
+      terrain[r][c] = true; // true = dirt exists
     }
   }
   // Generate a random tunnel (clear cells) across the grid
@@ -37,17 +37,20 @@ document.addEventListener("DOMContentLoaded", () => {
   // Load assets
   const diggerSprite = new Image();
   diggerSprite.src = "digger.png"; // 32x32 pixel art
-  // Sound effects (ensure these files exist)
   const soundMove = new Audio("move.mp3");
   const soundCollect = new Audio("collect.mp3");
   const soundEnemyHit = new Audio("hit.mp3");
   const soundFire = new Audio("fire.mp3");
   const soundPowerUp = new Audio("powerup.mp3");
   
-  // Player (Digger)
+  // Determine player's starting position near the tunnel's left edge:
+  let startingRow = 0;
+  for (let r = 0; r < rows; r++) {
+    if (!terrain[r][0]) { startingRow = r; break; }
+  }
   const player = {
-    x: canvas.width / 2 - 16,
-    y: canvas.height / 2 - 16,
+    x: 0 * cellSize + (cellSize - 32) / 2,
+    y: startingRow * cellSize + (cellSize - 32) / 2,
     width: 32,
     height: 32,
     baseSpeed: 4,
@@ -56,22 +59,28 @@ document.addEventListener("DOMContentLoaded", () => {
     dy: 0,
     sprite: diggerSprite,
     powerupTime: 0,
-    lastDirection: { x: 1, y: 0 } // default facing right
+    lastDirection: { x: 1, y: 0 }
   };
   
-  // Game objects arrays
   let enemies = [];
   let emeralds = [];    // collectibles (emeralds)
-  let goldBags = [];    // gold bags that might fall
+  let goldBags = [];    // gold bags that may fall
   let powerups = [];
   let bullets = [];
   
-  // Spawn an enemy on a dug cell along the tunnel
+  // Spawn an enemy on a clear cell that is at least 100px away from the player, and limit to 3 at a time
   function spawnEnemy() {
+    if (enemies.length >= 3) return;
     let possible = [];
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
-        if (!terrain[r][c]) possible.push({ r, c });
+        if (!terrain[r][c]) {
+          let ex = c * cellSize + (cellSize - 32) / 2;
+          let ey = r * cellSize + (cellSize - 32) / 2;
+          if (Math.hypot(ex - player.x, ey - player.y) > 100) {
+            possible.push({ r, c });
+          }
+        }
       }
     }
     if (possible.length > 0) {
@@ -81,16 +90,16 @@ document.addEventListener("DOMContentLoaded", () => {
         y: cell.r * cellSize + (cellSize - 32) / 2,
         width: 32,
         height: 32,
-        speed: 1  // slow speed
+        speed: 1
       });
     }
   }
   
-  // Spawn collectibles: emeralds and gold bags
+  // Spawn collectibles: 10 emeralds and 3 gold bags
   function spawnCollectibles() {
     emeralds = [];
     goldBags = [];
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 10; i++) {
       let col = Math.floor(Math.random() * cols);
       let row = Math.floor(Math.random() * rows);
       if (!terrain[row][col]) {
@@ -118,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
-  // Spawn a power-up (speed boost)
+  // Spawn power-up (speed boost)
   function spawnPowerup() {
     powerups = [];
     if (Math.random() < 0.5) {
@@ -136,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
-  // Draw terrain (only cells still with dirt)
+  // Draw terrain (only cells with dirt)
   function drawTerrain() {
     ctx.fillStyle = "#654321";
     for (let r = 0; r < rows; r++) {
@@ -148,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
-  // "Dig" the terrain as player moves
+  // Player "digs" by clearing the cell under its center
   function digTerrain() {
     let col = Math.floor((player.x + player.width/2) / cellSize);
     let row = Math.floor((player.y + player.height/2) / cellSize);
@@ -157,44 +166,34 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
-  // Draw player
+  // Drawing routines
   function drawPlayer() {
     ctx.drawImage(player.sprite, player.x, player.y, player.width, player.height);
   }
-  
-  // Draw enemies
   function drawEnemies() {
     ctx.fillStyle = "red";
     enemies.forEach(enemy => {
       ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
     });
   }
-  
-  // Draw emeralds
   function drawEmeralds() {
     ctx.fillStyle = "lime";
     emeralds.forEach(e => {
       ctx.fillRect(e.x, e.y, e.width, e.height);
     });
   }
-  
-  // Draw gold bags
   function drawGoldBags() {
     ctx.fillStyle = "gold";
     goldBags.forEach(bag => {
       ctx.fillRect(bag.x, bag.y, bag.width, bag.height);
     });
   }
-  
-  // Draw power-ups
   function drawPowerups() {
     ctx.fillStyle = "cyan";
     powerups.forEach(pu => {
       ctx.fillRect(pu.x, pu.y, pu.width, pu.height);
     });
   }
-  
-  // Draw bullets
   function drawBullets() {
     ctx.fillStyle = "white";
     bullets.forEach(b => {
@@ -202,7 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
   
-  // Update bullets (movement and collision with enemies)
+  // Update bullets: movement and enemy collision
   function updateBullets() {
     bullets.forEach((b, i) => {
       b.x += b.dx;
@@ -222,7 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
   
-  // Update gold bags (simulate falling)
+  // Update gold bags: simulate falling if below cell is clear
   function updateGoldBags() {
     goldBags.forEach(bag => {
       let col = Math.floor(bag.x / cellSize);
@@ -260,7 +259,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
   
-  // Restrict enemy movement to dug terrain
+  // Enemies move only along dug cells (tunnel) toward the player
   function canEnemyMove(enemy, dx, dy) {
     let nextX = enemy.x + dx + enemy.width/2;
     let nextY = enemy.y + dy + enemy.height/2;
@@ -272,8 +271,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return false;
   }
   
-  // Update all game objects
   function updateGame() {
+    // Update player position
     player.x += player.dx;
     player.y += player.dy;
     if (player.x < 0) player.x = 0;
@@ -281,16 +280,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (player.y < 0) player.y = 0;
     if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
     
-    // Update last movement direction
+    // Update last movement direction if moving
     if (player.dx !== 0 || player.dy !== 0) {
-      player.lastDirection.x = player.dx !== 0 ? player.dx/Math.abs(player.dx) : player.lastDirection.x;
-      player.lastDirection.y = player.dy !== 0 ? player.dy/Math.abs(player.dy) : player.lastDirection.y;
+      player.lastDirection.x = player.dx !== 0 ? player.dx / Math.abs(player.dx) : player.lastDirection.x;
+      player.lastDirection.y = player.dy !== 0 ? player.dy / Math.abs(player.dy) : player.lastDirection.y;
     }
     
-    // Player digs terrain as they move
     digTerrain();
     
-    // Check collisions with emeralds
+    // Collect emeralds
     emeralds.forEach((e, i) => {
       if (checkCollision(player, e)) {
         emeralds.splice(i, 1);
@@ -300,7 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
     
-    // Check collisions with power-ups
+    // Collect power-ups
     powerups.forEach((pu, i) => {
       if (checkCollision(player, pu)) {
         powerups.splice(i, 1);
@@ -312,13 +310,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
     
-    // Decrement power-up timer
     if (player.powerupTime > 0) {
       player.powerupTime--;
       if (player.powerupTime === 0) player.speed = player.baseSpeed;
     }
     
-    // Enemies chase player along dug path
+    // Enemies chase player along the tunnel
     enemies.forEach(enemy => {
       let dx = 0, dy = 0;
       if (enemy.x < player.x && canEnemyMove(enemy, enemy.speed, 0)) dx = enemy.speed;
@@ -327,7 +324,6 @@ document.addEventListener("DOMContentLoaded", () => {
       else if (enemy.y > player.y && canEnemyMove(enemy, 0, -enemy.speed)) dy = -enemy.speed;
       enemy.x += dx;
       enemy.y += dy;
-      
       if (checkCollision(player, enemy)) {
         gameOver = true;
         soundEnemyHit.play();
@@ -338,7 +334,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateGoldBags();
   }
   
-  // Main game loop
   function gameLoop() {
     if (gameOver) {
       document.getElementById("restartButton").style.display = "block";
@@ -356,7 +351,6 @@ document.addEventListener("DOMContentLoaded", () => {
     requestAnimationFrame(gameLoop);
   }
   
-  // Fire bullet function (uses player's last direction)
   function fireBullet() {
     let bullet = {
       x: player.x + player.width/2 - 4,
@@ -370,13 +364,13 @@ document.addEventListener("DOMContentLoaded", () => {
     soundFire.play();
   }
   
-  // Restart game function
   function restartGame() {
     score = 0;
     document.getElementById("scoreDisplay").innerText = "Score: " + score;
     gameOver = false;
-    player.x = canvas.width / 2 - player.width / 2;
-    player.y = canvas.height / 2 - player.height / 2;
+    // Reset player to left edge of tunnel
+    player.x = 0 * cellSize + (cellSize - player.width)/2;
+    player.y = startingRow * cellSize + (cellSize - player.height)/2;
     player.dx = 0;
     player.dy = 0;
     player.speed = player.baseSpeed;
@@ -396,7 +390,6 @@ document.addEventListener("DOMContentLoaded", () => {
     gameLoop();
   }
   
-  // Keyboard controls
   document.addEventListener("keydown", (e) => {
     if (e.key === "ArrowUp") {
       player.dy = -player.speed;
@@ -439,14 +432,12 @@ document.addEventListener("DOMContentLoaded", () => {
   rightBtn.addEventListener("touchend", () => { player.dx = 0; });
   fireBtn.addEventListener("touchstart", () => { fireBullet(); });
   
-  // Restart button event
   document.getElementById("restartButton").addEventListener("click", restartGame);
   
-  // Spawn initial objects and start loop
   spawnCollectibles();
   spawnPowerup();
   spawnEnemy();
-  // Spawn additional enemy every 15 seconds
+  // Spawn additional enemy every 15 seconds (if less than 3 exist)
   setInterval(() => { if (!gameOver) spawnEnemy(); }, 15000);
   
   gameLoop();
