@@ -22,7 +22,7 @@ goldImg.src = "gold.png";     // Gold bag sprite
 const emeraldImg = new Image();
 emeraldImg.src = "emerald.png"; // Emerald sprite
 
-// Load Sounds (ensure these files exist or adjust paths)
+// Load Sounds (ensure these files exist)
 const soundMove = new Audio("move.mp3");
 const soundCollect = new Audio("collect.mp3");
 const soundEnemyHit = new Audio("hit.mp3");
@@ -35,13 +35,13 @@ const soundPowerUp = new Audio("powerup.mp3");
 let score = 0;
 let gameOver = false;
 
-// Terrain grid: each cell is 40x40
+// Terrain grid: each cell is 40x40 pixels
 const cellSize = 40;
 const cols = canvas.width / cellSize;
 const rows = canvas.height / cellSize;
 let terrain = [];
 
-// Global variable to store tunnel row (for enemy spawn)
+// Global variable to store tunnel row for enemy spawn
 let tunnelRow = 0;
 
 // Initialize terrain: true means dirt is present
@@ -55,7 +55,7 @@ function initTerrain() {
   }
 }
 
-// Generate a tunnel across the grid and store tunnelRow
+// Generate a tunnel: clear a path across the grid; store tunnelRow
 function generateTunnel() {
   let currentRow = Math.floor(Math.random() * rows);
   for (let c = 0; c < cols; c++) {
@@ -95,7 +95,7 @@ let bullets = [];
 // Spawning Functions
 // ==================================================================
 
-// Spawn exactly 10 emeralds (placed randomly)
+// Spawn exactly 10 emeralds (placed randomly, regardless of tunnel)
 function spawnEmeralds() {
   emeralds = [];
   let count = 0;
@@ -113,7 +113,7 @@ function spawnEmeralds() {
   }
 }
 
-// Spawn exactly 3 gold bags; they remain until the cell beneath is dug out
+// Spawn exactly 3 gold bags; they remain until the cell beneath is cleared, then fall
 function spawnGoldBags() {
   goldBags = [];
   let count = 0;
@@ -149,7 +149,7 @@ function spawnEnemy() {
   });
 }
 
-// Spawn power-up (speed boost)
+// Spawn power-up (speed boost block)
 function spawnPowerups() {
   powerups = [];
   if (Math.random() < 0.5) {
@@ -171,9 +171,9 @@ function spawnPowerups() {
 // Drawing Functions
 // ==================================================================
 
-// Draw terrain: only cells with dirt remain
+// Draw terrain (dirt cells appear as brown "sand")
 function drawTerrain() {
-  ctx.fillStyle = "#654321";
+  ctx.fillStyle = "#a0522d"; // attractive brown sand color
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       if (terrain[r][c]) {
@@ -188,7 +188,7 @@ function drawPlayer() {
   ctx.drawImage(player.sprite, player.x, player.y, player.width, player.height);
 }
 
-// Draw enemies using enemy sprite
+// Draw enemies using sprite
 function drawEnemies() {
   enemies.forEach(enemy => {
     ctx.drawImage(enemyImg, enemy.x, enemy.y, enemy.width, enemy.height);
@@ -231,7 +231,7 @@ function drawBullets() {
 // Update Functions
 // ==================================================================
 
-// Update player: move and dig terrain
+// Update player: move and clear (dig) terrain
 function updatePlayer() {
   player.x += player.dx;
   player.y += player.dy;
@@ -240,7 +240,7 @@ function updatePlayer() {
   if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
   if (player.y < 0) player.y = 0;
   if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
-  // Update last direction; if no movement, default to left
+  // Update last direction; if no horizontal movement, default to left
   if (player.dx === 0 && player.dy === 0) {
     if (player.lastDirection.x === 0) {
       player.lastDirection = { x: -1, y: 0 };
@@ -270,7 +270,7 @@ function updatePlayer() {
   }
 }
 
-// Update enemies: move only on cleared cells (tunnel path)
+// Update enemies: move only on cleared (dug) cells (tunnel path)
 function updateEnemies() {
   enemies.forEach(enemy => {
     let dx = 0, dy = 0;
@@ -301,7 +301,7 @@ function cellBlocked(x, y) {
   return terrain[row][col];
 }
 
-// Update bullets: move them and check collision with enemies
+// Update bullets: move them and check collisions with enemies
 function updateBullets() {
   bullets.forEach((bullet, index) => {
     bullet.x += bullet.dx;
@@ -332,16 +332,23 @@ function updateGoldBags() {
     if (bag.falling) {
       bag.vy += 0.2;
       bag.y += bag.vy;
+      // If bag has fallen more than 2 blocks, its fallDistance is used
       if (bag.y + bag.height >= canvas.height) {
         bag.y = canvas.height - bag.height;
         bag.vy = 0;
         bag.falling = false;
       }
+      // If a falling bag collides with an enemy, remove enemy
       enemies.forEach((enemy, idx) => {
-        if (isColliding(bag, enemy)) {
+        if (isColliding(bag, enemy) && bag.y > enemy.y + 2 * cellSize) {
           enemies.splice(idx, 1);
           score += 20;
           scoreDisplay.innerText = "Score: " + score;
+          soundEnemyHit.play();
+        }
+        // If bag collides with player after falling more than 2 blocks, game over
+        if (isColliding(bag, player) && bag.y > player.y + 2 * cellSize) {
+          gameOver = true;
           soundEnemyHit.play();
         }
       });
@@ -452,7 +459,7 @@ function fireBullet() {
 // ==================================================================
 function endGame() {
   if (!emeralds.every(e => e.collected)) {
-    alert("Game Over! Digger was caught by an enemy.");
+    alert("Game Over! Digger was hit.");
   }
   restartButton.style.display = "block";
   gameScreen.style.display = "none";
@@ -521,10 +528,9 @@ startButton.addEventListener("click", () => {
   spawnEnemy();
   gameLoop();
 });
-
 restartButton.addEventListener("click", resetGame);
 
-// ==================================================================
-// Additional Enemy Spawn Timer (every 15 seconds if less than 3 enemies)
-// ==================================================================
+// ================================================================== */
+/* Additional Enemy Spawn Timer (Every 15 seconds, if less than 3 enemies exist) */
+/* ================================================================== */
 setInterval(() => { if (!gameOver && enemies.length < 3) { spawnEnemy(); } }, 15000);
