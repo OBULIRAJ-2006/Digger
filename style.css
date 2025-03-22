@@ -31,7 +31,6 @@
     height: 100%;
   }
   
-  /* Start Screen */
   #startScreen {
     background: url('classic-bg.png') no-repeat center;
     background-size: cover;
@@ -65,15 +64,14 @@
     transform: scale(1.05);
   }
   
-  /* ================================================================== */
-  /* Game Screen */
-  /* ================================================================== */
   #gameScreen {
     display: none;
     background-color: #000;
   }
   
-  /* Header in Game Screen */
+  /* ================================================================== */
+  /* Header */
+  /* ================================================================== */
   header {
     margin: 10px;
   }
@@ -112,7 +110,7 @@
   }
   
   /* ================================================================== */
-  /* Controls Section */
+  /* Controls */
   /* ================================================================== */
   #controls {
     position: absolute;
@@ -123,9 +121,7 @@
     padding: 0 20px;
   }
   
-  /* ================================================================== */
   /* Fire Button (Left Side) */
-  /* ================================================================== */
   #fireContainer {
     position: relative;
     left: 20px;
@@ -148,9 +144,7 @@
     transform: scale(1.1);
   }
   
-  /* ================================================================== */
   /* Joystick (Right Side) */
-  /* ================================================================== */
   #joystickContainer {
     position: relative;
     right: 20px;
@@ -287,7 +281,7 @@
   }
   
   /* ================================================================== */
-  /* Extra Utility Classes (for potential future enhancements) */
+  /* Extra Utility Classes (for future enhancements) */
   /* ================================================================== */
   .margin-top-10 { margin-top: 10px; }
   .margin-top-20 { margin-top: 20px; }
