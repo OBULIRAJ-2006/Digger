@@ -2,304 +2,304 @@
 /* Global Reset and Base Styles */
 /* ================================================================== */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  body, html {
-    width: 100%;
-    height: 100%;
-    overflow: hidden; /* Prevent scrollbars */
-    background: linear-gradient(135deg, #1a1a1a, #3a3a3a);
-    font-family: 'Press Start 2P', cursive, sans-serif;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-  }
-  
-  /* ================================================================== */
-  /* Screen Containers */
-  /* ================================================================== */
-  .screen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
-  
-  /* Start Screen */
-  #startScreen {
-    background: url('classic-bg.png') no-repeat center;
-    background-size: cover;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-  #startScreen h1 {
-    font-size: 40px;
-    margin-bottom: 20px;
-    color: gold;
-    text-shadow: 3px 3px 8px #000;
-  }
-  .main-btn {
-    padding: 15px 30px;
-    font-size: 24px;
-    border: 3px solid gold;
-    border-radius: 10px;
-    background-color: gold;
-    color: #000;
-    cursor: pointer;
-    transition: background 0.3s, transform 0.2s;
-  }
-  .main-btn:hover {
-    background-color: #ffd633;
-    transform: scale(1.05);
-  }
-  
-  /* ================================================================== */
-  /* Game Screen */
-  /* ================================================================== */
-  #gameScreen {
-    display: none;
-    background-color: #000;
-  }
-  header {
-    margin: 10px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* No scrollbars */
+  background: linear-gradient(135deg, #1a1a1a, #3a3a3a);
+  font-family: 'Press Start 2P', cursive, sans-serif;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* ================================================================== */
+/* Screen Containers */
+/* ================================================================== */
+.screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Start Screen */
+#startScreen {
+  background: url('classic-bg.png') no-repeat center;
+  background-size: cover;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+#startScreen h1 {
+  font-size: 40px;
+  margin-bottom: 20px;
+  color: gold;
+  text-shadow: 3px 3px 8px #000;
+}
+.main-btn {
+  padding: 15px 30px;
+  font-size: 24px;
+  border: 3px solid gold;
+  border-radius: 10px;
+  background-color: gold;
+  color: #000;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+.main-btn:hover {
+  background-color: #ffd633;
+  transform: scale(1.05);
+}
+
+/* ================================================================== */
+/* Game Screen */
+/* ================================================================== */
+#gameScreen {
+  display: none;
+  background-color: #000;
+}
+header {
+  margin: 10px;
+}
+header h2 {
+  font-size: 2em;
+  color: gold;
+  text-shadow: 2px 2px 6px #000;
+}
+#scoreDisplay {
+  font-size: 1.2em;
+  margin-top: 5px;
+}
+
+/* ================================================================== */
+/* Game Container and Canvas */
+/* ================================================================== */
+#gameContainer {
+  position: relative;
+  width: 800px;
+  height: 600px;
+  margin: 20px auto;
+  background: url('classic-bg.png') no-repeat center;
+  background-size: cover;
+  border: 8px solid gold;
+  box-shadow: 0 0 20px rgba(255,204,0,0.8);
+  border-radius: 15px;
+  overflow: hidden;
+}
+canvas {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+/* ================================================================== */
+/* Controls Section */
+/* ================================================================== */
+#controls {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+/* Fire Button (Left Side) */
+#fireContainer {
+  position: relative;
+  left: 20px;
+}
+.control-btn.fire {
+  width: 90px;
+  height: 90px;
+  background-color: #e91e63;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+.control-btn.fire:hover {
+  background-color: #d50000;
+  transform: scale(1.1);
+}
+
+/* Joystick (Right Side) */
+#joystickContainer {
+  position: relative;
+  right: 20px;
+}
+#joystick {
+  width: 100px;
+  height: 100px;
+  background-color: #444;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  position: relative;
+}
+#joystick .horizontal {
+  display: flex;
+  justify-content: center;
+  margin: 5px 0;
+}
+.arrow-btn {
+  width: 60px;
+  height: 60px;
+  background-color: #00bcd4;
+  border: 3px solid #fff;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 28px;
+  cursor: pointer;
+  margin: 5px;
+  transition: background 0.3s, transform 0.2s;
+}
+.arrow-btn:hover {
+  background-color: #008ba3;
+  transform: scale(1.1);
+}
+
+/* ================================================================== */
+/* Restart Button */
+/* ================================================================== */
+#restartButton {
+  margin-top: 20px;
+  padding: 12px 24px;
+  font-size: 24px;
+  background-color: gold;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: none;
+  transition: background 0.3s;
+}
+#restartButton:hover {
+  background-color: #ffd633;
+}
+
+/* ================================================================== */
+/* Responsive Design */
+/* ================================================================== */
+@media screen and (max-width: 1024px) {
+  #gameContainer {
+    width: 90vw;
+    height: 70vh;
+    border-width: 6px;
   }
   header h2 {
-    font-size: 2em;
-    color: gold;
-    text-shadow: 2px 2px 6px #000;
+    font-size: 1.8em;
   }
-  #scoreDisplay {
-    font-size: 1.2em;
-    margin-top: 5px;
-  }
-  
-  /* ================================================================== */
-  /* Game Container and Canvas */
-  /* ================================================================== */
-  #gameContainer {
-    position: relative;
-    width: 800px;
-    height: 600px;
-    margin: 20px auto;
-    background: url('classic-bg.png') no-repeat center;
-    background-size: cover;
-    border: 8px solid gold;
-    box-shadow: 0 0 20px rgba(255,204,0,0.8);
-    border-radius: 15px;
-    overflow: hidden;
-  }
-  canvas {
-    width: 100%;
-    height: 100%;
-    image-rendering: pixelated;
-  }
-  
-  /* ================================================================== */
-  /* Controls Section */
-  /* ================================================================== */
-  #controls {
-    position: absolute;
-    bottom: 20px;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 20px;
-  }
-  
-  /* Fire Button (Left Side) */
-  #fireContainer {
-    position: relative;
-    left: 20px;
-  }
-  .control-btn.fire {
-    width: 90px;
-    height: 90px;
-    background-color: #e91e63;
-    border: 3px solid #fff;
-    border-radius: 50%;
-    color: #fff;
-    font-size: 24px;
-    cursor: pointer;
-    transition: background 0.3s, transform 0.2s;
-  }
-  .control-btn.fire:hover {
-    background-color: #d50000;
-    transform: scale(1.1);
-  }
-  
-  /* Joystick (Right Side) */
-  #joystickContainer {
-    position: relative;
-    right: 20px;
-  }
-  #joystick {
-    width: 100px;
-    height: 100px;
-    background-color: #444;
-    border: 3px solid #fff;
-    border-radius: 50%;
-    position: relative;
-  }
-  #joystick .horizontal {
-    display: flex;
-    justify-content: center;
-    margin: 5px 0;
+  #restartButton {
+    font-size: 22px;
+    padding: 10px 20px;
   }
   .arrow-btn {
-    width: 60px;
-    height: 60px;
-    background-color: #00bcd4;
-    border: 3px solid #fff;
-    border-radius: 10px;
-    color: #fff;
-    font-size: 28px;
-    cursor: pointer;
-    margin: 5px;
-    transition: background 0.3s, transform 0.2s;
+    width: 55px;
+    height: 55px;
+    font-size: 26px;
   }
-  .arrow-btn:hover {
-    background-color: #008ba3;
-    transform: scale(1.1);
+  .control-btn.fire {
+    width: 80px;
+    height: 80px;
+    font-size: 22px;
   }
-  
-  /* ================================================================== */
-  /* Restart Button */
-  /* ================================================================== */
+}
+
+@media screen and (max-width: 768px) {
+  #gameContainer {
+    width: 95vw;
+    height: 75vh;
+    border-width: 4px;
+  }
+  header h2 {
+    font-size: 1.6em;
+  }
   #restartButton {
-    margin-top: 20px;
-    padding: 12px 24px;
+    font-size: 20px;
+    padding: 8px 18px;
+  }
+  .arrow-btn {
+    width: 50px;
+    height: 50px;
     font-size: 24px;
-    background-color: gold;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    display: none;
-    transition: background 0.3s;
   }
-  #restartButton:hover {
-    background-color: #ffd633;
+  .control-btn.fire {
+    width: 70px;
+    height: 70px;
+    font-size: 20px;
   }
-  
-  /* ================================================================== */
-  /* Responsive Design */
-  /* ================================================================== */
-  @media screen and (max-width: 1024px) {
-    #gameContainer {
-      width: 90vw;
-      height: 70vh;
-      border-width: 6px;
-    }
-    header h2 {
-      font-size: 1.8em;
-    }
-    #restartButton {
-      font-size: 22px;
-      padding: 10px 20px;
-    }
-    .arrow-btn {
-      width: 55px;
-      height: 55px;
-      font-size: 26px;
-    }
-    .control-btn.fire {
-      width: 80px;
-      height: 80px;
-      font-size: 22px;
-    }
+  #controls {
+    flex-direction: column;
   }
-  
-  @media screen and (max-width: 768px) {
-    #gameContainer {
-      width: 95vw;
-      height: 75vh;
-      border-width: 4px;
-    }
-    header h2 {
-      font-size: 1.6em;
-    }
-    #restartButton {
-      font-size: 20px;
-      padding: 8px 18px;
-    }
-    .arrow-btn {
-      width: 50px;
-      height: 50px;
-      font-size: 24px;
-    }
-    .control-btn.fire {
-      width: 70px;
-      height: 70px;
-      font-size: 20px;
-    }
-    #controls {
-      flex-direction: column;
-    }
+}
+
+@media screen and (max-width: 480px) {
+  #gameContainer {
+    width: 100vw;
+    height: 90vh;
+    border-width: 4px;
   }
-  
-  @media screen and (max-width: 480px) {
-    #gameContainer {
-      width: 100vw;
-      height: 90vh;
-      border-width: 4px;
-    }
-    header h2 {
-      font-size: 1.4em;
-    }
-    #restartButton {
-      font-size: 18px;
-      padding: 8px 16px;
-    }
-    .arrow-btn {
-      width: 45px;
-      height: 45px;
-      font-size: 22px;
-    }
-    .control-btn.fire {
-      width: 65px;
-      height: 65px;
-      font-size: 18px;
-    }
+  header h2 {
+    font-size: 1.4em;
   }
-  
-  /* ================================================================== */
-  /* Extra Utility Classes (for future enhancements) */
-  /* ================================================================== */
-  .margin-top-10 { margin-top: 10px; }
-  .margin-top-20 { margin-top: 20px; }
-  .margin-bottom-10 { margin-bottom: 10px; }
-  .margin-bottom-20 { margin-bottom: 20px; }
-  .padding-10 { padding: 10px; }
-  .padding-20 { padding: 20px; }
-  .flex-center { display: flex; justify-content: center; align-items: center; }
-  .flex-column { display: flex; flex-direction: column; }
-  .full-width { width: 100%; }
-  .rounded { border-radius: 10px; }
-  .box-shadow { box-shadow: 0 0 10px rgba(0,0,0,0.5); }
-  @keyframes pulse {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.05); opacity: 0.8; }
-    100% { transform: scale(1); opacity: 1; }
+  #restartButton {
+    font-size: 18px;
+    padding: 8px 16px;
   }
-  .animate-pulse { animation: pulse 2s infinite; }
-  .text-shadow { text-shadow: 2px 2px 4px #000; }
-  .dummy-class-1 { background-color: #333; padding: 10px; margin: 10px; }
-  .dummy-class-2 { border: 1px dashed #555; margin: 5px; padding: 5px; }
-  .dummy-class-3 { box-shadow: 0 0 5px #999; border-radius: 5px; }
-  .dummy-class-4 { background: linear-gradient(90deg, #ff5722, #ffc107); color: #fff; padding: 15px; margin: 15px; }
-  .dummy-class-5 { font-size: 18px; text-align: center; border: 2px solid #ffeb3b; padding: 10px; }
-  .dummy-class-6 { display: flex; justify-content: space-around; align-items: center; margin: 20px; }
-  .dummy-class-7 { width: 100%; height: 50px; background-color: #444; margin-top: 10px; }
-  .dummy-class-8 { padding: 20px; border: 2px dotted #00e676; margin: 10px 0; }
-  .dummy-class-9 { background-color: #00695c; color: #e0f2f1; padding: 15px; margin: 15px; }
-  .dummy-class-10 { border: 3px solid #ff9800; padding: 10px; margin: 10px; }
-  /* ================================================================== */
-  /* End of CSS File */
+  .arrow-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 22px;
+  }
+  .control-btn.fire {
+    width: 65px;
+    height: 65px;
+    font-size: 18px;
+  }
+}
+
+/* ================================================================== */
+/* Extra Utility Classes (for future enhancements) */
+/* ================================================================== */
+.margin-top-10 { margin-top: 10px; }
+.margin-top-20 { margin-top: 20px; }
+.margin-bottom-10 { margin-bottom: 10px; }
+.margin-bottom-20 { margin-bottom: 20px; }
+.padding-10 { padding: 10px; }
+.padding-20 { padding: 20px; }
+.flex-center { display: flex; justify-content: center; align-items: center; }
+.flex-column { display: flex; flex-direction: column; }
+.full-width { width: 100%; }
+.rounded { border-radius: 10px; }
+.box-shadow { box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-pulse { animation: pulse 2s infinite; }
+.text-shadow { text-shadow: 2px 2px 4px #000; }
+.dummy-class-1 { background-color: #333; padding: 10px; margin: 10px; }
+.dummy-class-2 { border: 1px dashed #555; margin: 5px; padding: 5px; }
+.dummy-class-3 { box-shadow: 0 0 5px #999; border-radius: 5px; }
+.dummy-class-4 { background: linear-gradient(90deg, #ff5722, #ffc107); color: #fff; padding: 15px; margin: 15px; }
+.dummy-class-5 { font-size: 18px; text-align: center; border: 2px solid #ffeb3b; padding: 10px; }
+.dummy-class-6 { display: flex; justify-content: space-around; align-items: center; margin: 20px; }
+.dummy-class-7 { width: 100%; height: 50px; background-color: #444; margin-top: 10px; }
+.dummy-class-8 { padding: 20px; border: 2px dotted #00e676; margin: 10px 0; }
+.dummy-class-9 { background-color: #00695c; color: #e0f2f1; padding: 15px; margin: 15px; }
+.dummy-class-10 { border: 3px solid #ff9800; padding: 10px; margin: 10px; }
+/* ================================================================== */
+/* End of CSS File */
