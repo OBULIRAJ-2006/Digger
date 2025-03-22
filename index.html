@@ -1,30 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digger Game</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ultimate Digger Revival</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
+  <!-- Start Screen -->
+  <div id="startScreen" class="screen">
+    <h1>Ultimate Digger Revival</h1>
+    <button id="startButton" class="main-btn">START</button>
+  </div>
 
-        <!-- Controls -->
-        <div id="controls">
-            <div id="joystick-container">
-                <div id="joystick"></div>
-            </div>
-            <button id="fire-button">FIRE</button>
-        </div>
-
-        <!-- Start Screen -->
-        <div id="start-screen">
-            <h1>DIGGER GAME</h1>
-            <button id="start-button">START</button>
-        </div>
+  <!-- Game Screen -->
+  <div id="gameScreen" class="screen" style="display:none;">
+    <header>
+      <h2>Digger Game</h2>
+      <p id="scoreDisplay">Score: 0</p>
+    </header>
+    <div id="gameContainer">
+      <canvas id="gameCanvas" width="800" height="600"></canvas>
     </div>
+    <!-- Controls: Fire button on the left; Joystick on the right -->
+    <div id="controls">
+      <div id="fireContainer">
+        <button id="fireButton" class="control-btn fire">FIRE</button>
+      </div>
+      <div id="joystickContainer">
+        <div id="joystick">
+          <button id="upBtn" class="arrow-btn">▲</button>
+          <div class="horizontal">
+            <button id="leftBtn" class="arrow-btn">◀</button>
+            <button id="rightBtn" class="arrow-btn">▶</button>
+          </div>
+          <button id="downBtn" class="arrow-btn">▼</button>
+        </div>
+      </div>
+    </div>
+    <button id="restartButton" class="main-btn" style="display:none;">RESTART</button>
+  </div>
 
-    <script src="game.js"></script>
+  <script src="game.js"></script>
 </body>
 </html>
