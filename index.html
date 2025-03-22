@@ -9,18 +9,22 @@
 <body>
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
+
+        <!-- Controls -->
         <div id="controls">
-            <div id="joystick">
-                <button id="up">↑</button>
-                <div>
-                    <button id="left">←</button>
-                    <button id="right">→</button>
-                </div>
-                <button id="down">↓</button>
+            <div id="joystick-container">
+                <div id="joystick"></div>
             </div>
-            <button id="fire">🔥</button>
+            <button id="fire-button">FIRE</button>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <h1>DIGGER GAME</h1>
+            <button id="start-button">START</button>
         </div>
     </div>
-    <script src="script.js"></script>
+
+    <script src="game.js"></script>
 </body>
 </html>
