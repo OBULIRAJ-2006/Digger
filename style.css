@@ -6,10 +6,10 @@
     padding: 0;
     box-sizing: border-box;
   }
-  
   body, html {
     width: 100%;
     height: 100%;
+    overflow: hidden; /* Prevent scrollbars */
     background: linear-gradient(135deg, #1a1a1a, #3a3a3a);
     font-family: 'Press Start 2P', cursive, sans-serif;
     color: #fff;
@@ -41,14 +41,12 @@
     justify-content: center;
     align-items: center;
   }
-  
   #startScreen h1 {
     font-size: 40px;
     margin-bottom: 20px;
     color: gold;
     text-shadow: 3px 3px 8px #000;
   }
-  
   .main-btn {
     padding: 15px 30px;
     font-size: 24px;
@@ -59,7 +57,6 @@
     cursor: pointer;
     transition: background 0.3s, transform 0.2s;
   }
-  
   .main-btn:hover {
     background-color: #ffd633;
     transform: scale(1.05);
@@ -72,17 +69,14 @@
     display: none;
     background-color: #000;
   }
-  
   header {
     margin: 10px;
   }
-  
   header h2 {
     font-size: 2em;
     color: gold;
     text-shadow: 2px 2px 6px #000;
   }
-  
   #scoreDisplay {
     font-size: 1.2em;
     margin-top: 5px;
@@ -103,7 +97,6 @@
     border-radius: 15px;
     overflow: hidden;
   }
-  
   canvas {
     width: 100%;
     height: 100%;
@@ -127,7 +120,6 @@
     position: relative;
     left: 20px;
   }
-  
   .control-btn.fire {
     width: 90px;
     height: 90px;
@@ -139,7 +131,6 @@
     cursor: pointer;
     transition: background 0.3s, transform 0.2s;
   }
-  
   .control-btn.fire:hover {
     background-color: #d50000;
     transform: scale(1.1);
@@ -150,7 +141,6 @@
     position: relative;
     right: 20px;
   }
-  
   #joystick {
     width: 100px;
     height: 100px;
@@ -159,13 +149,11 @@
     border-radius: 50%;
     position: relative;
   }
-  
   #joystick .horizontal {
     display: flex;
     justify-content: center;
     margin: 5px 0;
   }
-  
   .arrow-btn {
     width: 60px;
     height: 60px;
@@ -178,7 +166,6 @@
     margin: 5px;
     transition: background 0.3s, transform 0.2s;
   }
-  
   .arrow-btn:hover {
     background-color: #008ba3;
     transform: scale(1.1);
@@ -198,7 +185,6 @@
     display: none;
     transition: background 0.3s;
   }
-  
   #restartButton:hover {
     background-color: #ffd633;
   }
@@ -285,7 +271,7 @@
   }
   
   /* ================================================================== */
-  /* Extra Utility Classes (for future use) */
+  /* Extra Utility Classes (for future enhancements) */
   /* ================================================================== */
   .margin-top-10 { margin-top: 10px; }
   .margin-top-20 { margin-top: 20px; }
