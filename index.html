@@ -1,42 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Reviving Retro Games: Digger</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digger Game</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Start Screen -->
-  <div id="startScreen" class="screen">
-    <h1>Digger Revival</h1>
-    <button id="startButton" class="main-btn">Start Game</button>
-  </div>
-
-  <!-- Game Screen -->
-  <div id="gameScreen" class="screen" style="display:none;">
-    <header>
-      <h2>Digger Game</h2>
-      <p id="scoreDisplay">Score: 0</p>
-    </header>
-    <div id="gameContainer">
-      <canvas id="gameCanvas"></canvas>
-    </div>
-    <!-- On-screen Controls for Mobile -->
-    <div id="controls">
-      <div id="joystick">
-        <button id="upBtn" class="control-btn">▲</button>
-        <div class="horz">
-          <button id="leftBtn" class="control-btn">◀</button>
-          <button id="rightBtn" class="control-btn">▶</button>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="controls">
+            <div id="joystick">
+                <button id="up">↑</button>
+                <div>
+                    <button id="left">←</button>
+                    <button id="right">→</button>
+                </div>
+                <button id="down">↓</button>
+            </div>
+            <button id="fire">🔥</button>
         </div>
-        <button id="downBtn" class="control-btn">▼</button>
-      </div>
-      <button id="fireBtn" class="control-btn fire">Fire</button>
     </div>
-    <button id="restartButton" class="main-btn" style="display:none;">Restart Game</button>
-  </div>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
