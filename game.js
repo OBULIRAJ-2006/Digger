@@ -22,7 +22,7 @@ goldImg.src = "gold.png";     // Gold bag sprite
 const emeraldImg = new Image();
 emeraldImg.src = "emerald.png"; // Emerald sprite
 
-// Load Sounds (ensure these files exist)
+// Load Sounds (ensure these files exist or update paths)
 const soundMove = new Audio("move.mp3");
 const soundCollect = new Audio("collect.mp3");
 const soundEnemyHit = new Audio("hit.mp3");
@@ -35,13 +35,13 @@ const soundPowerUp = new Audio("powerup.mp3");
 let score = 0;
 let gameOver = false;
 
-// Terrain grid: each cell is 40x40 pixels
+// Terrain grid: each cell is 40x40
 const cellSize = 40;
 const cols = canvas.width / cellSize;
 const rows = canvas.height / cellSize;
 let terrain = [];
 
-// Global variable to store tunnel row for enemy spawn
+// Global variable to store tunnel row (for enemy spawn)
 let tunnelRow = 0;
 
 // Initialize terrain: true means dirt is present
@@ -55,14 +55,17 @@ function initTerrain() {
   }
 }
 
-// Generate a tunnel: clear a path across the grid; store tunnelRow
+// Generate a continuous tunnel from left to right and store tunnelRow.
+// This creates a clear path for the enemy from the tunnel’s right end.
 function generateTunnel() {
   let currentRow = Math.floor(Math.random() * rows);
   for (let c = 0; c < cols; c++) {
     terrain[currentRow][c] = false;
+    // Slight vertical deviation for a natural tunnel
     if (Math.random() < 0.3) {
       if (currentRow > 0 && Math.random() < 0.5) currentRow--;
       else if (currentRow < rows - 1) currentRow++;
+      terrain[currentRow][c] = false;
     }
   }
   tunnelRow = currentRow;
@@ -82,6 +85,8 @@ let player = {
   dy: 0,
   sprite: diggerImg,
   powerupTime: 0,
+  shieldTime: 0,
+  firepowerTime: 0,
   lastDirection: { x: 1, y: 0 }
 };
 
@@ -95,7 +100,7 @@ let bullets = [];
 // Spawning Functions
 // ==================================================================
 
-// Spawn exactly 10 emeralds (placed randomly, regardless of tunnel)
+// Spawn exactly 10 emeralds (placed randomly)
 function spawnEmeralds() {
   emeralds = [];
   let count = 0;
@@ -113,7 +118,7 @@ function spawnEmeralds() {
   }
 }
 
-// Spawn exactly 3 gold bags; they remain until the cell beneath is cleared, then fall
+// Spawn exactly 3 gold bags; they remain until the cell below is cleared, then fall
 function spawnGoldBags() {
   goldBags = [];
   let count = 0;
@@ -126,7 +131,8 @@ function spawnGoldBags() {
       width: 16,
       height: 16,
       falling: false,
-      vy: 0
+      vy: 0,
+      startFallY: null
     });
     count++;
   }
@@ -149,21 +155,21 @@ function spawnEnemy() {
   });
 }
 
-// Spawn power-up (speed boost block)
+// Spawn power-up: randomly choose one of three types: "speed", "shield", "firepower"
 function spawnPowerups() {
   powerups = [];
   if (Math.random() < 0.5) {
     let col = Math.floor(Math.random() * cols);
     let row = Math.floor(Math.random() * rows);
-    if (!terrain[row][col]) {
-      powerups.push({
-        x: col * cellSize + (cellSize - 16) / 2,
-        y: row * cellSize + (cellSize - 16) / 2,
-        width: 16,
-        height: 16,
-        type: "speed"
-      });
-    }
+    const types = ["speed", "shield", "firepower"];
+    const type = types[Math.floor(Math.random() * types.length)];
+    powerups.push({
+      x: col * cellSize + (cellSize - 16) / 2,
+      y: row * cellSize + (cellSize - 16) / 2,
+      width: 16,
+      height: 16,
+      type: type
+    });
   }
 }
 
@@ -171,9 +177,9 @@ function spawnPowerups() {
 // Drawing Functions
 // ==================================================================
 
-// Draw terrain (dirt cells appear as brown "sand")
+// Draw terrain as attractive brown sand
 function drawTerrain() {
-  ctx.fillStyle = "#a0522d"; // attractive brown sand color
+  ctx.fillStyle = "#a0522d";
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       if (terrain[r][c]) {
@@ -211,10 +217,12 @@ function drawGoldBags() {
   });
 }
 
-// Draw power-ups
+// Draw power-ups with distinct colors per type
 function drawPowerups() {
   powerups.forEach(pu => {
-    ctx.fillStyle = "cyan";
+    if (pu.type === "speed") ctx.fillStyle = "orange";
+    else if (pu.type === "shield") ctx.fillStyle = "lightblue";
+    else if (pu.type === "firepower") ctx.fillStyle = "purple";
     ctx.fillRect(pu.x, pu.y, pu.width, pu.height);
   });
 }
@@ -231,32 +239,29 @@ function drawBullets() {
 // Update Functions
 // ==================================================================
 
-// Update player: move and clear (dig) terrain
+// Update player: move, update direction, dig terrain, and collect emeralds
 function updatePlayer() {
   player.x += player.dx;
   player.y += player.dy;
-  // Boundary checks
+  // Boundaries
   if (player.x < 0) player.x = 0;
   if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
   if (player.y < 0) player.y = 0;
   if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
-  // Update last direction; if no horizontal movement, default to left
+  // Update last direction; if no movement, default to left
   if (player.dx === 0 && player.dy === 0) {
-    if (player.lastDirection.x === 0) {
-      player.lastDirection = { x: -1, y: 0 };
-    }
+    if (player.lastDirection.x === 0) player.lastDirection = { x: -1, y: 0 };
   } else {
     if (player.dx !== 0) {
       player.lastDirection.x = player.dx / Math.abs(player.dx);
       player.lastDirection.y = 0;
     }
   }
-  // Dig the cell under player's center
+  // Dig the cell under player's center and check for emeralds
   let col = Math.floor((player.x + player.width / 2) / cellSize);
   let row = Math.floor((player.y + player.height / 2) / cellSize);
   if (row >= 0 && row < rows && col >= 0 && col < cols) {
     terrain[row][col] = false;
-    // If an emerald is in this cell, mark it as collected
     emeralds.forEach(e => {
       let eCol = Math.floor(e.x / cellSize);
       let eRow = Math.floor(e.y / cellSize);
@@ -270,7 +275,7 @@ function updatePlayer() {
   }
 }
 
-// Update enemies: move only on cleared (dug) cells (tunnel path)
+// Update enemies: follow the tunnel (move only on cleared cells)
 function updateEnemies() {
   enemies.forEach(enemy => {
     let dx = 0, dy = 0;
@@ -287,8 +292,10 @@ function updateEnemies() {
     enemy.x += dx;
     enemy.y += dy;
     if (isColliding(player, enemy)) {
-      gameOver = true;
-      soundEnemyHit.play();
+      if (player.shieldTime <= 0) {
+        gameOver = true;
+        soundEnemyHit.play();
+      }
     }
   });
 }
@@ -301,7 +308,7 @@ function cellBlocked(x, y) {
   return terrain[row][col];
 }
 
-// Update bullets: move them and check collisions with enemies
+// Update bullets: move and check collision with enemies
 function updateBullets() {
   bullets.forEach((bullet, index) => {
     bullet.x += bullet.dx;
@@ -328,35 +335,36 @@ function updateGoldBags() {
     let row = Math.floor((bag.y + bag.height) / cellSize);
     if (row < rows && terrain[row][col] === false) {
       bag.falling = true;
+      if (bag.startFallY === null) bag.startFallY = bag.y;
     }
     if (bag.falling) {
       bag.vy += 0.2;
       bag.y += bag.vy;
-      // If bag has fallen more than 2 blocks, its fallDistance is used
       if (bag.y + bag.height >= canvas.height) {
         bag.y = canvas.height - bag.height;
         bag.vy = 0;
         bag.falling = false;
       }
-      // If a falling bag collides with an enemy, remove enemy
-      enemies.forEach((enemy, idx) => {
-        if (isColliding(bag, enemy) && bag.y > enemy.y + 2 * cellSize) {
-          enemies.splice(idx, 1);
-          score += 20;
-          scoreDisplay.innerText = "Score: " + score;
-          soundEnemyHit.play();
-        }
-        // If bag collides with player after falling more than 2 blocks, game over
-        if (isColliding(bag, player) && bag.y > player.y + 2 * cellSize) {
+      // If fallen more than 2 blocks (80px) and colliding with enemy or player
+      if (bag.startFallY !== null && (bag.y - bag.startFallY > 80)) {
+        enemies.forEach((enemy, idx) => {
+          if (isColliding(bag, enemy)) {
+            enemies.splice(idx, 1);
+            score += 20;
+            scoreDisplay.innerText = "Score: " + score;
+            soundEnemyHit.play();
+          }
+        });
+        if (isColliding(bag, player) && player.shieldTime <= 0) {
           gameOver = true;
           soundEnemyHit.play();
         }
-      });
+      }
     }
   });
 }
 
-// Update power-ups: if collected, apply speed boost
+// Update power-ups: if collected, apply effect based on type
 function updatePowerups() {
   powerups.forEach((pu, index) => {
     if (isColliding(player, pu)) {
@@ -364,6 +372,12 @@ function updatePowerups() {
       if (pu.type === "speed") {
         player.speed = player.baseSpeed * 1.5;
         player.powerupTime = 300;
+        soundPowerUp.play();
+      } else if (pu.type === "shield") {
+        player.shieldTime = 300;
+        soundPowerUp.play();
+      } else if (pu.type === "firepower") {
+        player.firepowerTime = 300;
         soundPowerUp.play();
       }
     }
@@ -373,6 +387,12 @@ function updatePowerups() {
     if (player.powerupTime === 0) {
       player.speed = player.baseSpeed;
     }
+  }
+  if (player.shieldTime > 0) {
+    player.shieldTime--;
+  }
+  if (player.firepowerTime > 0) {
+    player.firepowerTime--;
   }
 }
 
@@ -434,21 +454,22 @@ function drawEmeralds() {
 }
 
 // ==================================================================
-// Firing Mechanic: First shot restricted to horizontal (left/right)
+// Firing Mechanic: Allow shooting in all four directions (default left if none)
 // ==================================================================
 function fireBullet() {
   let direction = { x: player.lastDirection.x, y: player.lastDirection.y };
-  if (direction.x === 0) {
+  if (direction.x === 0 && direction.y === 0) {
     direction.x = -1;
     direction.y = 0;
   }
+  let speedMultiplier = (player.firepowerTime > 0) ? 16 : 8;
   let bullet = {
     x: player.x + player.width / 2 - 4,
     y: player.y + player.height / 2 - 4,
     width: 8,
     height: 8,
-    dx: direction.x * 8,
-    dy: direction.y * 8
+    dx: direction.x * speedMultiplier,
+    dy: direction.y * speedMultiplier
   };
   bullets.push(bullet);
   soundFire.play();
@@ -459,7 +480,7 @@ function fireBullet() {
 // ==================================================================
 function endGame() {
   if (!emeralds.every(e => e.collected)) {
-    alert("Game Over! Digger was hit.");
+    alert("Game Over! Digger was caught.");
   }
   restartButton.style.display = "block";
   gameScreen.style.display = "none";
@@ -475,6 +496,8 @@ function resetGame() {
   player.dy = 0;
   player.speed = player.baseSpeed;
   player.powerupTime = 0;
+  player.shieldTime = 0;
+  player.firepowerTime = 0;
   initTerrain();
   generateTunnel();
   spawnEmeralds();
@@ -530,7 +553,7 @@ startButton.addEventListener("click", () => {
 });
 restartButton.addEventListener("click", resetGame);
 
-// ================================================================== */
-/* Additional Enemy Spawn Timer (Every 15 seconds, if less than 3 enemies exist) */
-/* ================================================================== */
+// ==================================================================
+// Additional Enemy Spawn Timer (every 15 seconds, if less than 3 enemies exist)
+// ==================================================================
 setInterval(() => { if (!gameOver && enemies.length < 3) { spawnEnemy(); } }, 15000);
