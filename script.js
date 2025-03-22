@@ -82,6 +82,7 @@ function checkCollisions() {
     });
 }
 
+
 function resetGame() {
     player.x = 100;
     player.y = 100;
