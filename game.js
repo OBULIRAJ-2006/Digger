@@ -35,13 +35,13 @@ const soundPowerUp = new Audio("powerup.mp3");
 let score = 0;
 let gameOver = false;
 
-// Terrain grid (each cell 40x40)
+// Terrain grid: each cell 40x40
 const cellSize = 40;
 const cols = canvas.width / cellSize;
 const rows = canvas.height / cellSize;
 let terrain = [];
 
-// Initialize terrain: true means dirt present
+// Initialize terrain: true means dirt is present
 function initTerrain() {
   terrain = [];
   for (let r = 0; r < rows; r++) {
@@ -91,51 +91,48 @@ let bullets = [];
 // Spawning Functions
 // ==================================================================
 
-// Spawn exactly 10 emeralds
+// Spawn exactly 10 emeralds (placed randomly, not only on tunnel)
 function spawnEmeralds() {
   emeralds = [];
   let count = 0;
   while (count < 10) {
     let col = Math.floor(Math.random() * cols);
     let row = Math.floor(Math.random() * rows);
-    if (!terrain[row][col]) {
-      emeralds.push({
-        x: col * cellSize + (cellSize - 16) / 2,
-        y: row * cellSize + (cellSize - 16) / 2,
-        width: 16,
-        height: 16,
-        collected: false
-      });
-      count++;
-    }
+    // Place emerald even if the cell is not dug, so they can be uncovered later
+    emeralds.push({
+      x: col * cellSize + (cellSize - 16) / 2,
+      y: row * cellSize + (cellSize - 16) / 2,
+      width: 16,
+      height: 16,
+      collected: false
+    });
+    count++;
   }
 }
 
-// Spawn exactly 3 gold bags; they stay until the cell below is dug
+// Spawn exactly 3 gold bags; they remain until the cell below is dug out
 function spawnGoldBags() {
   goldBags = [];
   let count = 0;
   while (count < 3) {
     let col = Math.floor(Math.random() * cols);
     let row = Math.floor(Math.random() * rows);
-    if (!terrain[row][col]) {
-      goldBags.push({
-        x: col * cellSize + (cellSize - 16) / 2,
-        y: row * cellSize + (cellSize - 16) / 2,
-        width: 16,
-        height: 16,
-        falling: false,
-        vy: 0
-      });
-      count++;
-    }
+    // Gold bags remain stationary until the cell beneath is cleared
+    goldBags.push({
+      x: col * cellSize + (cellSize - 16) / 2,
+      y: row * cellSize + (cellSize - 16) / 2,
+      width: 16,
+      height: 16,
+      falling: false,
+      vy: 0
+    });
+    count++;
   }
 }
 
-// Spawn enemy: fixed spawn location (top-right, far from player)
+// Spawn enemy: fixed spawn location (top-right) to attack the player along the tunnel
 function spawnEnemy() {
   if (enemies.length >= 3) return;
-  // Spawn enemy at a fixed location far from player
   let spawnX = canvas.width - 60;
   let spawnY = 60;
   let col = Math.floor(spawnX / cellSize);
@@ -174,7 +171,7 @@ function spawnPowerups() {
 // Drawing Functions
 // ==================================================================
 
-// Draw terrain: only cells with dirt
+// Draw terrain: only cells with dirt remain
 function drawTerrain() {
   ctx.fillStyle = "#654321";
   for (let r = 0; r < rows; r++) {
@@ -191,7 +188,7 @@ function drawPlayer() {
   ctx.drawImage(player.sprite, player.x, player.y, player.width, player.height);
 }
 
-// Draw enemies using enemy sprite
+// Draw enemies using sprite
 function drawEnemies() {
   enemies.forEach(enemy => {
     ctx.drawImage(enemyImg, enemy.x, enemy.y, enemy.width, enemy.height);
@@ -234,16 +231,16 @@ function drawBullets() {
 // Update Functions
 // ==================================================================
 
-// Update player position and dig terrain
+// Update player: move and dig terrain
 function updatePlayer() {
   player.x += player.dx;
   player.y += player.dy;
-  // Boundaries
+  // Boundary check
   if (player.x < 0) player.x = 0;
   if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
   if (player.y < 0) player.y = 0;
   if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
-  // Update last direction; force horizontal if no movement
+  // Update last direction; if no horizontal movement, default to left
   if (player.dx === 0 && player.dy === 0) {
     if (player.lastDirection.x === 0) {
       player.lastDirection = { x: -1, y: 0 };
@@ -262,7 +259,7 @@ function updatePlayer() {
   }
 }
 
-// Update enemies: they move only on dug cells (clear path)
+// Update enemies: they move only on cleared (dug) cells
 function updateEnemies() {
   enemies.forEach(enemy => {
     let dx = 0, dy = 0;
@@ -285,7 +282,7 @@ function updateEnemies() {
   });
 }
 
-// Check if a point is blocked (cell is still dirt)
+// Check if a point is blocked (cell still has dirt)
 function cellBlocked(x, y) {
   let col = Math.floor(x / cellSize);
   let row = Math.floor(y / cellSize);
@@ -293,7 +290,7 @@ function cellBlocked(x, y) {
   return terrain[row][col];
 }
 
-// Update bullets: move and check collisions with enemies
+// Update bullets: move them and check collision with enemies
 function updateBullets() {
   bullets.forEach((bullet, index) => {
     bullet.x += bullet.dx;
@@ -313,7 +310,7 @@ function updateBullets() {
   });
 }
 
-// Update gold bags: remain stationary until the cell below is dug, then fall
+// Update gold bags: they remain still until the cell beneath is dug, then fall
 function updateGoldBags() {
   goldBags.forEach(bag => {
     let col = Math.floor(bag.x / cellSize);
@@ -419,7 +416,7 @@ function drawEmeralds() {
 }
 
 // ==================================================================
-// Firing Mechanic: First shot restricted to horizontal (left/right)
+// Firing Mechanic: First shot restricted to horizontal only
 // ==================================================================
 function fireBullet() {
   let direction = { x: player.lastDirection.x, y: player.lastDirection.y };
@@ -443,7 +440,10 @@ function fireBullet() {
 // Game Over and Restart Functions
 // ==================================================================
 function endGame() {
-  // If player dies, show restart; if win condition, also show restart
+  // Show restart button and a pop-up message based on condition
+  if (gameOver && enemies.length > 0) {
+    alert("Game Over! Digger was caught by an enemy.");
+  }
   restartButton.style.display = "block";
   gameScreen.style.display = "none";
 }
