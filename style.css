@@ -31,6 +31,7 @@
     height: 100%;
   }
   
+  /* Start Screen */
   #startScreen {
     background: url('classic-bg.png') no-repeat center;
     background-size: cover;
@@ -64,14 +65,14 @@
     transform: scale(1.05);
   }
   
+  /* ================================================================== */
+  /* Game Screen */
+  /* ================================================================== */
   #gameScreen {
     display: none;
     background-color: #000;
   }
   
-  /* ================================================================== */
-  /* Header */
-  /* ================================================================== */
   header {
     margin: 10px;
   }
@@ -98,7 +99,7 @@
     background: url('classic-bg.png') no-repeat center;
     background-size: cover;
     border: 8px solid gold;
-    box-shadow: 0 0 20px rgba(255, 204, 0, 0.8);
+    box-shadow: 0 0 20px rgba(255,204,0,0.8);
     border-radius: 15px;
     overflow: hidden;
   }
@@ -110,7 +111,7 @@
   }
   
   /* ================================================================== */
-  /* Controls */
+  /* Controls Section */
   /* ================================================================== */
   #controls {
     position: absolute;
@@ -253,6 +254,9 @@
       height: 70px;
       font-size: 20px;
     }
+    #controls {
+      flex-direction: column;
+    }
   }
   
   @media screen and (max-width: 480px) {
@@ -281,7 +285,7 @@
   }
   
   /* ================================================================== */
-  /* Extra Utility Classes (for future enhancements) */
+  /* Extra Utility Classes (for potential future enhancements) */
   /* ================================================================== */
   .margin-top-10 { margin-top: 10px; }
   .margin-top-20 { margin-top: 20px; }

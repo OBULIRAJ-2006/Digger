@@ -14,15 +14,15 @@ const restartButton = document.getElementById("restartButton");
 
 // Load Images
 const diggerImg = new Image();
-diggerImg.src = "digger.png";  // Player sprite
+diggerImg.src = "digger.png"; // Player sprite
 const enemyImg = new Image();
-enemyImg.src = "enemy.png";    // Enemy sprite (provide your own)
+enemyImg.src = "enemy.png";   // Enemy sprite
 const goldImg = new Image();
-goldImg.src = "gold.png";      // Gold bag sprite
+goldImg.src = "gold.png";     // Gold bag sprite
 const emeraldImg = new Image();
 emeraldImg.src = "emerald.png"; // Emerald sprite
 
-// Load Sound Effects (ensure files exist)
+// Load Sounds (ensure these files exist)
 const soundMove = new Audio("move.mp3");
 const soundCollect = new Audio("collect.mp3");
 const soundEnemyHit = new Audio("hit.mp3");
@@ -41,7 +41,7 @@ const cols = canvas.width / cellSize;
 const rows = canvas.height / cellSize;
 let terrain = [];
 
-// Initialize terrain (true = dirt present)
+// Initialize terrain: true means dirt present
 function initTerrain() {
   terrain = [];
   for (let r = 0; r < rows; r++) {
@@ -52,7 +52,7 @@ function initTerrain() {
   }
 }
 
-// Generate a random tunnel (clear cells) across the grid
+// Generate a tunnel: clear cells across the grid
 function generateTunnel() {
   let currentRow = Math.floor(Math.random() * rows);
   for (let c = 0; c < cols; c++) {
@@ -111,7 +111,7 @@ function spawnEmeralds() {
   }
 }
 
-// Spawn exactly 3 gold bags that remain until ground is dug below
+// Spawn exactly 3 gold bags; they stay until the cell below is dug
 function spawnGoldBags() {
   goldBags = [];
   let count = 0;
@@ -132,31 +132,24 @@ function spawnGoldBags() {
   }
 }
 
-// Spawn enemy: maximum 3 per round; spawn enemy in a single cell away from player
+// Spawn enemy: fixed spawn location (top-right, far from player)
 function spawnEnemy() {
   if (enemies.length >= 3) return;
-  let possible = [];
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      if (!terrain[r][c]) {
-        let ex = c * cellSize + (cellSize - 32) / 2;
-        let ey = r * cellSize + (cellSize - 32) / 2;
-        if (Math.hypot(ex - player.x, ey - player.y) > 100) {
-          possible.push({ r, c });
-        }
-      }
-    }
+  // Spawn enemy at a fixed location far from player
+  let spawnX = canvas.width - 60;
+  let spawnY = 60;
+  let col = Math.floor(spawnX / cellSize);
+  let row = Math.floor(spawnY / cellSize);
+  if (terrain[row][col]) {
+    terrain[row][col] = false;
   }
-  if (possible.length > 0) {
-    const cell = possible[Math.floor(Math.random() * possible.length)];
-    enemies.push({
-      x: cell.c * cellSize + (cellSize - 32) / 2,
-      y: cell.r * cellSize + (cellSize - 32) / 2,
-      width: 32,
-      height: 32,
-      speed: 1
-    });
-  }
+  enemies.push({
+    x: spawnX,
+    y: spawnY,
+    width: 32,
+    height: 32,
+    speed: 1
+  });
 }
 
 // Spawn power-up (speed boost)
@@ -181,7 +174,7 @@ function spawnPowerups() {
 // Drawing Functions
 // ==================================================================
 
-// Draw terrain: only draw cells with dirt
+// Draw terrain: only cells with dirt
 function drawTerrain() {
   ctx.fillStyle = "#654321";
   for (let r = 0; r < rows; r++) {
@@ -198,7 +191,7 @@ function drawPlayer() {
   ctx.drawImage(player.sprite, player.x, player.y, player.width, player.height);
 }
 
-// Draw enemies
+// Draw enemies using enemy sprite
 function drawEnemies() {
   enemies.forEach(enemy => {
     ctx.drawImage(enemyImg, enemy.x, enemy.y, enemy.width, enemy.height);
@@ -245,15 +238,21 @@ function drawBullets() {
 function updatePlayer() {
   player.x += player.dx;
   player.y += player.dy;
-  // Boundary check
+  // Boundaries
   if (player.x < 0) player.x = 0;
   if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
   if (player.y < 0) player.y = 0;
   if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
-  // Update last movement direction
-  if (player.dx !== 0 || player.dy !== 0) {
-    player.lastDirection.x = player.dx !== 0 ? player.dx / Math.abs(player.dx) : player.lastDirection.x;
-    player.lastDirection.y = player.dy !== 0 ? player.dy / Math.abs(player.dy) : player.lastDirection.y;
+  // Update last direction; force horizontal if no movement
+  if (player.dx === 0 && player.dy === 0) {
+    if (player.lastDirection.x === 0) {
+      player.lastDirection = { x: -1, y: 0 };
+    }
+  } else {
+    if (player.dx !== 0) {
+      player.lastDirection.x = player.dx / Math.abs(player.dx);
+      player.lastDirection.y = 0;
+    }
   }
   // Dig the cell under player's center
   let col = Math.floor((player.x + player.width / 2) / cellSize);
@@ -263,15 +262,20 @@ function updatePlayer() {
   }
 }
 
-// Update enemies: they only move on dug terrain
+// Update enemies: they move only on dug cells (clear path)
 function updateEnemies() {
   enemies.forEach(enemy => {
     let dx = 0, dy = 0;
-    // Only move if the next cell is already dug
-    if (enemy.x < player.x && !cellBlocked(enemy.x + enemy.speed, enemy.y)) dx = enemy.speed;
-    else if (enemy.x > player.x && !cellBlocked(enemy.x - enemy.speed, enemy.y)) dx = -enemy.speed;
-    if (enemy.y < player.y && !cellBlocked(enemy.x, enemy.y + enemy.speed)) dy = enemy.speed;
-    else if (enemy.y > player.y && !cellBlocked(enemy.x, enemy.y - enemy.speed)) dy = -enemy.speed;
+    if (enemy.x < player.x && !cellBlocked(enemy.x + enemy.speed, enemy.y)) {
+      dx = enemy.speed;
+    } else if (enemy.x > player.x && !cellBlocked(enemy.x - enemy.speed, enemy.y)) {
+      dx = -enemy.speed;
+    }
+    if (enemy.y < player.y && !cellBlocked(enemy.x, enemy.y + enemy.speed)) {
+      dy = enemy.speed;
+    } else if (enemy.y > player.y && !cellBlocked(enemy.x, enemy.y - enemy.speed)) {
+      dy = -enemy.speed;
+    }
     enemy.x += dx;
     enemy.y += dy;
     if (isColliding(player, enemy)) {
@@ -281,14 +285,12 @@ function updateEnemies() {
   });
 }
 
-// Check if a point is blocked (i.e. cell is not dug)
+// Check if a point is blocked (cell is still dirt)
 function cellBlocked(x, y) {
   let col = Math.floor(x / cellSize);
   let row = Math.floor(y / cellSize);
-  if (row >= 0 && row < rows && col >= 0 && col < cols) {
-    return terrain[row][col];
-  }
-  return true;
+  if (row < 0 || row >= rows || col < 0 || col >= cols) return true;
+  return terrain[row][col];
 }
 
 // Update bullets: move and check collisions with enemies
@@ -311,7 +313,7 @@ function updateBullets() {
   });
 }
 
-// Update gold bags: they fall only when the cell below is dug
+// Update gold bags: remain stationary until the cell below is dug, then fall
 function updateGoldBags() {
   goldBags.forEach(bag => {
     let col = Math.floor(bag.x / cellSize);
@@ -339,7 +341,7 @@ function updateGoldBags() {
   });
 }
 
-// Update power-ups: apply effect if collected
+// Update power-ups: apply speed boost if collected
 function updatePowerups() {
   powerups.forEach((pu, index) => {
     if (isColliding(player, pu)) {
@@ -393,12 +395,11 @@ function gameLoop() {
   drawBullets();
   drawPlayer();
   
-  // Check win condition: all emeralds collected
-  let allCollected = emeralds.every(e => e.collected);
-  if (allCollected) {
+  // Check win condition: if all emeralds are collected
+  let win = emeralds.every(e => e.collected);
+  if (win) {
     gameOver = true;
-    alert("Level Complete! You collected all emeralds!");
-    // You could load a new level here instead.
+    alert("You Won! All emeralds collected.");
     endGame();
     return;
   }
@@ -407,7 +408,7 @@ function gameLoop() {
 }
 
 // ==================================================================
-// Additional Drawing Functions
+// Additional Drawing: Emeralds
 // ==================================================================
 function drawEmeralds() {
   emeralds.forEach(e => {
@@ -418,25 +419,31 @@ function drawEmeralds() {
 }
 
 // ==================================================================
-// Firing Mechanic
+// Firing Mechanic: First shot restricted to horizontal (left/right)
 // ==================================================================
 function fireBullet() {
+  let direction = { x: player.lastDirection.x, y: player.lastDirection.y };
+  if (direction.x === 0) {
+    direction.x = -1;
+    direction.y = 0;
+  }
   let bullet = {
     x: player.x + player.width / 2 - 4,
     y: player.y + player.height / 2 - 4,
     width: 8,
     height: 8,
-    dx: player.lastDirection.x * 8,
-    dy: player.lastDirection.y * 8
+    dx: direction.x * 8,
+    dy: direction.y * 8
   };
   bullets.push(bullet);
   soundFire.play();
 }
 
 // ==================================================================
-// Game Over and Restart
+// Game Over and Restart Functions
 // ==================================================================
 function endGame() {
+  // If player dies, show restart; if win condition, also show restart
   restartButton.style.display = "block";
   gameScreen.style.display = "none";
 }
