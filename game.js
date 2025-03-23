@@ -37,8 +37,8 @@ const soundPowerUp = new Audio("powerup.mp3");
 // ==================================================================
 let score = 0;
 let gameOver = false;
-let bulletCooldown = 0; // Frames until next bullet can be fired (~60 frames = 1 second)
-let shootSlowTimer = 0; // Timer for player slowdown after shooting
+let bulletCooldown = 0; // 60 frames cooldown (~1 sec)
+let shootSlowTimer = 0; // 30 frames slowdown after shooting
 
 const cellSize = 40;
 const cols = canvas.width / cellSize;
@@ -46,7 +46,7 @@ const rows = canvas.height / cellSize;
 let terrain = [];
 let tunnelRow = 0;
 
-// Initialize terrain: true = dirt is present
+// Initialize terrain: true = dirt present
 function initTerrain() {
   terrain = [];
   for (let r = 0; r < rows; r++) {
@@ -57,7 +57,7 @@ function initTerrain() {
   }
 }
 
-// Generate a continuous tunnel from left to right and store tunnelRow.
+// Generate a continuous tunnel from left to right; store tunnelRow.
 function generateTunnel() {
   let currentRow = Math.floor(Math.random() * rows);
   for (let c = 0; c < cols; c++) {
@@ -79,8 +79,8 @@ let player = {
   y: 50,
   width: 32,
   height: 32,
-  speed: 0.5, // Lowered speed for challenge & to emphasize shoot slowdown
-  baseSpeed: 4,
+  speed: 2, // Slower digger
+  baseSpeed: 2,
   dx: 0,
   dy: 0,
   sprite: diggerImg,
@@ -95,13 +95,13 @@ let emeralds = [];
 let goldBags = [];
 let powerups = [];
 let bullets = [];
-let enemyBullets = [];
+let enemyBullets = []; // Not used since enemy does not shoot now
 
 // ==================================================================
 // Spawning Functions
 // ==================================================================
 
-// Spawn exactly 10 emeralds (placed randomly)
+// Spawn exactly 10 emeralds (randomly)
 function spawnEmeralds() {
   emeralds = [];
   let count = 0;
@@ -119,7 +119,7 @@ function spawnEmeralds() {
   }
 }
 
-// Spawn exactly 3 gold bags; they remain until the cell below is cleared, then fall
+// Spawn exactly 3 gold bags; remain until the cell below is clear, then fall
 function spawnGoldBags() {
   goldBags = [];
   let count = 0;
@@ -139,7 +139,7 @@ function spawnGoldBags() {
   }
 }
 
-// Spawn enemy at a fixed location along the tunnel (top-right of tunnel)
+// Spawn enemy at fixed location along tunnel (top-right of tunnel)
 function spawnEnemy() {
   if (enemies.length >= 3) return;
   let spawnX = canvas.width - cellSize - 10;
@@ -153,13 +153,13 @@ function spawnEnemy() {
     width: 32,
     height: 32,
     speed: 1,
-    // Randomize initial movement direction
-    dx: (Math.random() < 0.5 ? -1 : 1) * 1,
-    dy: (Math.random() < 0.5 ? -1 : 1) * 1
+    // Intelligent movement: move toward player with some randomness
+    dx: 0,
+    dy: 0
   });
 }
 
-// Spawn power-up: randomly choose one of three types: "speed", "shield", "firepower"
+// Spawn power-up: choose one type randomly: "speed", "shield", "firepower"
 function spawnPowerups() {
   powerups = [];
   if (Math.random() < 0.5) {
@@ -181,7 +181,7 @@ function spawnPowerups() {
 // Drawing Functions
 // ==================================================================
 
-// Draw terrain: if cell is still dirt, draw dug-sand; if dug, show dug-sand.png
+// Draw terrain: if cell is still dirt, fill with brown; if dug, show dug-sand image.
 function drawTerrain() {
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
@@ -195,19 +195,19 @@ function drawTerrain() {
   }
 }
 
-// Draw player using sprite
+// Draw player using sprite.
 function drawPlayer() {
   ctx.drawImage(player.sprite, player.x, player.y, player.width, player.height);
 }
 
-// Draw enemies using enemy sprite
+// Draw enemies using sprite.
 function drawEnemies() {
   enemies.forEach(enemy => {
     ctx.drawImage(enemyImg, enemy.x, enemy.y, enemy.width, enemy.height);
   });
 }
 
-// Draw emeralds
+// Draw emeralds.
 function drawEmeralds() {
   emeralds.forEach(e => {
     if (!e.collected) {
@@ -216,14 +216,14 @@ function drawEmeralds() {
   });
 }
 
-// Draw gold bags
+// Draw gold bags.
 function drawGoldBags() {
   goldBags.forEach(bag => {
     ctx.drawImage(goldImg, bag.x, bag.y, bag.width, bag.height);
   });
 }
 
-// Draw power-ups with colors based on type
+// Draw power-ups with colors based on type.
 function drawPowerups() {
   powerups.forEach(pu => {
     if (pu.type === "speed") ctx.fillStyle = "orange";
@@ -233,34 +233,28 @@ function drawPowerups() {
   });
 }
 
-// Draw bullets (player and enemy)
+// Draw bullets.
 function drawBullets() {
   ctx.fillStyle = "white";
   bullets.forEach(b => {
     ctx.fillRect(b.x, b.y, b.width, b.height);
   });
-  ctx.fillStyle = "red";
-  enemyBullets.forEach(b => {
-    ctx.fillRect(b.x, b.y, b.width, b.height);
-  });
 }
 
 // ==================================================================
-// Update Functions.
+// Update Functions
 // ==================================================================
 
-// Update player: move, update last direction, dig terrain, collect emeralds
+// Update player: move, update direction, dig terrain, and collect emeralds.
 function updatePlayer() {
   player.x += player.dx;
   player.y += player.dy;
-  
-  // Boundary checks
   if (player.x < 0) player.x = 0;
   if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
   if (player.y < 0) player.y = 0;
   if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
   
-  // Apply shoot slowdown if active
+  // Apply shoot slowdown if active.
   if (shootSlowTimer > 0) {
     player.speed = player.baseSpeed * 0.5;
     shootSlowTimer--;
@@ -268,17 +262,15 @@ function updatePlayer() {
     player.speed = player.baseSpeed;
   }
   
-  // Update last direction (if moving, record horizontal movement)
-  if (player.dx === 0 && player.dy === 0) {
-    if (player.lastDirection.x === 0) player.lastDirection = { x: -1, y: 0 };
-  } else {
-    if (player.dx !== 0) {
-      player.lastDirection.x = player.dx / Math.abs(player.dx);
-      player.lastDirection.y = 0;
-    }
+  // Update lastDirection based on movement (allow vertical updates)
+  if (player.dx !== 0 || player.dy !== 0) {
+    player.lastDirection = { 
+      x: player.dx !== 0 ? player.dx / Math.abs(player.dx) : 0,
+      y: player.dy !== 0 ? player.dy / Math.abs(player.dy) : 0
+    };
   }
   
-  // Dig the cell under player's center and collect emeralds
+  // Dig the cell beneath the center and collect emeralds.
   let col = Math.floor((player.x + player.width/2) / cellSize);
   let row = Math.floor((player.y + player.height/2) / cellSize);
   if (row >= 0 && row < rows && col >= 0 && col < cols) {
@@ -296,16 +288,22 @@ function updatePlayer() {
   }
 }
 
-// Update enemies: random movement
+// Update enemies: Use intelligent movement toward the player with randomness.
 function updateEnemies() {
   enemies.forEach(enemy => {
-    // Random chance to change direction
-    if (Math.random() < 0.05) {
-      enemy.dx = (Math.random() < 0.5 ? -1 : 1) * enemy.speed;
-      enemy.dy = (Math.random() < 0.5 ? -1 : 1) * enemy.speed;
+    // Compute direction toward player.
+    let targetDX = 0, targetDY = 0;
+    if (player.x > enemy.x) targetDX = 1;
+    else if (player.x < enemy.x) targetDX = -1;
+    if (player.y > enemy.y) targetDY = 1;
+    else if (player.y < enemy.y) targetDY = -1;
+    // Add random deviation occasionally.
+    if (Math.random() < 0.3) {
+      targetDX = (Math.random() < 0.5 ? -1 : 1);
+      targetDY = (Math.random() < 0.5 ? -1 : 1);
     }
-    let newX = enemy.x + enemy.dx;
-    let newY = enemy.y + enemy.dy;
+    let newX = enemy.x + targetDX * enemy.speed;
+    let newY = enemy.y + targetDY * enemy.speed;
     if (!cellBlocked(newX, enemy.y)) enemy.x = newX;
     if (!cellBlocked(enemy.x, newY)) enemy.y = newY;
     
@@ -318,7 +316,7 @@ function updateEnemies() {
   });
 }
 
-// Check if a point is blocked (if cell still has dirt)
+// Check if a point is blocked (if cell still contains dirt)
 function cellBlocked(x, y) {
   let col = Math.floor(x / cellSize);
   let row = Math.floor(y / cellSize);
@@ -326,7 +324,7 @@ function cellBlocked(x, y) {
   return terrain[row][col];
 }
 
-// Update bullets: move them; stop if encountering dirt
+// Update bullets: move them and stop them if they hit dirt.
 function updateBullets() {
   bullets.forEach((bullet, index) => {
     let nextX = bullet.x + bullet.dx;
@@ -334,7 +332,6 @@ function updateBullets() {
     let col = Math.floor(nextX / cellSize);
     let row = Math.floor(nextY / cellSize);
     if (row >= 0 && row < rows && col >= 0 && col < cols && terrain[row][col]) {
-      // Bullet hits dirt; remove it
       bullets.splice(index, 1);
       return;
     }
@@ -353,28 +350,13 @@ function updateBullets() {
       }
     });
   });
-  
-  enemyBullets.forEach((bullet, index) => {
-    bullet.y += bullet.dy;
-    if (bullet.y < 0 || bullet.y > canvas.height) {
-      enemyBullets.splice(index, 1);
-    }
-    if (isColliding(player, bullet)) {
-      if (player.shieldTime <= 0) {
-        gameOver = true;
-        soundEnemyHit.play();
-      }
-      enemyBullets.splice(index, 1);
-    }
-  });
 }
 
-// Update gold bags: only fall if the cell below is clear
+// Update gold bags: They only fall if the cell directly below is cleared.
 function updateGoldBags() {
   goldBags.forEach(bag => {
     let col = Math.floor(bag.x / cellSize);
     let rowBelow = Math.floor((bag.y + bag.height) / cellSize);
-    // If there is still dirt below, stop falling
     if (rowBelow < rows && terrain[rowBelow][col] === true) {
       bag.falling = false;
       bag.vy = 0;
@@ -409,7 +391,7 @@ function updateGoldBags() {
   });
 }
 
-// Update power-ups: if collected, apply effect and show remaining time
+// Update power-ups: if collected, apply effect and show remaining time.
 function updatePowerups() {
   powerups.forEach((pu, index) => {
     if (isColliding(player, pu)) {
@@ -455,7 +437,7 @@ function isColliding(a, b) {
 }
 
 // ==================================================================
-// Update Bullet Cooldown and Player Slowdown Timer
+// Update Bullet Cooldown
 // ==================================================================
 function updateBulletCooldown() {
   if (bulletCooldown > 0) bulletCooldown--;
@@ -475,7 +457,6 @@ function gameLoop() {
   updateGoldBags();
   updatePowerups();
   updateBulletCooldown();
-  
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawTerrain();
   drawEmeralds();
@@ -508,7 +489,7 @@ function drawEmeralds() {
 }
 
 // ==================================================================
-// Firing Mechanic: Shoot in all directions (default left if none).
+// Firing Mechanic: Player shoots in the direction of movement (up/down/left/right).
 // Also, reduce player's speed temporarily upon shooting.
 function fireBullet() {
   if (bulletCooldown > 0) return;
@@ -537,7 +518,7 @@ function fireBullet() {
 // ==================================================================
 function endGame() {
   if (!emeralds.every(e => e.collected)) {
-    alert("Game Over! What a Failure!!!");
+    alert("Game Over! Digger was caught.");
   }
   restartButton.style.display = "block";
   gameScreen.style.display = "none";
