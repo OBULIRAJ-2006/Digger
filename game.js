@@ -479,7 +479,7 @@ function fireBullet() {
   let direction = { x: player.lastDirection.x, y: player.lastDirection.y };
   if (direction.x === 0 && direction.y === 0) {
     direction.x = -1;
-    direction.y = 0;
+    direction.y = -1;
   }
   let speedMultiplier = (player.firepowerTime > 0) ? 16 : 8;
   let bullet = {
