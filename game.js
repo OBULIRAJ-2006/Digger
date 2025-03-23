@@ -90,7 +90,7 @@ let player = {
   sprite: diggerImg,
   powerupTime: 0,
   shieldTime: 0,
-  firepowerTime: 0,
+  firepowerTime: 0.5,
   lastDirection: { x: 1, y: 0 }
 };
 
