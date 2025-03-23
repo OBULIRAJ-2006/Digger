@@ -79,7 +79,7 @@ let player = {
   y: 50,
   width: 32,
   height: 32,
-  speed: 1, // Lowered speed for challenge & to emphasize shoot slowdown
+  speed: 0.1, // Lowered speed for challenge & to emphasize shoot slowdown
   baseSpeed: 2,
   dx: 0,
   dy: 0,
