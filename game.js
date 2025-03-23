@@ -83,7 +83,7 @@ let player = {
   y: 50,
   width: 32,
   height: 32,
-  speed: 4,
+  speed: 2,
   baseSpeed: 4,
   dx: 0,
   dy: 0,
