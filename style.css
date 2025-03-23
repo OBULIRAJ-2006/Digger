@@ -81,6 +81,11 @@ header h2 {
   font-size: 1.2em;
   margin-top: 5px;
 }
+#powerupDisplay {
+  margin-top: 5px;
+  font-size: 1em;
+  color: lightgreen;
+}
 
 /* ================================================================== */
 /* Game Container and Canvas */
@@ -142,12 +147,15 @@ canvas {
   right: 20px;
 }
 #joystick {
-  width: 100px;
-  height: 100px;
-  background-color: #444;
+  width: 120px; /* Bigger background circle */
+  height: 120px;
+  background-color: rgba(68, 68, 68, 0.8);
   border: 3px solid #fff;
   border-radius: 50%;
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 #joystick .horizontal {
   display: flex;
@@ -155,15 +163,15 @@ canvas {
   margin: 5px 0;
 }
 .arrow-btn {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   background-color: #00bcd4;
   border: 3px solid #fff;
   border-radius: 10px;
   color: #fff;
-  font-size: 28px;
+  font-size: 24px;
   cursor: pointer;
-  margin: 5px;
+  margin: 3px;
   transition: background 0.3s, transform 0.2s;
 }
 .arrow-btn:hover {
@@ -206,9 +214,9 @@ canvas {
     padding: 10px 20px;
   }
   .arrow-btn {
-    width: 55px;
-    height: 55px;
-    font-size: 26px;
+    width: 45px;
+    height: 45px;
+    font-size: 22px;
   }
   .control-btn.fire {
     width: 80px;
@@ -231,9 +239,9 @@ canvas {
     padding: 8px 18px;
   }
   .arrow-btn {
-    width: 50px;
-    height: 50px;
-    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
   }
   .control-btn.fire {
     width: 70px;
@@ -259,9 +267,9 @@ canvas {
     padding: 8px 16px;
   }
   .arrow-btn {
-    width: 45px;
-    height: 45px;
-    font-size: 22px;
+    width: 35px;
+    height: 35px;
+    font-size: 18px;
   }
   .control-btn.fire {
     width: 65px;
