@@ -246,7 +246,7 @@ function drawBullets() {
 }
 
 // ==================================================================
-// Update Functions
+// Update Functions.
 // ==================================================================
 
 // Update player: move, update last direction, dig terrain, collect emeralds
