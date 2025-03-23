@@ -90,7 +90,7 @@ let player = {
   sprite: diggerImg,
   powerupTime: 0,
   shieldTime: 0,
-  firepowerTime: 0.5,
+  firepowerTime: 0,
   lastDirection: { x: 1, y: 0 }
 };
 
@@ -488,7 +488,7 @@ function fireBullet() {
     width: 8,
     height: 8,
     dx: direction.x * speedMultiplier,
-    dy: direction.y * speedMultiplier
+    dy: direction.y * speedMultiplier,
   };
   bullets.push(bullet);
   bulletCooldown = 60; // Cooldown for approx 1 second at 60fps
