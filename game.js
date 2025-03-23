@@ -79,7 +79,7 @@ let player = {
   y: 50,
   width: 32,
   height: 32,
-  speed: 2, // Lowered speed for challenge & to emphasize shoot slowdown
+  speed: 1, // Lowered speed for challenge & to emphasize shoot slowdown
   baseSpeed: 2,
   dx: 0,
   dy: 0,
@@ -537,7 +537,7 @@ function fireBullet() {
 // ==================================================================
 function endGame() {
   if (!emeralds.every(e => e.collected)) {
-    alert("Game Over! Digger was caught.");
+    alert("Game Over! What a Failure!!!");
   }
   restartButton.style.display = "block";
   gameScreen.style.display = "none";
