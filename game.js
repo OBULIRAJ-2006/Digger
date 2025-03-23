@@ -79,8 +79,8 @@ let player = {
   y: 50,
   width: 32,
   height: 32,
-  speed: 0.1, // Lowered speed for challenge & to emphasize shoot slowdown
-  baseSpeed: 2,
+  speed: 0.5, // Lowered speed for challenge & to emphasize shoot slowdown
+  baseSpeed: 4,
   dx: 0,
   dy: 0,
   sprite: diggerImg,
