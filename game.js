@@ -479,7 +479,7 @@ function fireBullet() {
   let direction = { x: player.lastDirection.x, y: player.lastDirection.y };
   if (direction.x === 0 && direction.y === 0) {
     direction.x = -1;
-    direction.y = -1;
+    direction.y = 0;
   }
   let speedMultiplier = (player.firepowerTime > 0) ? 16 : 8;
   let bullet = {
@@ -500,7 +500,7 @@ function fireBullet() {
 // ==================================================================
 function endGame() {
   if (!emeralds.every(e => e.collected)) {
-    alert("Game Over! Digger was caught.");
+    alert("Game Over! What a failure!");
   }
   restartButton.style.display = "block";
   gameScreen.style.display = "none";
