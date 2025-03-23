@@ -83,7 +83,7 @@ let player = {
   y: 50,
   width: 32,
   height: 32,
-  speed: 4,
+  speed: 1,
   baseSpeed: 4,
   dx: 0,
   dy: 0,
@@ -500,7 +500,7 @@ function fireBullet() {
 // ==================================================================
 function endGame() {
   if (!emeralds.every(e => e.collected)) {
-    alert("Game Over! Digger was caught.");
+    alert("Game Over! What a failure!!!");
   }
   restartButton.style.display = "block";
   gameScreen.style.display = "none";
