@@ -175,10 +175,10 @@ function spawnGoldBags() {
     let col = Math.floor(Math.random() * cols);
     let row = Math.floor(Math.random() * rows);
     goldBags.push({
-      x: col * cellSize + (cellSize - 16) / 2,
-      y: row * cellSize + (cellSize - 16) / 2,
-      width: 16,
-      height: 16,
+      x: col * cellSize,
+      y: row * cellSize,
+      width: cellSize,
+      height: cellSize,
       falling: false,
       vy: 0,
       startFallY: null
