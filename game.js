@@ -86,7 +86,7 @@ function findPath(start, goal) {
       fScore[k] = Infinity;
     }
   }
-  
+
   gScore[key(start)] = 0;
   fScore[key(start)] = heuristic(start, goal);
   while (openSet.length > 0) {
@@ -131,8 +131,8 @@ let player = {
   y: 50,
   width: 32,
   height: 32,
-  speed: 2,
-  baseSpeed: 2,
+  speed: 1,
+  baseSpeed: 4,
   dx: 0,
   dy: 0,
   sprite: diggerImg,
