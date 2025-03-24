@@ -1,61 +1,41 @@
-// ==================================================================
-// Initialization and Asset Loading
-// ==================================================================
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 canvas.width = 800;
 canvas.height = 600;
-
 const startScreen = document.getElementById("startScreen");
 const startButton = document.getElementById("startButton");
 const gameScreen = document.getElementById("gameScreen");
 const scoreDisplay = document.getElementById("scoreDisplay");
 const restartButton = document.getElementById("restartButton");
 const powerupDisplay = document.getElementById("powerupDisplay");
-
-// Load Images
-const diggerImg = new Image();
-diggerImg.src = "digger.png"; // Player sprite
-const enemyImg = new Image();
-enemyImg.src = "enemy.png";   // Enemy sprite
-const goldImg = new Image();
-goldImg.src = "gold.png";     // Gold bag sprite
-const emeraldImg = new Image();
-emeraldImg.src = "emerald.png"; // Emerald sprite
-const dugSandImg = new Image();
-dugSandImg.src = "dug-sand.png"; // Dug sand image (40x40 px)
-
-// Load Sounds
+const diggerImg = new Image(); diggerImg.src = "digger.png";
+const enemyImg = new Image(); enemyImg.src = "enemy.png";
+const goldImg = new Image(); goldImg.src = "gold.png";
+const emeraldImg = new Image(); emeraldImg.src = "emerald.png";
+const dugSandImg = new Image(); dugSandImg.src = "dug-sand.png";
 const soundMove = new Audio("move.mp3");
 const soundCollect = new Audio("collect.mp3");
 const soundEnemyHit = new Audio("hit.mp3");
 const soundFire = new Audio("fire.mp3");
 const soundPowerUp = new Audio("powerup.mp3");
-
-// ==================================================================
-// Game State and Terrain Setup
-// ==================================================================
 let score = 0;
 let gameOver = false;
-let bulletCooldown = 0;  // 60 frames cooldown (~1 sec)
-let shootSlowTimer = 0;  // 30 frames slowdown after shooting
-
+let bulletCooldown = 0;
+let shootSlowTimer = 0;
 const cellSize = 40;
 const cols = canvas.width / cellSize;
 const rows = canvas.height / cellSize;
 let terrain = [];
 let tunnelRow = 0;
-
 function initTerrain() {
   terrain = [];
   for (let r = 0; r < rows; r++) {
     terrain[r] = [];
     for (let c = 0; c < cols; c++) {
-      terrain[r][c] = true; // true indicates dirt is present
+      terrain[r][c] = true;
     }
   }
 }
-
 function generateTunnel() {
   let currentRow = Math.floor(Math.random() * rows);
   for (let c = 0; c < cols; c++) {
@@ -68,30 +48,24 @@ function generateTunnel() {
   }
   tunnelRow = currentRow;
 }
-
-// ==================================================================
-// Advanced Enemy AI: A* Pathfinding with Fallback Random Movement
-// ==================================================================
 function heuristic(a, b) {
   return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 }
-
 function findPath(start, goal) {
-  function key(node) { return ${node.x},${node.y}; }
+  function key(node) { return `${node.x},${node.y}`; }
   let openSet = [start];
   let cameFrom = {};
   let gScore = {};
   let fScore = {};
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      let k = ${c},${r};
+      let k = `${c},${r}`;
       gScore[k] = Infinity;
       fScore[k] = Infinity;
     }
   }
   gScore[key(start)] = 0;
   fScore[key(start)] = heuristic(start, goal);
-
   while (openSet.length > 0) {
     let current = openSet.reduce((a, b) => fScore[key(a)] < fScore[key(b)] ? a : b);
     if (current.x === goal.x && current.y === goal.y) {
@@ -111,7 +85,7 @@ function findPath(start, goal) {
     ];
     for (let neighbor of neighbors) {
       if (neighbor.x < 0 || neighbor.x >= cols || neighbor.y < 0 || neighbor.y >= rows) continue;
-      if (terrain[neighbor.y][neighbor.x] === true) continue; // Only walk on dug cells
+      if (terrain[neighbor.y][neighbor.x] === true) continue;
       let tentativeG = gScore[key(current)] + 1;
       if (tentativeG < gScore[key(neighbor)]) {
         cameFrom[key(neighbor)] = current;
@@ -125,16 +99,12 @@ function findPath(start, goal) {
   }
   return [];
 }
-
-// ==================================================================
-// Game Objects
-// ==================================================================
 let player = {
   x: 50,
   y: 50,
   width: 32,
   height: 32,
-  speed: 2, // Very slow digger
+  speed: 2,
   baseSpeed: 2,
   dx: 0,
   dy: 0,
@@ -144,17 +114,11 @@ let player = {
   firepowerTime: 0,
   lastDirection: { x: 1, y: 0 }
 };
-
 let enemies = [];
 let emeralds = [];
 let goldBags = [];
 let powerups = [];
 let bullets = [];
-// enemyBullets not used since enemy doesn't shoot
-
-// ==================================================================
-// Spawning Functions
-// ==================================================================
 function spawnEmeralds() {
   emeralds = [];
   let count = 0;
@@ -171,7 +135,6 @@ function spawnEmeralds() {
     count++;
   }
 }
-
 function spawnGoldBags() {
   goldBags = [];
   let count = 0;
@@ -190,7 +153,6 @@ function spawnGoldBags() {
     count++;
   }
 }
-
 function spawnEnemy() {
   if (enemies.length >= 3) return;
   let spawnX = canvas.width - cellSize - 10;
@@ -206,7 +168,6 @@ function spawnEnemy() {
     speed: 1
   });
 }
-
 function spawnPowerups() {
   powerups = [];
   if (Math.random() < 0.5) {
@@ -223,26 +184,18 @@ function spawnPowerups() {
     });
   }
 }
-
-// ==================================================================
-// Drawing Functions
-// ==================================================================
 function drawTerrain() {
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       if (terrain[r][c]) {
-        // Dirt with a subtle texture effect
         ctx.fillStyle = "#a0522d";
         ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
-        // Optional: a slight overlay for texture (could be an image instead)
       } else {
-        // Dug cell shows the dug-sand image with a smooth transition
         ctx.drawImage(dugSandImg, c * cellSize, r * cellSize, cellSize, cellSize);
       }
     }
   }
 }
-
 function drawPlayer() {
   ctx.save();
   ctx.shadowBlur = 8;
@@ -250,7 +203,6 @@ function drawPlayer() {
   ctx.drawImage(player.sprite, player.x, player.y, player.width, player.height);
   ctx.restore();
 }
-
 function drawEnemies() {
   enemies.forEach(enemy => {
     ctx.save();
@@ -260,7 +212,6 @@ function drawEnemies() {
     ctx.restore();
   });
 }
-
 function drawEmeralds() {
   emeralds.forEach(e => {
     if (!e.collected) {
@@ -272,7 +223,6 @@ function drawEmeralds() {
     }
   });
 }
-
 function drawGoldBags() {
   goldBags.forEach(bag => {
     ctx.save();
@@ -282,7 +232,6 @@ function drawGoldBags() {
     ctx.restore();
   });
 }
-
 function drawPowerups() {
   powerups.forEach(pu => {
     ctx.save();
@@ -295,7 +244,6 @@ function drawPowerups() {
     ctx.restore();
   });
 }
-
 function drawBullets() {
   ctx.save();
   ctx.shadowBlur = 6;
@@ -306,10 +254,6 @@ function drawBullets() {
   });
   ctx.restore();
 }
-
-// ==================================================================
-// Update Functions
-// ==================================================================
 function updatePlayer() {
   player.x += player.dx;
   player.y += player.dy;
@@ -317,23 +261,18 @@ function updatePlayer() {
   if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
   if (player.y < 0) player.y = 0;
   if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
-  
   if (shootSlowTimer > 0) {
     player.speed = player.baseSpeed * 0.5;
     shootSlowTimer--;
   } else {
     player.speed = player.baseSpeed;
   }
-  
-  // Update lastDirection based on movement (allows vertical shooting)
   if (player.dx !== 0 || player.dy !== 0) {
     player.lastDirection = {
       x: player.dx !== 0 ? player.dx / Math.abs(player.dx) : 0,
       y: player.dy !== 0 ? player.dy / Math.abs(player.dy) : 0
     };
   }
-  
-  // Dig the cell under the center and collect emeralds
   let col = Math.floor((player.x + player.width / 2) / cellSize);
   let row = Math.floor((player.y + player.height / 2) / cellSize);
   if (row >= 0 && row < rows && col >= 0 && col < cols) {
@@ -350,10 +289,8 @@ function updatePlayer() {
     });
   }
 }
-
 function updateEnemies() {
   enemies.forEach(enemy => {
-    // Use A* pathfinding to chase player's center
     let start = { x: Math.floor(enemy.x / cellSize), y: Math.floor(enemy.y / cellSize) };
     let goal = { x: Math.floor((player.x + player.width / 2) / cellSize), y: Math.floor((player.y + player.height / 2) / cellSize) };
     let path = findPath(start, goal);
@@ -369,7 +306,6 @@ function updateEnemies() {
         enemy.y += (dy / dist) * enemy.speed;
       }
     } else {
-      // If no path found, use random movement
       if (Math.random() < 0.05) {
         enemy.dx = (Math.random() < 0.5 ? -1 : 1) * enemy.speed;
         enemy.dy = (Math.random() < 0.5 ? -1 : 1) * enemy.speed;
@@ -379,7 +315,6 @@ function updateEnemies() {
       if (!cellBlocked(newX, enemy.y)) enemy.x = newX;
       if (!cellBlocked(enemy.x, newY)) enemy.y = newY;
     }
-    
     if (isColliding(player, enemy)) {
       if (player.shieldTime <= 0) {
         gameOver = true;
@@ -388,14 +323,12 @@ function updateEnemies() {
     }
   });
 }
-
 function cellBlocked(x, y) {
   let col = Math.floor(x / cellSize);
   let row = Math.floor(y / cellSize);
   if (row < 0 || row >= rows || col < 0 || col >= cols) return true;
   return terrain[row][col];
 }
-
 function updateBullets() {
   bullets.forEach((bullet, index) => {
     let nextX = bullet.x + bullet.dx;
@@ -403,7 +336,6 @@ function updateBullets() {
     let col = Math.floor(nextX / cellSize);
     let row = Math.floor(nextY / cellSize);
     if (row >= 0 && row < rows && col >= 0 && col < cols && terrain[row][col]) {
-      // Stop bullet when hitting dirt
       bullets.splice(index, 1);
       return;
     }
@@ -423,12 +355,10 @@ function updateBullets() {
     });
   });
 }
-
 function updateGoldBags() {
   goldBags.forEach(bag => {
     let col = Math.floor(bag.x / cellSize);
     let rowBelow = Math.floor((bag.y + bag.height) / cellSize);
-    // Fall only if the cell directly below is clear (dug)
     if (rowBelow < rows && terrain[rowBelow][col] === true) {
       bag.falling = false;
       bag.vy = 0;
@@ -462,7 +392,6 @@ function updateGoldBags() {
     }
   });
 }
-
 function updatePowerups() {
   powerups.forEach((pu, index) => {
     if (isColliding(player, pu)) {
@@ -481,48 +410,28 @@ function updatePowerups() {
   let displayText = "";
   if (player.powerupTime > 0) {
     player.powerupTime--;
-    displayText += "Speed: " + Math.ceil(player.powerupTime/60) + "s ";
+    displayText += "Speed: " + Math.ceil(player.powerupTime / 60) + "s ";
     if (player.powerupTime === 0) player.speed = player.baseSpeed;
   }
   if (player.shieldTime > 0) {
     player.shieldTime--;
-    displayText += "Shield: " + Math.ceil(player.shieldTime/60) + "s ";
+    displayText += "Shield: " + Math.ceil(player.shieldTime / 60) + "s ";
   }
   if (player.firepowerTime > 0) {
     player.firepowerTime--;
-    displayText += "Firepower: " + Math.ceil(player.firepowerTime/60) + "s";
+    displayText += "Firepower: " + Math.ceil(player.firepowerTime / 60) + "s";
   }
   powerupDisplay.innerText = displayText;
 }
-
 function isColliding(a, b) {
-  return (
-    a.x < b.x + b.width &&
-    a.x + a.width > b.x &&
-    a.y < b.y + b.height &&
-    a.y + a.height > b.y
-  );
+  return (a.x < b.x + b.width &&
+          a.x + a.width > b.x &&
+          a.y < b.y + b.height &&
+          a.y + a.height > b.y);
 }
-
 function updateBulletCooldown() {
   if (bulletCooldown > 0) bulletCooldown--;
 }
-
-function drawEmeralds() {
-  emeralds.forEach(e => {
-    if (!e.collected) {
-      ctx.save();
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = "lime";
-      ctx.drawImage(emeraldImg, e.x, e.y, e.width, e.height);
-      ctx.restore();
-    }
-  });
-}
-
-// ==================================================================
-// Main Game Loop
-// ==================================================================
 function gameLoop() {
   if (gameOver) {
     endGame();
@@ -534,7 +443,6 @@ function gameLoop() {
   updateGoldBags();
   updatePowerups();
   updateBulletCooldown();
-
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawTerrain();
   drawEmeralds();
@@ -543,7 +451,6 @@ function gameLoop() {
   drawEnemies();
   drawBullets();
   drawPlayer();
-
   let win = emeralds.every(e => e.collected);
   if (win) {
     gameOver = true;
@@ -551,13 +458,19 @@ function gameLoop() {
     endGame();
     return;
   }
-
   requestAnimationFrame(gameLoop);
 }
-
-// ==================================================================
-// Firing Mechanic: Player shoots in the current movement direction.
-// Also, reduce player's speed temporarily (recoil effect).
+function drawEmeralds() {
+  emeralds.forEach(e => {
+    if (!e.collected) {
+      ctx.save();
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = "lime";
+      ctx.drawImage(emeraldImg, e.x, e.y, e.width, e.height);
+      ctx.restore();
+    }
+  });
+}
 function fireBullet() {
   if (bulletCooldown > 0) return;
   let direction = { x: player.lastDirection.x, y: player.lastDirection.y };
@@ -579,10 +492,6 @@ function fireBullet() {
   shootSlowTimer = 30;
   soundFire.play();
 }
-
-// ==================================================================
-// Game Over and Restart Functions
-// ==================================================================
 function endGame() {
   if (!emeralds.every(e => e.collected)) {
     alert("Game Over! Digger was caught.");
@@ -590,7 +499,6 @@ function endGame() {
   restartButton.style.display = "block";
   gameScreen.style.display = "none";
 }
-
 function resetGame() {
   score = 0;
   scoreDisplay.innerText = "Score: " + score;
@@ -617,10 +525,6 @@ function resetGame() {
   gameScreen.style.display = "block";
   gameLoop();
 }
-
-// ==================================================================
-// Input Handling (Keyboard and On-screen Controls)
-// ==================================================================
 document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowUp") { player.dy = -player.speed; soundMove.play(); }
   if (e.key === "ArrowDown") { player.dy = player.speed; soundMove.play(); }
@@ -632,8 +536,6 @@ document.addEventListener("keyup", (e) => {
   if (["ArrowUp", "ArrowDown"].includes(e.key)) player.dy = 0;
   if (["ArrowLeft", "ArrowRight"].includes(e.key)) player.dx = 0;
 });
-
-// On-screen mobile controls
 document.getElementById("upBtn").addEventListener("touchstart", () => { player.dy = -player.speed; });
 document.getElementById("upBtn").addEventListener("touchend", () => { player.dy = 0; });
 document.getElementById("downBtn").addEventListener("touchstart", () => { player.dy = player.speed; });
@@ -643,10 +545,6 @@ document.getElementById("leftBtn").addEventListener("touchend", () => { player.d
 document.getElementById("rightBtn").addEventListener("touchstart", () => { player.dx = player.speed; });
 document.getElementById("rightBtn").addEventListener("touchend", () => { player.dx = 0; });
 document.getElementById("fireButton").addEventListener("touchstart", () => { fireBullet(); });
-
-// ==================================================================
-// Start and Restart Handlers
-// ==================================================================
 startButton.addEventListener("click", () => {
   startScreen.style.display = "none";
   gameScreen.style.display = "block";
@@ -656,13 +554,7 @@ startButton.addEventListener("click", () => {
   spawnGoldBags();
   spawnPowerups();
   spawnEnemy();
-  gameloop();
-  });
+  gameLoop();
+});
 restartButton.addEventListener("click", resetGame);
-
-// ==================================================================
-// Additional Enemy Spawn Timer (every 15 seconds if fewer than 3 enemies)
-// ==================================================================
-setInterval(() => {
-  if (!gameOver && enemies.length < 3) { spawnEnemy(); }
-}, 15000);
+setInterval(() => { if (!gameOver && enemies.length < 3) { spawnEnemy(); } }, 15000);
