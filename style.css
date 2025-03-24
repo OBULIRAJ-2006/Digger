@@ -84,13 +84,13 @@ header h2 {
   color: lightgreen;
   text-shadow: 1px 1px 4px #000;
 }
-/* Game container now uses a plain brown background */
+/* Set game container background to black so that the drawn terrain is visible */
 #gameContainer {
   position: relative;
   width: 800px;
   height: 600px;
   margin: 20px auto;
-  background-color: #8B4513; /* SaddleBrown color */
+  background-color: #000;
   border: 8px solid gold;
   box-shadow: 0 0 20px rgba(255,204,0,0.8);
   border-radius: 15px;
