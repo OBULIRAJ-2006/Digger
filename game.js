@@ -86,6 +86,7 @@ function findPath(start, goal) {
       fScore[k] = Infinity;
     }
   }
+  
   gScore[key(start)] = 0;
   fScore[key(start)] = heuristic(start, goal);
   while (openSet.length > 0) {
