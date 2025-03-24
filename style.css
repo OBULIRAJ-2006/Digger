@@ -1,6 +1,3 @@
-/* ================================================================== */
-/* Global Reset and Base Styles */
-/* ================================================================== */
 * {
   margin: 0;
   padding: 0;
@@ -19,10 +16,6 @@ body, html {
   align-items: center;
   text-align: center;
 }
-
-/* ================================================================== */
-/* Screen Containers with Fade In Animation */
-/* ================================================================== */
 .screen {
   position: absolute;
   top: 0;
@@ -35,10 +28,6 @@ body, html {
 @keyframes fadeIn {
   to { opacity: 1; }
 }
-
-/* ================================================================== */
-/* Start Screen */
-/* ================================================================== */
 #startScreen {
   background: url('classic-bg.png') no-repeat center;
   background-size: cover;
@@ -54,10 +43,6 @@ body, html {
   color: gold;
   text-shadow: 3px 3px 8px #000;
 }
-
-/* ================================================================== */
-/* Buttons (with transitions & hover effects) */
-/* ================================================================== */
 .main-btn {
   padding: 15px 30px;
   font-size: 24px;
@@ -71,12 +56,8 @@ body, html {
 .main-btn:hover {
   background-color: #ffd633;
   transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(255, 204, 0, 0.8);
+  box-shadow: 0 0 10px rgba(255,204,0,0.8);
 }
-
-/* ================================================================== */
-/* Game Screen */
-/* ================================================================== */
 #gameScreen {
   background-color: #000;
 }
@@ -103,10 +84,6 @@ header h2 {
   color: lightgreen;
   text-shadow: 1px 1px 4px #000;
 }
-
-/* ================================================================== */
-/* Game Container and Canvas */
-/* ================================================================== */
 #gameContainer {
   position: relative;
   width: 800px;
@@ -129,10 +106,6 @@ canvas {
   height: 100%;
   image-rendering: pixelated;
 }
-
-/* ================================================================== */
-/* Controls Section */
-/* ================================================================== */
 #controls {
   position: absolute;
   bottom: 20px;
@@ -142,10 +115,6 @@ canvas {
   padding: 0 20px;
   animation: fadeIn 0.5s forwards;
 }
-
-/* ================================================================== */
-/* Fire Button (Left Side) */
-/* ================================================================== */
 #fireContainer {
   position: relative;
   left: 20px;
@@ -166,10 +135,6 @@ canvas {
   transform: scale(1.1);
   box-shadow: 0 0 10px rgba(255,0,0,0.8);
 }
-
-/* ================================================================== */
-/* Joystick (Right Side) */
-/* ================================================================== */
 #joystickContainer {
   position: relative;
   right: 20px;
@@ -177,7 +142,7 @@ canvas {
 #joystick {
   width: 120px;
   height: 120px;
-  background-color: rgba(68, 68, 68, 0.8);
+  background-color: rgba(68,68,68,0.8);
   border: 3px solid #fff;
   border-radius: 50%;
   position: relative;
@@ -212,10 +177,6 @@ canvas {
   transform: scale(1.1);
   box-shadow: 0 0 8px rgba(0,188,212,0.8);
 }
-
-/* ================================================================== */
-/* Restart Button */
-/* ================================================================== */
 #restartButton {
   margin-top: 20px;
   padding: 12px 24px;
@@ -231,91 +192,28 @@ canvas {
   background-color: #ffd633;
   opacity: 0.9;
 }
-
-/* ================================================================== */
-/* Responsive Design */
-/* ================================================================== */
 @media screen and (max-width: 1024px) {
-  #gameContainer {
-    width: 90vw;
-    height: 70vh;
-    border-width: 6px;
-  }
-  header h2 {
-    font-size: 1.8em;
-  }
-  #restartButton {
-    font-size: 22px;
-    padding: 10px 20px;
-  }
-  .arrow-btn {
-    width: 45px;
-    height: 45px;
-    font-size: 22px;
-  }
-  .control-btn.fire {
-    width: 80px;
-    height: 80px;
-    font-size: 22px;
-  }
+  #gameContainer { width: 90vw; height: 70vh; border-width: 6px; }
+  header h2 { font-size: 1.8em; }
+  #restartButton { font-size: 22px; padding: 10px 20px; }
+  .arrow-btn { width: 45px; height: 45px; font-size: 22px; }
+  .control-btn.fire { width: 80px; height: 80px; font-size: 22px; }
 }
-
 @media screen and (max-width: 768px) {
-  #gameContainer {
-    width: 95vw;
-    height: 75vh;
-    border-width: 4px;
-  }
-  header h2 {
-    font-size: 1.6em;
-  }
-  #restartButton {
-    font-size: 20px;
-    padding: 8px 18px;
-  }
-  .arrow-btn {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-  }
-  .control-btn.fire {
-    width: 70px;
-    height: 70px;
-    font-size: 20px;
-  }
-  #controls {
-    flex-direction: column;
-  }
+  #gameContainer { width: 95vw; height: 75vh; border-width: 4px; }
+  header h2 { font-size: 1.6em; }
+  #restartButton { font-size: 20px; padding: 8px 18px; }
+  .arrow-btn { width: 40px; height: 40px; font-size: 20px; }
+  .control-btn.fire { width: 70px; height: 70px; font-size: 20px; }
+  #controls { flex-direction: column; }
 }
-
 @media screen and (max-width: 480px) {
-  #gameContainer {
-    width: 100vw;
-    height: 90vh;
-    border-width: 4px;
-  }
-  header h2 {
-    font-size: 1.4em;
-  }
-  #restartButton {
-    font-size: 18px;
-    padding: 8px 16px;
-  }
-  .arrow-btn {
-    width: 35px;
-    height: 35px;
-    font-size: 18px;
-  }
-  .control-btn.fire {
-    width: 65px;
-    height: 65px;
-    font-size: 18px;
-  }
+  #gameContainer { width: 100vw; height: 90vh; border-width: 4px; }
+  header h2 { font-size: 1.4em; }
+  #restartButton { font-size: 18px; padding: 8px 16px; }
+  .arrow-btn { width: 35px; height: 35px; font-size: 18px; }
+  .control-btn.fire { width: 65px; height: 65px; font-size: 18px; }
 }
-
-/* ================================================================== */
-/* Extra Utility Classes */
-/* ================================================================== */
 .margin-top-10 { margin-top: 10px; }
 .margin-top-20 { margin-top: 20px; }
 .margin-bottom-10 { margin-bottom: 10px; }
