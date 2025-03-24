@@ -77,14 +77,14 @@ function heuristic(a, b) {
 }
 
 function findPath(start, goal) {
-  function key(node) { return ${node.x},${node.y}; }
+  function key(node) { return `${node.x},${node.y}`; } // Fixed string interpolation
   let openSet = [start];
   let cameFrom = {};
   let gScore = {};
   let fScore = {};
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      let k = ${c},${r};
+      let k = `${c},${r}`; // Fixed string interpolation
       gScore[k] = Infinity;
       fScore[k] = Infinity;
     }
@@ -525,7 +525,7 @@ function gameLoop() {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawTerrain();
-  drawEmeralds();
+  drawEmeralds(); // Keep the first definition of drawEmeralds
   drawGoldBags();
   drawPowerups();
   drawEnemies();
@@ -541,18 +541,6 @@ function gameLoop() {
   }
 
   requestAnimationFrame(gameLoop);
-}
-
-function drawEmeralds() {
-  emeralds.forEach(e => {
-    if (!e.collected) {
-      ctx.save();
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = "lime";
-      ctx.drawImage(emeraldImg, e.x, e.y, e.width, e.height);
-      ctx.restore();
-    }
-  });
 }
 
 // ==================================================================
