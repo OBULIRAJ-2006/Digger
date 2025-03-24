@@ -8,16 +8,11 @@ const gameScreen = document.getElementById("gameScreen");
 const scoreDisplay = document.getElementById("scoreDisplay");
 const restartButton = document.getElementById("restartButton");
 const powerupDisplay = document.getElementById("powerupDisplay");
-const diggerImg = new Image();
-diggerImg.src = "digger.png";
-const enemyImg = new Image();
-enemyImg.src = "enemy.png";
-const goldImg = new Image();
-goldImg.src = "gold.png";
-const emeraldImg = new Image();
-emeraldImg.src = "emerald.png";
-const dugSandImg = new Image();
-dugSandImg.src = "dug-sand.png";
+const diggerImg = new Image(); diggerImg.src = "digger.png";
+const enemyImg = new Image(); enemyImg.src = "enemy.png";
+const goldImg = new Image(); goldImg.src = "gold.png";
+const emeraldImg = new Image(); emeraldImg.src = "emerald.png";
+const dugSandImg = new Image(); dugSandImg.src = "dug-sand.png";
 const soundMove = new Audio("move.mp3");
 const soundCollect = new Audio("collect.mp3");
 const soundEnemyHit = new Audio("hit.mp3");
@@ -58,10 +53,7 @@ function heuristic(a, b) {
 }
 function findPath(start, goal) {
   function key(node) { return `${node.x},${node.y}`; }
-  let openSet = [start];
-  let cameFrom = {};
-  let gScore = {};
-  let fScore = {};
+  let openSet = [start], cameFrom = {}, gScore = {}, fScore = {};
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       let k = `${c},${r}`;
