@@ -77,14 +77,14 @@ function heuristic(a, b) {
 }
 
 function findPath(start, goal) {
-  function key(node) { return `${node.x},${node.y}`; }
+  function key(node) { return ${node.x},${node.y}; }
   let openSet = [start];
   let cameFrom = {};
   let gScore = {};
   let fScore = {};
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      let k = `${c},${r}`;
+      let k = ${c},${r};
       gScore[k] = Infinity;
       fScore[k] = Infinity;
     }
@@ -134,8 +134,8 @@ let player = {
   y: 50,
   width: 32,
   height: 32,
-  speed: 1, // Very slow digger
-  baseSpeed: 4,
+  speed: 2, // Very slow digger
+  baseSpeed: 2,
   dx: 0,
   dy: 0,
   sprite: diggerImg,
@@ -507,6 +507,7 @@ function isColliding(a, b) {
 function updateBulletCooldown() {
   if (bulletCooldown > 0) bulletCooldown--;
 }
+
 function drawEmeralds() {
   emeralds.forEach(e => {
     if (!e.collected) {
@@ -518,6 +519,7 @@ function drawEmeralds() {
     }
   });
 }
+
 // ==================================================================
 // Main Game Loop
 // ==================================================================
@@ -552,8 +554,6 @@ function gameLoop() {
 
   requestAnimationFrame(gameLoop);
 }
-
-
 
 // ==================================================================
 // Firing Mechanic: Player shoots in the current movement direction.
@@ -656,6 +656,7 @@ startButton.addEventListener("click", () => {
   spawnGoldBags();
   spawnPowerups();
   spawnEnemy();
+  gameloop();
   });
 restartButton.addEventListener("click", resetGame);
 
