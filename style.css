@@ -84,13 +84,13 @@ header h2 {
   color: lightgreen;
   text-shadow: 1px 1px 4px #000;
 }
-/* Game Container now uses a plain dark background */
+/* Game container now uses a plain brown background */
 #gameContainer {
   position: relative;
   width: 800px;
   height: 600px;
   margin: 20px auto;
-  background-color: #333;
+  background-color: #8B4513; /* SaddleBrown color */
   border: 8px solid gold;
   box-shadow: 0 0 20px rgba(255,204,0,0.8);
   border-radius: 15px;
@@ -145,7 +145,6 @@ canvas {
   background-color: rgba(68,68,68,0.8);
   border: 3px solid #fff;
   border-radius: 50%;
-  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
