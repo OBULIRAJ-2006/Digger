@@ -147,7 +147,7 @@ canvas {
   right: 20px;
 }
 #joystick {
-  width: 120px; /* Bigger circle */
+  width: 120px; /* Bigger background circle */
   height: 120px;
   background-color: rgba(68, 68, 68, 0.8);
   border: 3px solid #fff;
@@ -156,8 +156,6 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  /* Move joystick higher for convenience */
-  margin-bottom: 20px;
 }
 #joystick .horizontal {
   display: flex;
