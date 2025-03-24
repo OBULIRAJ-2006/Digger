@@ -15,15 +15,15 @@ const powerupDisplay = document.getElementById("powerupDisplay");
 
 // Load Images
 const diggerImg = new Image();
-diggerImg.src = "digger.png"; // Player sprite
+diggerImg.src = "digger.png";
 const enemyImg = new Image();
-enemyImg.src = "enemy.png";   // Enemy sprite
+enemyImg.src = "enemy.png";
 const goldImg = new Image();
-goldImg.src = "gold.png";     // Gold bag sprite
+goldImg.src = "gold.png";
 const emeraldImg = new Image();
-emeraldImg.src = "emerald.png"; // Emerald sprite
+emeraldImg.src = "emerald.png";
 const dugSandImg = new Image();
-dugSandImg.src = "dug-sand.png"; // Dug sand image (40x40 px)
+dugSandImg.src = "dug-sand.png";
 
 // Load Sounds
 const soundMove = new Audio("move.mp3");
@@ -37,8 +37,8 @@ const soundPowerUp = new Audio("powerup.mp3");
 // ==================================================================
 let score = 0;
 let gameOver = false;
-let bulletCooldown = 0; // 60 frames cooldown (~1 sec)
-let shootSlowTimer = 0; // 30 frames slowdown after shooting
+let bulletCooldown = 0;
+let shootSlowTimer = 0;
 
 const cellSize = 40;
 const cols = canvas.width / cellSize;
@@ -51,7 +51,7 @@ function initTerrain() {
   for (let r = 0; r < rows; r++) {
     terrain[r] = [];
     for (let c = 0; c < cols; c++) {
-      terrain[r][c] = true; // true means dirt present
+      terrain[r][c] = true; // true indicates undug dirt
     }
   }
 }
@@ -78,10 +78,7 @@ function heuristic(a, b) {
 
 function findPath(start, goal) {
   function key(node) { return `${node.x},${node.y}`; }
-  let openSet = [start];
-  let cameFrom = {};
-  let gScore = {};
-  let fScore = {};
+  let openSet = [start], cameFrom = {}, gScore = {}, fScore = {};
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       let k = `${c},${r}`;
@@ -133,7 +130,7 @@ let player = {
   y: 50,
   width: 32,
   height: 32,
-  speed: 2, // Slow digger
+  speed: 2,
   baseSpeed: 2,
   dx: 0,
   dy: 0,
@@ -231,7 +228,7 @@ function drawTerrain() {
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       if (terrain[r][c]) {
-        ctx.fillStyle = "#8B4513"; // Classic brown dirt
+        ctx.fillStyle = "#8B4513"; // Brown dirt
         ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
       } else {
         ctx.drawImage(dugSandImg, c * cellSize, r * cellSize, cellSize, cellSize);
@@ -334,10 +331,10 @@ function updatePlayer() {
   }
 }
 
-// ----------------- Enhanced Enemy AI -----------------
-// The enemy now predicts the player's future position (using a fixed prediction factor)
-// and uses A* pathfinding to compute a path toward that predicted position.
-// If no valid path exists, it uses a fallback random motion.
+// -------------------- Enhanced Enemy AI --------------------
+// This version predicts the player's future position based on current velocity,
+// computes an A* path toward that predicted cell, and moves along the path.
+// If no path is found, it defaults to random movement.
 function updateEnemies() {
   enemies.forEach(enemy => {
     let predictionFactor = 40;
@@ -347,7 +344,7 @@ function updateEnemies() {
     predictedY = Math.max(0, Math.min(canvas.height - player.height, predictedY));
     
     let start = { x: Math.floor(enemy.x / cellSize), y: Math.floor(enemy.y / cellSize) };
-    let goal = { x: Math.floor((predictedX + player.width/2) / cellSize), y: Math.floor((predictedY + player.height/2) / cellSize) };
+    let goal = { x: Math.floor((predictedX + player.width / 2) / cellSize), y: Math.floor((predictedY + player.height / 2) / cellSize) };
     let path = findPath(start, goal);
     
     if (path.length > 1) {
@@ -378,7 +375,14 @@ function updateEnemies() {
     }
   });
 }
-// ------------------------------------------------------
+// -------------------------------------------------------------
+
+function cellBlocked(x, y) {
+  let col = Math.floor(x / cellSize);
+  let row = Math.floor(y / cellSize);
+  if (row < 0 || row >= rows || col < 0 || col >= cols) return true;
+  return terrain[row][col];
+}
 
 function updateBullets() {
   bullets.forEach((bullet, index) => {
