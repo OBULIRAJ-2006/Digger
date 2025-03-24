@@ -132,7 +132,7 @@ let player = {
   width: 32,
   height: 32,
   speed: 1,
-  baseSpeed: 4,
+  baseSpeed: 1,
   dx: 0,
   dy: 0,
   sprite: diggerImg,
