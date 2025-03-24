@@ -8,11 +8,16 @@ const gameScreen = document.getElementById("gameScreen");
 const scoreDisplay = document.getElementById("scoreDisplay");
 const restartButton = document.getElementById("restartButton");
 const powerupDisplay = document.getElementById("powerupDisplay");
-const diggerImg = new Image(); diggerImg.src = "digger.png";
-const enemyImg = new Image(); enemyImg.src = "enemy.png";
-const goldImg = new Image(); goldImg.src = "gold.png";
-const emeraldImg = new Image(); emeraldImg.src = "emerald.png";
-const dugSandImg = new Image(); dugSandImg.src = "dug-sand.png";
+const diggerImg = new Image();
+diggerImg.src = "digger.png";
+const enemyImg = new Image();
+enemyImg.src = "enemy.png";
+const goldImg = new Image();
+goldImg.src = "gold.png";
+const emeraldImg = new Image();
+emeraldImg.src = "emerald.png";
+const dugSandImg = new Image();
+dugSandImg.src = "dug-sand.png";
 const soundMove = new Audio("move.mp3");
 const soundCollect = new Audio("collect.mp3");
 const soundEnemyHit = new Audio("hit.mp3");
@@ -433,10 +438,7 @@ function updateBulletCooldown() {
   if (bulletCooldown > 0) bulletCooldown--;
 }
 function gameLoop() {
-  if (gameOver) {
-    endGame();
-    return;
-  }
+  if (gameOver) { endGame(); return; }
   updatePlayer();
   updateEnemies();
   updateBullets();
@@ -474,10 +476,7 @@ function drawEmeralds() {
 function fireBullet() {
   if (bulletCooldown > 0) return;
   let direction = { x: player.lastDirection.x, y: player.lastDirection.y };
-  if (direction.x === 0 && direction.y === 0) {
-    direction.x = -1;
-    direction.y = 0;
-  }
+  if (direction.x === 0 && direction.y === 0) { direction.x = -1; direction.y = 0; }
   let speedMultiplier = (player.firepowerTime > 0) ? 16 : 8;
   let bullet = {
     x: player.x + player.width / 2 - 4,
@@ -493,9 +492,7 @@ function fireBullet() {
   soundFire.play();
 }
 function endGame() {
-  if (!emeralds.every(e => e.collected)) {
-    alert("Game Over! Digger was caught.");
-  }
+  if (!emeralds.every(e => e.collected)) { alert("Game Over! Digger was caught."); }
   restartButton.style.display = "block";
   gameScreen.style.display = "none";
 }
