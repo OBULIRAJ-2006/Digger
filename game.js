@@ -185,7 +185,7 @@ function drawTerrain() {
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       if (terrain[r][c]) {
-        ctx.fillStyle = "#a0522d";
+        ctx.fillStyle = "#8B4513";
         ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
       } else {
         ctx.drawImage(dugSandImg, c * cellSize, r * cellSize, cellSize, cellSize);
