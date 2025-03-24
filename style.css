@@ -84,13 +84,13 @@ header h2 {
   color: lightgreen;
   text-shadow: 1px 1px 4px #000;
 }
+/* Game Container now uses a plain dark background */
 #gameContainer {
   position: relative;
   width: 800px;
   height: 600px;
   margin: 20px auto;
-  background: url('classic-bg.png') no-repeat center;
-  background-size: cover;
+  background-color: #333;
   border: 8px solid gold;
   box-shadow: 0 0 20px rgba(255,204,0,0.8);
   border-radius: 15px;
