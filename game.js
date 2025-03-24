@@ -507,7 +507,17 @@ function isColliding(a, b) {
 function updateBulletCooldown() {
   if (bulletCooldown > 0) bulletCooldown--;
 }
-
+function drawEmeralds() {
+  emeralds.forEach(e => {
+    if (!e.collected) {
+      ctx.save();
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = "lime";
+      ctx.drawImage(emeraldImg, e.x, e.y, e.width, e.height);
+      ctx.restore();
+    }
+  });
+}
 // ==================================================================
 // Main Game Loop
 // ==================================================================
@@ -543,17 +553,7 @@ function gameLoop() {
   requestAnimationFrame(gameLoop);
 }
 
-function drawEmeralds() {
-  emeralds.forEach(e => {
-    if (!e.collected) {
-      ctx.save();
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = "lime";
-      ctx.drawImage(emeraldImg, e.x, e.y, e.width, e.height);
-      ctx.restore();
-    }
-  });
-}
+
 
 // ==================================================================
 // Firing Mechanic: Player shoots in the current movement direction.
