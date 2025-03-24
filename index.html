@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- Ensure proper scaling on mobile devices -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ultimate Digger Revival</title>
   <link rel="stylesheet" href="style.css">
@@ -15,7 +14,7 @@
   </div>
 
   <!-- Game Screen -->
-  <div id="gameScreen" class="screen" style="display: none;">
+  <div id="gameScreen" class="screen" style="display:none;">
     <header>
       <h2>Digger Game</h2>
       <p id="scoreDisplay">Score: 0</p>
@@ -24,7 +23,6 @@
     <div id="gameContainer">
       <canvas id="gameCanvas" width="800" height="600"></canvas>
     </div>
-    <!-- On-screen Controls: Fire button on left; Joystick on right -->
     <div id="controls">
       <div id="fireContainer">
         <button id="fireButton" class="control-btn fire">FIRE</button>
@@ -40,7 +38,7 @@
         </div>
       </div>
     </div>
-    <button id="restartButton" class="main-btn" style="display: none;">RESTART</button>
+    <button id="restartButton" class="main-btn" style="display:none;">RESTART</button>
   </div>
 
   <script src="game.js"></script>
