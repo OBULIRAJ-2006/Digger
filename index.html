@@ -1,12 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Digger-Style Game</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Digger-Style HTML5 Game</title>
+    <!-- Ensure the canvas fits mobile screens at 1:1 scale6 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <canvas id="gameCanvas"></canvas>
-  <script src="game.js"></script>
+    <!-- Overlay for start screen, level-complete, and game-over messages -->
+    <div id="overlay">
+        <h1 id="overlay-title">Digger Game</h1>
+        <p id="overlay-message">Click Start to play</p>
+        <button id="overlay-button">Start Game</button>
+    </div>
+
+    <!-- Heads-Up Display: score, level, power-ups -->
+    <div id="hud">
+        <span id="score">Score: 0</span>
+        <span id="level">Level: 3</span>
+        <span id="powers">Power-up: None</span>
+    </div>
+
+    <!-- The game canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- On-screen touch controls for mobile -->
+    <div id="controls">
+        <div id="up" class="control-button">&#8593;</div>
+        <div id="left" class="control-button">&#8592;</div>
+        <div id="down" class="control-button">&#8595;</div>
+        <div id="right" class="control-button">&#8594;</div>
+        <div id="fire" class="control-button">FIRE</div>
+    </div>
+
+    <script src="game.js"></script>
 </body>
 </html>
