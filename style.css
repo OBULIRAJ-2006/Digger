@@ -1,65 +1,51 @@
-body, html {
+/* Reset margins and set background */
+body {
   margin: 0;
-  padding: 0;
+  overflow: hidden;
+  background: #000;
+}
+#gameContainer {
+  position: relative;
+  width: 640px;
+  margin: auto;
+}
+#gameCanvas {
+  display: block;
+  background: #000;
+}
+
+/* Controls container */
+#controls {
+  position: absolute;
+  bottom: 10px;
   width: 100%;
-  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #111;
-  color: #fff;
-  font-family: sans-serif;
+  pointer-events: none; /* allow events to pass through except on buttons */
 }
-#game-container {
-  position: relative;
-}
-#gameCanvas {
-  background: #222;
-}
-#ui {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 10;
-}
-#ui div {
-  margin-bottom: 5px;
-}
-#inv-status {
-  color: #ff0;
-}
-.hidden {
-  display: none;
-}
-#message {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0,0,0,0.8);
-  padding: 20px;
-  border-radius: 8px;
-  text-align: center;
-}
-#controls {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+
+/* Directional button grid */
+#directionButtons {
   display: grid;
-  grid-template-columns: repeat(3, 50px);
+  grid-template-columns: 50px 50px 50px;
+  grid-template-rows: 50px 50px;
   gap: 5px;
-  z-index: 10;
+  pointer-events: auto;
 }
+#btn-up    { grid-column: 2; grid-row: 1; }
+#btn-left  { grid-column: 1; grid-row: 2; }
+#btn-down  { grid-column: 2; grid-row: 2; }
+#btn-right { grid-column: 3; grid-row: 2; }
+
+/* Button styling */
 #controls button {
   width: 50px;
   height: 50px;
-  font-size: 1.5rem;
-  border: none;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.2);
-  color: #fff;
+  font-size: 24px;
+  margin: 0 5px;
+  pointer-events: auto;
 }
-@media (pointer: fine) {
-  #controls { display: none; }
+#btn-fire {
+  margin-left: 20px;
 }
