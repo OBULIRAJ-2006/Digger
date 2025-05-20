@@ -1,47 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Retro Digger</title>
+  <title>Digger Game</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Start Screen -->
-  <div id="startScreen" class="screen">
-    <h1>Retro Digger</h1>
-    <button id="startButton" class="main-btn">START</button>
-  </div>
-
-  <!-- Game Screen -->
-  <div id="gameScreen" class="screen" style="display: none;">
-    <header>
-      <h2>Digger Game</h2>
-      <p id="scoreDisplay">Score: 0</p>
-      <div id="powerupDisplay"></div>
-    </header>
-    <!-- The game container has a plain black background for clarity -->
-    <div id="gameContainer">
-      <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+    <div id="ui">
+      <div id="score">Score: 0</div>
+      <div id="level">Level: 1</div>
+      <div id="inv-status" class="hidden">Invincible!</div>
+      <div id="message" class="hidden"></div>
     </div>
     <div id="controls">
-      <div id="fireContainer">
-        <button id="fireButton" class="control-btn fire">FIRE</button>
-      </div>
-      <div id="joystickContainer">
-        <div id="joystick">
-          <button id="upBtn" class="arrow-btn">▲</button>
-          <div class="horizontal">
-            <button id="leftBtn" class="arrow-btn">◀</button>
-            <button id="rightBtn" class="arrow-btn">▶</button>
-          </div>
-          <button id="downBtn" class="arrow-btn">▼</button>
-        </div>
-      </div>
+      <button data-dir="ArrowUp">↑</button>
+      <button data-dir="ArrowLeft">←</button>
+      <button data-dir="ArrowDown">↓</button>
+      <button data-dir="ArrowRight">→</button>
     </div>
-    <button id="restartButton" class="main-btn" style="display: none;">RESTART</button>
   </div>
-
   <script src="game.js"></script>
 </body>
 </html>
