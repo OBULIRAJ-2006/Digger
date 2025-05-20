@@ -1,27 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Digger Game</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="game-container">
-    <canvas id="gameCanvas"></canvas>
-    <div id="ui">
-      <div id="score">Score: 0</div>
-      <div id="level">Level: 1</div>
-      <div id="inv-status" class="hidden">Invincible!</div>
-      <div id="message" class="hidden"></div>
-    </div>
+  <div id="gameContainer">
+    <!-- Game canvas -->
+    <canvas id="gameCanvas" width="640" height="480"></canvas>
+    <!-- On-screen controls for mobile -->
     <div id="controls">
-      <button data-dir="ArrowUp">↑</button>
-      <button data-dir="ArrowLeft">←</button>
-      <button data-dir="ArrowDown">↓</button>
-      <button data-dir="ArrowRight">→</button>
+      <div id="directionButtons">
+        <button id="btn-up">&#9650;</button>
+        <button id="btn-left">&#9664;</button>
+        <button id="btn-down">&#9660;</button>
+        <button id="btn-right">&#9654;</button>
+      </div>
+      <button id="btn-fire">X</button>
     </div>
   </div>
+  <!-- Game logic script -->
   <script src="game.js"></script>
 </body>
 </html>
