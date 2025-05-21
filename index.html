@@ -1,21 +1,25 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Digger Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="gameContainer">
-    <div id="hud">
-      <div>Score: <span id="score">0</span></div>
-      <div>Level: <span id="level">1</span></div>
-      <div>Power-ups: <span id="powerups">None</span></div>
-      <button id="startBtn">Start</button>
-      <button id="restartBtn" disabled>Restart</button>
-    </div>
-    <canvas id="gameCanvas" width="600" height="400"></canvas>
+  <h1>Digger: Retro Maze Game</h1>
+  <!-- Canvas for the game world -->
+  <canvas id="gameCanvas" width="320" height="240" aria-label="Digger game area"></canvas>
+  <!-- On-screen controls (shown on mobile) -->
+  <div id="touchControls">
+    <div id="joystickBase"><div id="joystickStick"></div></div>
+    <button id="fireButton">FIRE</button>
+  </div>
+  <!-- HUD: score, lives, power-up icons -->
+  <div id="hud">
+    <span id="score">Score: 0</span>
+    <span id="lives">Lives: 3</span>
+    <span id="powerups">Power: --</span>
   </div>
   <script src="game.js"></script>
 </body>
