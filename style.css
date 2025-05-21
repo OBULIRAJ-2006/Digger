@@ -1,75 +1,81 @@
 body {
-  background: #000;
-  color: #fff;
-  font-family: 'Press Start 2P', monospace;
-  text-align: center;
   margin: 0;
   padding: 0;
+  background: #000;
+  color: #0f0;
+  font-family: 'Press Start 2P', monospace;
 }
-h1 { margin: 8px 0; }
-
-#gameCanvas {
-  /* Low-resolution canvas scaled up with pixelated rendering */
-  width: 640px; /* 2× scale of 320px */
-  height: 480px; /* 2× scale of 240px */
-  border: 4px solid #333;
-  image-rendering: pixelated; /* Crisp pixel art */
-  background: #552; /* retro earth color */
-}
-
-#hud {
-  margin: 10px;
-  font-size: 14px;
-  letter-spacing: 1px;
-}
-#hud span { margin: 0 15px; }
-
-/* Touch controls */
-#touchControls {
+.screen {
   position: fixed;
-  bottom: 20px;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  color: #0f0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.hidden {
+  display: none;
+}
+.title {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+.blink {
+  animation: blink 1s steps(2) infinite;
+}
+@keyframes blink {
+  50% { opacity: 0; }
+}
+#hud {
+  position: absolute;
+  top: 0;
   width: 100%;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  pointer-events: none; /* allow events to pass to canvas except buttons */
+  justify-content: space-between;
+  padding: 10px;
+  box-sizing: border-box;
+  font-size: 14px;
 }
-#joystickBase, #joystickStick {
-  width: 80px; height: 80px;
-  background: rgba(255,255,255,0.1);
-  border: 2px solid #fff;
-  border-radius: 50%;
-  position: relative;
-  touch-action: none;
+#gameCanvas {
+  display: block;
+  margin: 0 auto;
+  background: #000;
+  image-rendering: pixelated;
 }
-#joystickBase { margin-right: 20px; }
-#joystickStick {
-  width: 60px; height: 60px;
-  background: rgba(255,255,255,0.3);
-  position: absolute;
-  top: 10px; left: 10px;
-  border-radius: 50%;
-  transition: top 0.1s, left 0.1s;
+#controls {
+  position: fixed;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
 }
-
-#fireButton {
-  width: 80px; height: 80px;
-  background: #f00;
+#controls .btn {
+  width: 50px;
+  height: 50px;
+  margin: 0 5px;
+  font-size: 24px;
   color: #fff;
-  border: none;
-  border-radius: 10px;
-  font-weight: bold;
-  opacity: 0.8;
-  pointer-events: auto;
-  touch-action: none;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid #fff;
+  border-radius: 5px;
 }
-
-/* Responsive tweaks */
-@media (max-width: 600px) {
-  #gameCanvas {
-    width: 100%;
-    height: auto;
-  }
-  #joystickBase, #fireButton { width: 60px; height: 60px; }
-  #joystickStick { width: 40px; height: 40px; top: 10px; left: 10px; }
+#gameOver h1, #levelUp h1 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+button {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  padding: 10px 20px;
+  cursor: pointer;
+  background: #111;
+  color: #0f0;
+  border: 2px solid #0f0;
+  outline: none;
+}
+button:hover {
+  background: #222;
 }
