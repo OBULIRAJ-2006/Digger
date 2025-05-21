@@ -1,28 +1,21 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Digger Canvas Game</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>Digger Game</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="game-container">
-    <canvas id="gameCanvas"></canvas>
+  <div id="gameContainer">
     <div id="hud">
-      <div id="score">Score: 0</div>
-      <div id="level">Level: 1</div>
-      <div id="lives">Lives: 3</div>
-      <div id="powerups">Power-ups: None</div>
+      <div>Score: <span id="score">0</span></div>
+      <div>Level: <span id="level">1</span></div>
+      <div>Power-ups: <span id="powerups">None</span></div>
+      <button id="startBtn">Start</button>
+      <button id="restartBtn" disabled>Restart</button>
     </div>
-    <div id="start-screen">
-      <h1>Digger Game</h1>
-      <p>Press any key or tap to Start</p>
-    </div>
-    <div id="game-over-screen" class="hidden">
-      <h1>Game Over</h1>
-      <p>Your score: <span id="finalScore">0</span></p>
-      <p>Press R or tap to Restart</p>
-    </div>
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
   </div>
   <script src="game.js"></script>
 </body>
