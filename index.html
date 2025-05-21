@@ -1,39 +1,30 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Digger Game</title>
+  <title>Digger Canvas Game</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Start screen overlay -->
-  <div id="startScreen" class="overlay">
-    <h1>Digger Game</h1>
-    <button id="startButton">Start Game</button>
-  </div>
-
-  <!-- The game canvas -->
-  <canvas id="gameCanvas"></canvas>
-
-  <!-- HUD: Score and Level indicators -->
-  <div id="hud">
-    <span id="score">Score: 0</span>
-    <span id="level">Level: 1</span>
-    <div id="powerups">
-      <span id="shieldTimer" class="powerup"></span>
-      <span id="speedTimer" class="powerup"></span>
-      <span id="rapidTimer" class="powerup"></span>
+  <div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+    <div id="hud">
+      <div id="score">Score: 0</div>
+      <div id="level">Level: 1</div>
+      <div id="lives">Lives: 3</div>
+      <div id="powerups">Power-ups: None</div>
+    </div>
+    <div id="start-screen"> 
+      <h1>Digger Game</h1>
+      <p>Tap or press any key to Start</p>
+    </div>
+    <div id="game-over-screen">
+      <h1>Game Over</h1>
+      <p>Your score: <span id="finalScore"></span></p>
+      <p>Press R or tap to Restart</p>
     </div>
   </div>
-
-  <!-- Game over overlay -->
-  <div id="gameOverScreen" class="overlay hidden">
-    <h1>Game Over</h1>
-    <p>Your Score: <span id="finalScore">0</span></p>
-    <button id="restartButton">Restart</button>
-  </div>
-
   <script src="game.js"></script>
 </body>
 </html>
