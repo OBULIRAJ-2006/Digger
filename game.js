@@ -1,370 +1,343 @@
 // game.js
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const gameContainer = document.getElementById('game-container');
-const hudScore = document.getElementById('score');
-const hudLevel = document.getElementById('level');
-const hudLives = document.getElementById('lives');
-const hudPowerups = document.getElementById('powerups');
-const startScreen = document.getElementById('start-screen');
-const gameOverScreen = document.getElementById('game-over-screen');
-const finalScoreSpan = document.getElementById('finalScore');
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const scoreSpan = document.getElementById("score");
+const levelSpan = document.getElementById("level");
+const powerupsSpan = document.getElementById("powerups");
+const startBtn = document.getElementById("startBtn");
+const restartBtn = document.getElementById("restartBtn");
 
-let levelMap = [], currentLevel = 1;
-let player = { x: 5, y: 5, speed: 2, lives: 3, score: 0 };
-let enemies = [], bullets = [], powerUps = [];
-let activePowerups = { shield: false, speed: false, rapid: false };
-let powerupTimers = { shield: 0, speed: 0, rapid: 0 };
-let keys = {}, canShoot = true, shootCooldown = 500;
-let devicePixelRatio = window.devicePixelRatio || 1;
+let keysPressed = {};
+let player, bullets = [], enemies = [], gems = [], powerUps = [];
+let lastTime = 0, lastBullet = 0;
+let score = 0, level = 1;
+let gameRunning = false;
+let bgMusic, shootSound, gemSound, hitSound, audioCtx;
 
-// Load levels (2D arrays: 0=empty,1=dirt,2=diamond,3=enemy spawn,4=powerup spawn)
-const levels = {
-  1: [
-    [1,1,1,1,1,1,1,1,1,1],
-    [1,0,0,2,0,0,2,0,0,1],
-    [1,0,1,1,1,1,1,1,0,1],
-    [1,2,1,0,0,0,0,1,2,1],
-    [1,0,1,0,1,1,0,1,0,1],
-    [1,0,0,0,1,1,0,0,0,1],
-    [1,0,1,0,0,0,0,1,0,1],
-    [1,2,1,1,1,1,1,1,2,1],
-    [1,0,0,0,2,0,2,0,0,1],
-    [1,1,1,1,1,1,1,1,1,1]
-  ],
-  2: [
-    /* more complex map with more diamonds/enemies */
-    // (Same size 10x10 for simplicity; larger levels could scroll, omitted for brevity)
-    [1,1,1,1,1,1,1,1,1,1],
-    [1,2,0,0,0,0,0,0,2,1],
-    [1,0,1,1,1,1,1,1,0,1],
-    [1,0,1,0,2,0,2,1,0,1],
-    [1,0,1,0,1,1,0,1,0,1],
-    [1,0,0,0,1,1,0,0,0,1],
-    [1,2,1,0,0,0,0,1,2,1],
-    [1,0,1,1,1,1,1,1,0,1],
-    [1,2,0,0,0,0,0,0,2,1],
-    [1,1,1,1,1,1,1,1,1,1]
-  ],
-  3: [
-    [1,1,1,1,1,1,1,1,1,1],
-    [1,2,0,1,0,1,0,1,0,1],
-    [1,0,1,1,1,1,1,1,0,1],
-    [1,0,1,0,2,0,2,1,0,1],
-    [1,0,1,0,1,1,0,1,0,1],
-    [1,2,0,0,1,1,0,0,2,1],
-    [1,0,1,0,0,0,0,1,0,1],
-    [1,0,1,1,1,1,1,1,0,1],
-    [1,2,0,0,2,0,0,0,2,1],
-    [1,1,1,1,1,1,1,1,1,1]
-  ]
-};
+// Power-up states
+let shieldActive = false, speedActive = false, rapidActive = false;
+let shieldTimer = 0, speedTimer = 0, rapidTimer = 0;
 
-// Audio setup (Web Audio API)
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioContext();
-let bgBuffer, shootBuffer, enemyDieBuffer, powerupBuffer;
-async function loadSound(url) {
-  const res = await fetch(url);
-  const arrayBuffer = await res.arrayBuffer();
-  return audioCtx.decodeAudioData(arrayBuffer);
+// Level configuration (increasing difficulty)
+const levels = [
+    {numEnemies: 3, numGems: 5, spawnInterval: 3000},
+    {numEnemies: 5, numGems: 7, spawnInterval: 2500},
+    {numEnemies: 7, numGems: 10, spawnInterval: 2000}
+];
+
+// Utility: random between min and max
+function rand(min, max) { return Math.random() * (max - min) + min; }
+
+// --- Classes for game entities ---
+
+class Player {
+    constructor() {
+        this.x = canvas.width/2; this.y = canvas.height - 50;
+        this.size = 20; this.speed = 150; // base speed
+        this.dirX = 0; this.dirY = -1;   // initial facing up
+    }
+    update(dt) {
+        // Movement input
+        let moveX = 0, moveY = 0;
+        if (keysPressed["ArrowLeft"] || keysPressed["a"]) moveX = -1;
+        if (keysPressed["ArrowRight"]|| keysPressed["d"]) moveX =  1;
+        if (keysPressed["ArrowUp"]   || keysPressed["w"]) moveY = -1;
+        if (keysPressed["ArrowDown"] || keysPressed["s"]) moveY =  1;
+        if (moveX!==0 || moveY!==0) {
+            let mag = Math.hypot(moveX, moveY);
+            moveX /= mag; moveY /= mag;
+            let sp = speedActive ? this.speed*2 : this.speed;
+            this.x += moveX * sp * dt;
+            this.y += moveY * sp * dt;
+            this.dirX = moveX; this.dirY = moveY;
+        }
+        // Boundary clamp
+        this.x = Math.max(this.size, Math.min(canvas.width - this.size, this.x));
+        this.y = Math.max(this.size, Math.min(canvas.height - this.size, this.y));
+
+        // Collect gems
+        for (let i = gems.length-1; i >= 0; i--) {
+            let g = gems[i];
+            let dist = Math.hypot(this.x - g.x, this.y - g.y);
+            if (dist < this.size + g.size) {
+                gems.splice(i,1);
+                score += 10; scoreSpan.textContent = score;
+                gemSound && gemSound.play();
+                if (Math.random() < 0.2) spawnPowerUp();
+                if (gems.length === 0) {
+                    nextLevel();
+                }
+            }
+        }
+        // Pickup power-ups
+        for (let i = powerUps.length-1; i >= 0; i--) {
+            let p = powerUps[i];
+            let dist = Math.hypot(this.x - p.x, this.y - p.y);
+            if (dist < this.size + p.size) {
+                powerUps.splice(i,1);
+                activatePowerUp(p.type);
+            }
+        }
+        // Enemy collision
+        for (let i = enemies.length-1; i >= 0; i--) {
+            let e = enemies[i];
+            let dist = Math.hypot(this.x - e.x, this.y - e.y);
+            if (dist < this.size + e.size) {
+                if (shieldActive) {
+                    enemies.splice(i,1);
+                    score += 5;
+                    hitSound && hitSound.play();
+                } else {
+                    stopGame();
+                    return;
+                }
+            }
+        }
+    }
+    draw() {
+        ctx.fillStyle = shieldActive ? "#0ff" : "#0f0";
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+        ctx.fill();
+    }
+    shoot() {
+        let now = performance.now();
+        if (now - lastBullet > (rapidActive ? 100 : 500)) {
+            let speed = 300;
+            let vx = this.dirX, vy = this.dirY;
+            if (vx===0 && vy===0) { vy = -1; } // default up
+            let b = new Bullet(this.x, this.y, vx, vy, speed);
+            bullets.push(b);
+            shootSound && shootSound.play();
+            lastBullet = now;
+        }
+    }
 }
-// Load audio files (place bg.mp3, shoot.wav, etc. locally)
-Promise.all([
-  loadSound('bg.mp3'),
-  loadSound('shoot.wav'),
-  loadSound('enemy_die.wav'),
-  loadSound('powerup.wav')
-]).then(buffers => {
-  [bgBuffer, shootBuffer, enemyDieBuffer, powerupBuffer] = buffers;
-  playBackgroundMusic();
-});
-function playBackgroundMusic() {
-  if (!bgBuffer) return;
-  const src = audioCtx.createBufferSource();
-  src.buffer = bgBuffer;
-  src.loop = true;
-  src.connect(audioCtx.destination);
-  src.start();
+
+class Bullet {
+    constructor(x,y,dx,dy,speed) {
+        this.x = x; this.y = y;
+        this.dx = dx; this.dy = dy;
+        this.speed = speed;
+        this.size = 5;
+    }
+    update(dt) {
+        this.x += this.dx * this.speed * dt;
+        this.y += this.dy * this.speed * dt;
+        // Remove if off-screen
+        if (this.x < -10 || this.x > canvas.width+10 || this.y < -10 || this.y > canvas.height+10) {
+            bullets.splice(bullets.indexOf(this),1);
+            return;
+        }
+        // Hit enemies
+        for (let i = enemies.length-1; i >= 0; i--) {
+            let e = enemies[i];
+            let dist = Math.hypot(this.x - e.x, this.y - e.y);
+            if (dist < this.size + e.size) {
+                enemies.splice(i,1);
+                bullets.splice(bullets.indexOf(this),1);
+                score += 10;
+                scoreSpan.textContent = score;
+                hitSound && hitSound.play();
+                break;
+            }
+        }
+    }
+    draw() {
+        ctx.fillStyle = "#ff0";
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+        ctx.fill();
+    }
 }
-function playSound(buffer) {
-  if (!buffer) return;
-  const src = audioCtx.createBufferSource();
-  src.buffer = buffer;
-  src.connect(audioCtx.destination);
-  src.start();
+
+class Enemy {
+    constructor() {
+        this.size = 15;
+        const edge = Math.floor(rand(0,4));
+        if (edge === 0) { this.x = rand(0,canvas.width); this.y = -this.size; }
+        if (edge === 1) { this.x = rand(0,canvas.width); this.y = canvas.height+this.size; }
+        if (edge === 2) { this.y = rand(0,canvas.height); this.x = -this.size; }
+        if (edge === 3) { this.y = rand(0,canvas.height); this.x = canvas.width+this.size; }
+        this.speed = rand(50, 100) + level*10;
+    }
+    update(dt) {
+        let dx = player.x - this.x;
+        let dy = player.y - this.y;
+        let dist = Math.hypot(dx, dy);
+        if (dist > 0) {
+            this.x += (dx/dist) * this.speed * dt;
+            this.y += (dy/dist) * this.speed * dt;
+        }
+    }
+    draw() {
+        ctx.fillStyle = "#f00";
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+        ctx.fill();
+    }
 }
 
-// Resize canvas for high-DPI displays25
-function resizeCanvas() {
-  const rect = gameContainer.getBoundingClientRect();
-  canvas.width = rect.width * devicePixelRatio;
-  canvas.height = rect.height * devicePixelRatio;
-  ctx.scale(devicePixelRatio, devicePixelRatio);
-  canvas.style.width = `${rect.width}px`;
-  canvas.style.height = `${rect.height}px`;
+class Gem {
+    constructor() {
+        this.size = 8;
+        this.x = rand(this.size, canvas.width - this.size);
+        this.y = rand(this.size, canvas.height - this.size);
+    }
+    draw() {
+        ctx.fillStyle = "#00f";
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y - this.size);
+        ctx.lineTo(this.x + this.size, this.y);
+        ctx.lineTo(this.x, this.y + this.size);
+        ctx.lineTo(this.x - this.size, this.y);
+        ctx.closePath();
+        ctx.fill();
+    }
 }
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
 
-// Input: keyboard
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
-  if (e.key === 'ArrowRight'|| e.key === 'd') keys.right = true;
-  if (e.key === 'ArrowUp'   || e.key === 'w') keys.up = true;
-  if (e.key === 'ArrowDown' || e.key === 's') keys.down = true;
-  if (e.key === ' ') keys.fire = true;
-  if (e.key === 'r' || e.key === 'R') startGame();
-});
-window.addEventListener('keyup', (e) => {
-  if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
-  if (e.key === 'ArrowRight'|| e.key === 'd') keys.right = false;
-  if (e.key === 'ArrowUp'   || e.key === 'w') keys.up = false;
-  if (e.key === 'ArrowDown' || e.key === 's') keys.down = false;
-  if (e.key === ' ') keys.fire = false;
-});
+class PowerUp {
+    constructor(type) {
+        this.type = type; // 'shield', 'speed', or 'rapid'
+        this.size = 10;
+        this.x = rand(this.size, canvas.width - this.size);
+        this.y = rand(this.size, canvas.height - this.size);
+    }
+    draw() {
+        if (this.type === 'shield') ctx.fillStyle = "#0ff";
+        if (this.type === 'speed')  ctx.fillStyle = "#ff0";
+        if (this.type === 'rapid')  ctx.fillStyle = "#f0f";
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+        ctx.fill();
+    }
+}
 
-// Input: touch (simple swipe and second-finger fire)26
-let touchStartX = 0, touchStartY = 0;
-canvas.addEventListener('touchstart', (e) => {
-  if (e.touches.length > 1) {
-    keys.fire = true;
-  } else {
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-  }
-  e.preventDefault();
-});
-canvas.addEventListener('touchmove', (e) => {
-  const touch = e.touches[0];
-  const dx = touch.clientX - touchStartX;
-  const dy = touch.clientY - touchStartY;
-  if (Math.abs(dx) > Math.abs(dy)) {
-    keys.right = dx > 0;
-    keys.left = dx < 0;
-    keys.up = keys.down = false;
-  } else {
-    keys.down = dy > 0;
-    keys.up = dy < 0;
-    keys.left = keys.right = false;
-  }
-  e.preventDefault();
-});
-canvas.addEventListener('touchend', (e) => {
-  keys.left = keys.right = keys.up = keys.down = keys.fire = false;
-});
+// --- Game setup functions ---
 
-// Start game or next level
+function spawnEnemies(num) {
+    for (let i = 0; i < num; i++) enemies.push(new Enemy());
+}
+function spawnGems(num) {
+    for (let i = 0; i < num; i++) gems.push(new Gem());
+}
+function spawnPowerUp() {
+    const types = ['shield','speed','rapid'];
+    let type = types[Math.floor(rand(0, types.length))];
+    powerUps.push(new PowerUp(type));
+}
+function activatePowerUp(type) {
+    if (type === 'shield') { shieldActive = true; shieldTimer = 5000; }
+    if (type === 'speed')  { speedActive  = true; speedTimer  = 5000; }
+    if (type === 'rapid')  { rapidActive  = true; rapidTimer  = 5000; }
+}
+
+function nextLevel() {
+    if (level < levels.length) {
+        level++;
+        levelSpan.textContent = level;
+        initLevel();
+    } else {
+        alert("You win! Score: " + score);
+        stopGame();
+    }
+}
+
+function initLevel() {
+    // Reset entities
+    bullets = []; enemies = []; gems = []; powerUps = [];
+    player.x = canvas.width/2; player.y = canvas.height - 50;
+    let cfg = levels[level-1];
+    spawnEnemies(cfg.numEnemies);
+    spawnGems(cfg.numGems);
+}
+
+// --- Game start/stop ---
+
 function startGame() {
-  player.score = 0;
-  player.lives = 3;
-  currentLevel = 1;
-  loadLevel(currentLevel);
-  startScreen.classList.add('hidden');
-  gameOverScreen.classList.add('hidden');
+    if (!gameRunning) {
+        gameRunning = true;
+        startBtn.disabled = true;
+        restartBtn.disabled = false;
+        score = 0; level = 1;
+        scoreSpan.textContent = score;
+        levelSpan.textContent = level;
+        player = new Player();
+        initLevel();
+        lastTime = performance.now();
+        // Initialize audio context and sounds on first start
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+            function playBeep(freq) {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.start();
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.3);
+                osc.stop(audioCtx.currentTime + 0.3);
+            }
+            shootSound = { play: () => playBeep(600) };
+            gemSound   = { play: () => playBeep(900) };
+            hitSound   = { play: () => playBeep(300) };
+            // Background music oscillator
+            bgMusic = audioCtx.createOscillator();
+            let bgGain = audioCtx.createGain();
+            bgMusic.type = 'sine'; bgMusic.frequency.value = 220;
+            bgMusic.connect(bgGain);
+            bgGain.connect(audioCtx.destination);
+            bgGain.gain.value = 0.02;
+            bgMusic.start();
+        }
+        requestAnimationFrame(gameLoop);
+    }
 }
 
-// Load a level map
-function loadLevel(n) {
-  levelMap = JSON.parse(JSON.stringify(levels[n])); // deep copy
-  // Reset player position
-  player.x = 1 * tilesize + tilesize/2;
-  player.y = 1 * tilesize + tilesize/2;
-  // Spawn enemies (one per '3' tile, if any)
-  enemies = [];
-  for (let y = 0; y < levelMap.length; y++) {
-    for (let x = 0; x < levelMap[y].length; x++) {
-      if (levelMap[y][x] === 3) {
-        enemies.push({x: x*tilesize+tilesize/2, y: y*tilesize+tilesize/2, dir: 0});
-        levelMap[y][x] = 0;
-      }
-    }
-  }
-  bullets = [];
-  powerUps = [];
-  activePowerups = { shield: false, speed: false, rapid: false };
-  hudLevel.textContent = `Level: ${n}`;
+function stopGame() {
+    gameRunning = false;
+    startBtn.disabled = false;
+    restartBtn.disabled = true;
+    if (bgMusic) { bgMusic.stop(); bgMusic = null; }
 }
 
-// Game loop (using requestAnimationFrame)27
-function gameLoop() {
-  requestAnimationFrame(gameLoop);
-  updateGame();
-  renderGame();
+// --- Event listeners ---
+
+startBtn.addEventListener("click", startGame);
+restartBtn.addEventListener("click", () => { stopGame(); startGame(); });
+window.addEventListener("keydown", (e) => {
+    keysPressed[e.key] = true;
+    if (e.key === " ") {
+        player && player.shoot();
+    }
+});
+window.addEventListener("keyup", (e) => { keysPressed[e.key] = false; });
+
+// Touch controls (as shown earlier)
+
+// --- Main game loop ---
+
+function gameLoop(timestamp) {
+    if (!gameRunning) return;
+    let dt = (timestamp - lastTime) / 1000;
+    lastTime = timestamp;
+    // Clear
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Update power-up timers
+    if (shieldActive) { shieldTimer -= dt*1000; if (shieldTimer <= 0) shieldActive = false; }
+    if (speedActive)  { speedTimer  -= dt*1000; if (speedTimer  <= 0) speedActive  = false; }
+    if (rapidActive)  { rapidTimer  -= dt*1000; if (rapidTimer  <= 0) rapidActive  = false; }
+    // Update/draw all entities
+    player.update(dt); player.draw();
+    gems.forEach(g => g.draw());
+    powerUps.forEach(p => p.draw());
+    enemies.forEach(e => { e.update(dt); e.draw(); });
+    bullets.forEach(b => { b.update(dt); b.draw(); });
+    // Update HUD power-ups display
+    let pu = [];
+    if (shieldActive) pu.push("Shield");
+    if (speedActive)  pu.push("Speed");
+    if (rapidActive)  pu.push("Rapid");
+    powerupsSpan.textContent = pu.join(", ") || "None";
+    // Next frame
+    requestAnimationFrame(gameLoop);
 }
-gameLoop();
-
-// Update game state
-function updateGame() {
-  // Player movement
-  let moveSpeed = player.speed;
-  if (activePowerups.speed) moveSpeed *= 2;
-  if (keys.left)  player.x -= moveSpeed;
-  if (keys.right) player.x += moveSpeed;
-  if (keys.up)    player.y -= moveSpeed;
-  if (keys.down)  player.y += moveSpeed;
-  // Keep player inside bounds
-  player.x = Math.max(tilesize/2, Math.min(canvas.width/devicePixelRatio - tilesize/2, player.x));
-  player.y = Math.max(tilesize/2, Math.min(canvas.height/devicePixelRatio - tilesize/2, player.y));
-
-  // Digging (turn tile to empty)
-  let px = Math.floor(player.x / tilesize);
-  let py = Math.floor(player.y / tilesize);
-  if (levelMap[py] && levelMap[py][px] === 1) {
-    levelMap[py][px] = 0;
-    player.score += 10;
-  }
-  // Collect diamonds (tile '2')
-  if (levelMap[py] === undefined || levelMap[py][px] === undefined) { /* outside map */ }
-  else if (levelMap[py][px] === 2) {
-    levelMap[py][px] = 0;
-    player.score += 50;
-    playSound(powerupBuffer);
-  }
-  // Collect power-ups (tile '4' for example)
-  // ... (omitted: code would spawn actual power-up objects on map)
-
-  // Handle shooting
-  if (keys.fire && canShoot) {
-    // Determine direction vector (we use last move direction or default right)
-    let dir = {x:1, y:0};
-    if (keys.up)    dir = {x:0, y:-1};
-    if (keys.down)  dir = {x:0, y: 1};
-    if (keys.left)  dir = {x:-1,y: 0};
-    if (keys.right) dir = {x:1, y: 0};
-    bullets.push({ x: player.x, y: player.y, dir: dir });
-    playSound(shootBuffer);
-    canShoot = false;
-    setTimeout(() => { canShoot = true; }, shootCooldown / (activePowerups.rapid ? 2 : 1));
-  }
-
-  // Update bullets
-  bullets = bullets.filter(b => {
-    b.x += b.dir.x * 5;
-    b.y += b.dir.y * 5;
-    // Check bounds
-    if (b.x < 0 || b.x > canvas.width/devicePixelRatio || b.y < 0 || b.y > canvas.height/devicePixelRatio) {
-      return false;
-    }
-    // Check collision with enemies
-    for (let i = 0; i < enemies.length; i++) {
-      const e = enemies[i];
-      if (Math.hypot(b.x - e.x, b.y - e.y) < 16) {
-        enemies.splice(i, 1);
-        playSound(enemyDieBuffer);
-        player.score += 100;
-        return false;
-      }
-    }
-    return true;
-  });
-
-  // Update enemies (simple chase)
-  enemies.forEach(e => {
-    // Move towards player if no wall in direct path (line-of-sight simple)
-    let dx = player.x - e.x;
-    let dy = player.y - e.y;
-    let step = 1.5;
-    if (Math.abs(dx) > Math.abs(dy)) {
-      e.x += (dx > 0 ? step : -step);
-    } else {
-      e.y += (dy > 0 ? step : -step);
-    }
-    // Collision with player
-    if (Math.hypot(player.x - e.x, player.y - e.y) < 16) {
-      if (activePowerups.shield) {
-        activePowerups.shield = false;
-      } else {
-        player.lives--;
-      }
-      // Reset player position briefly
-      player.x = 1.5*tilesize; player.y = 1.5*tilesize;
-    }
-  });
-
-  // Update power-up timers
-  Object.keys(powerupTimers).forEach(k => {
-    if (powerupTimers[k] > 0) {
-      powerupTimers[k]--;
-      if (powerupTimers[k] === 0) {
-        activePowerups[k] = false;
-      }
-    }
-  });
-
-  // Update HUD
-  hudScore.textContent = `Score: ${player.score}`;
-  hudLives.textContent = `Lives: ${player.lives}`;
-  let puText = [];
-  if (activePowerups.shield) puText.push("Shield");
-  if (activePowerups.speed) puText.push("Speed");
-  if (activePowerups.rapid) puText.push("Rapid");
-  hudPowerups.textContent = `Power-ups: ${puText.join(', ') || 'None'}`;
-
-  // Check win/lose conditions
-  if (player.lives <= 0) {
-    // Game over
-    finalScoreSpan.textContent = player.score;
-    gameOverScreen.classList.remove('hidden');
-  }
-  // Check all diamonds collected (win level)
-  if (player.lives > 0 && allDiamondsCollected()) {
-    currentLevel++;
-    if (currentLevel > 3) {
-      // No more levels, win game - show game over as win
-      finalScoreSpan.textContent = player.score;
-      gameOverScreen.querySelector('h1').textContent = "You Win!";
-      gameOverScreen.classList.remove('hidden');
-    } else {
-      loadLevel(currentLevel);
-    }
-  }
-}
-
-function allDiamondsCollected() {
-  for (let row of levelMap) {
-    if (row.includes(2)) return false;
-  }
-  return true;
-}
-
-// Rendering function
-function renderGame() {
-  // Clear canvas
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  // Draw map (dirt and diamonds)
-  for (let y = 0; y < levelMap.length; y++) {
-    for (let x = 0; x < levelMap[y].length; x++) {
-      let tile = levelMap[y][x];
-      if (tile === 1) {
-        ctx.fillStyle = '#885511'; // dirt color
-        ctx.fillRect(x*tilesize, y*tilesize, tilesize, tilesize);
-      } else if (tile === 2) {
-        // diamond (simple blue square for demo)
-        ctx.fillStyle = '#55f';
-        ctx.fillRect(x*tilesize+8, y*tilesize+8, tilesize-16, tilesize-16);
-      }
-    }
-  }
-  // Draw player (green square)
-  ctx.fillStyle = '#0f0';
-  ctx.fillRect(player.x-16, player.y-16, 32, 32);
-  // Draw enemies (red squares)
-  ctx.fillStyle = '#f00';
-  enemies.forEach(e => {
-    ctx.fillRect(e.x-16, e.y-16, 32, 32);
-  });
-  // Draw bullets (yellow small)
-  ctx.fillStyle = '#ff0';
-  bullets.forEach(b => {
-    ctx.fillRect(b.x-4, b.y-4, 8, 8);
-  });
-}
-
-// Start the game on first input
-document.addEventListener('keydown', () => {
-  if (startScreen && !startScreen.classList.contains('hidden')) startGame();
-}, {once: true});
-canvas.addEventListener('touchstart', () => {
-  if (startScreen && !startScreen.classList.contains('hidden')) startGame();
-}, {once: true});
