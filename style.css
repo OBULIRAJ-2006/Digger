@@ -1,80 +1,93 @@
-/* Reset margins/padding and disable scrolling */
 html, body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    background: #000; /* black background */
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #222;
+  color: #fff;
+  font-family: Arial, sans-serif;
 }
-
-/* Full-screen canvas */
 #gameCanvas {
-    display: block;
-    background: #111;
-    /* The canvas size is set in JS based on window size */
+  display: block;
+  background: #111;
 }
-
-/* Overlay screen (start, pause, game over) */
-#overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.8); /* semi-transparent black */
-    color: #fff;
-    text-align: center;
-    padding-top: 20%;
-    font-family: sans-serif;
-    z-index: 1000;
+/* Overlays for start and game over screens */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 }
-#overlay h1 {
-    font-size: 48px;
-    margin-bottom: 20px;
+.overlay.hidden {
+  display: none;
 }
-#overlay p {
-    font-size: 24px;
-    margin-bottom: 30px;
+.overlay h1 {
+  font-size: 3em;
+  margin-bottom: 20px;
+  color: #fff;
+  text-shadow: 2px 2px 4px #000;
 }
-#overlay button {
-    font-size: 20px;
-    padding: 10px 20px;
+.overlay button {
+  padding: 15px 30px;
+  font-size: 1.2em;
+  cursor: pointer;
+  background: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  transition: background 0.3s;
 }
-
-/* Heads-up display */
+.overlay button:hover {
+  background: #218838;
+}
+/* Heads-up display (HUD) for score and level */
 #hud {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    color: #fff;
-    font-family: sans-serif;
-    z-index: 500;
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  font-size: 1.2em;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 2px solid #444;
 }
 #hud span {
-    margin-right: 20px;
-    font-size: 18px;
+  color: #fff;
 }
-
-/* On-screen touch controls */
-.control-button {
-    position: fixed;
-    width: 50px;
-    height: 50px;
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    text-align: center;
-    line-height: 50px;
-    font-size: 24px;
-    user-select: none;
-    z-index: 200;
+#powerups {
+  display: flex;
+  gap: 10px;
 }
-/* Position each arrow button */
-#up    { bottom: 120px; left: 60px; }
-#left  { bottom: 60px;  left: 10px; }
-#down  { bottom: 60px;  left: 60px; }
-#right { bottom: 60px;  left: 110px; }
-#fire  { bottom: 60px;  right: 10px; background: rgba(255, 50, 50, 0.3); }
-
-/* For mobile: increase size on active touch */
-.control-button:active {
-    background: rgba(200, 200, 200, 0.5);
+.powerup {
+  min-width: 60px;
+  text-align: center;
+  background: #333;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 0.9em;
+}
+/* Responsive adjustments for small screens */
+@media (max-width: 600px) {
+  #hud {
+    font-size: 1em;
+    gap: 20px;
+    padding: 8px 16px;
+  }
+  .overlay h1 {
+    font-size: 2.5em;
+  }
+  .overlay button {
+    padding: 12px 24px;
+    font-size: 1em;
+  }
 }
