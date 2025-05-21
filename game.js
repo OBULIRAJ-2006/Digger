@@ -1,447 +1,471 @@
-// Get canvas and context
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+window.onload = function() {
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
 
-// Game state
-let canvasWidth, canvasHeight;
-let gridCols, gridRows, cellSize = 40; // Grid cell size in pixels
-let grid = []; // 2D array to track dirt (true = dirt present)
+  // Make canvas full-screen and adjust on resize
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
 
-// Player state
-let player = {
+  // Game state variables
+  let score = 0, level = 1;
+  let gameState = 'start'; // 'start', 'playing', 'gameover'
+
+  // Player properties
+  const player = {
     x: 0, y: 0,
-    size: 20,
-    speed: 120, // base speed in pixels/second
-    lastDir: { x: 0, y: 0 },
+    radius: 15,
+    speed: 200,
+    facing: 'up',
     shieldActive: false,
     speedActive: false,
-    fireActive: false
-};
-let score = 0;
-let currentLevel = 3; // Start at level 3 (easiest, as per spec)
-let gameState = 'menu'; // 'menu', 'playing', 'levelComplete', 'gameover'
+    rapidActive: false,
+    shieldEnd: 0,
+    speedEnd: 0,
+    rapidEnd: 0
+  };
 
-// Enemies, bullets, and power-ups
-let enemies = [];
-let bullets = [];
-let powerUps = []; // {x, y, type, spawnTime}
+  // Entity arrays
+  let enemies = [], bullets = [], powerups = [];
 
-// Timing
-let lastTimestamp = 0;
+  // Input flags
+  let upPressed = false, downPressed = false, leftPressed = false, rightPressed = false;
+  let firePressed = false;
+  let joystickTouchId = null, fireTouchId = null;
+  const touchCenterX = () => canvas.width * 0.75;
+  const touchCenterY = () => canvas.height * 0.5;
 
-// Key input tracking
-const keys = {
-    ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false,
-    Space: false
-};
+  // Constants
+  const BULLET_SPEED = 400;
+  const BULLET_COOLDOWN = 500; // milliseconds
+  const POWERUP_DURATION = 5000; // ms
+  const POWERUP_CHANCE = 0.3;    // 30% chance to spawn
 
-// DOM elements for overlay and HUD
-const overlay = document.getElementById('overlay');
-const overlayTitle = document.getElementById('overlay-title');
-const overlayMessage = document.getElementById('overlay-message');
-const overlayButton = document.getElementById('overlay-button');
-const hudScore = document.getElementById('score');
-const hudLevel = document.getElementById('level');
-const hudPowers = document.getElementById('powers');
+  let lastShotTime = 0;
+  let lastTime = 0;
 
-// Set canvas to full screen
-function resizeCanvas() {
-    canvasWidth = window.innerWidth;
-    canvasHeight = window.innerHeight;
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-    // Calculate grid based on cellSize
-    gridCols = Math.floor(canvasWidth / cellSize);
-    gridRows = Math.floor(canvasHeight / cellSize);
-    // Reset grid if in menu or level change
-    if (gameState === 'playing') initGrid();
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
+  // HUD elements
+  const scoreEl = document.getElementById('score');
+  const levelEl = document.getElementById('level');
+  const finalScoreEl = document.getElementById('finalScore');
+  const shieldTimerEl = document.getElementById('shieldTimer');
+  const speedTimerEl = document.getElementById('speedTimer');
+  const rapidTimerEl = document.getElementById('rapidTimer');
+  const startScreen = document.getElementById('startScreen');
+  const gameOverScreen = document.getElementById('gameOverScreen');
+  const startButton = document.getElementById('startButton');
+  const restartButton = document.getElementById('restartButton');
 
-/* Initialize or reset the grid of dirt blocks.
-   The border is kept empty (no dirt) so player/enemies spawn/move easily. */
-function initGrid() {
-    grid = new Array(gridCols);
-    for (let x = 0; x < gridCols; x++) {
-        grid[x] = new Array(gridRows);
-        for (let y = 0; y < gridRows; y++) {
-            // Border cells: no dirt
-            if (x === 0 || y === 0 || x === gridCols - 1 || y === gridRows - 1) {
-                grid[x][y] = false;
-            } else {
-                grid[x][y] = true; // dirt present
-            }
-        }
-    }
-    // Dig out the player's starting cell
-    const startX = Math.floor(gridCols / 2);
-    const startY = Math.floor(gridRows / 2);
-    grid[startX][startY] = false;
-    player.x = startX * cellSize + cellSize/2;
-    player.y = startY * cellSize + cellSize/2;
-}
+  // Start and restart buttons
+  startButton.addEventListener('click', startGame);
+  restartButton.addEventListener('click', function() {
+    gameOverScreen.classList.add('hidden');
+    startGame();
+  });
 
-/* Initialize a level: set up player, enemies, score, etc. */
-function startLevel(level) {
-    currentLevel = level;
-    // Reset player state
-    player.shieldActive = false;
-    player.speedActive = false;
-    player.fireActive = false;
-    player.lastDir = { x: 1, y: 0 };
-    player.speed = 120;
-    score = 0;
-    // Initialize grid (dirt)
-    initGrid();
-    // Spawn enemies based on level difficulty
-    enemies = [];
-    let numEnemies = level === 3 ? 3 : (level === 2 ? 5 : 7);
-    let enemySpeed = (level === 3 ? 60 : (level === 2 ? 100 : 150));
-    for (let i = 0; i < numEnemies; i++) {
-        // Spawn at a random border cell
-        let ex, ey;
-        if (Math.random() < 0.5) {
-            // Top or bottom border
-            ex = Math.floor(Math.random() * gridCols);
-            ey = (Math.random() < 0.5 ? 1 : gridRows - 2);
+  // Keyboard controls
+  window.addEventListener('keydown', function(e) {
+    if (e.code === 'ArrowUp' || e.key === 'w')    { upPressed = true; player.facing = 'up'; }
+    if (e.code === 'ArrowDown' || e.key === 's')  { downPressed = true; player.facing = 'down'; }
+    if (e.code === 'ArrowLeft' || e.key === 'a')  { leftPressed = true; player.facing = 'left'; }
+    if (e.code === 'ArrowRight' || e.key === 'd') { rightPressed = true; player.facing = 'right'; }
+    if (e.code === 'Space')                       { firePressed = true; }
+  });
+  window.addEventListener('keyup', function(e) {
+    if (e.code === 'ArrowUp' || e.key === 'w')    upPressed = false;
+    if (e.code === 'ArrowDown' || e.key === 's')  downPressed = false;
+    if (e.code === 'ArrowLeft' || e.key === 'a')  leftPressed = false;
+    if (e.code === 'ArrowRight' || e.key === 'd') rightPressed = false;
+    if (e.code === 'Space')                       firePressed = false;
+  });
+
+  // Touch controls for mobile
+  canvas.addEventListener('touchstart', function(e) {
+    for (let touch of e.changedTouches) {
+      const x = touch.clientX, y = touch.clientY;
+      // Fire button (left half)
+      if (x < canvas.width / 2 && fireTouchId === null) {
+        fireTouchId = touch.identifier;
+        firePressed = true;
+      }
+      // Joystick (right half)
+      else if (x >= canvas.width / 2 && joystickTouchId === null) {
+        joystickTouchId = touch.identifier;
+        // Set initial direction based on touch position
+        const dx = x - touchCenterX();
+        const dy = y - touchCenterY();
+        if (Math.abs(dx) > Math.abs(dy)) {
+          if (dx > 0) {
+            leftPressed = false; rightPressed = true;
+            upPressed = false; downPressed = false;
+            player.facing = 'right';
+          } else {
+            leftPressed = true; rightPressed = false;
+            upPressed = false; downPressed = false;
+            player.facing = 'left';
+          }
         } else {
-            // Left or right border
-            ex = (Math.random() < 0.5 ? 1 : gridCols - 2);
-            ey = Math.floor(Math.random() * gridRows);
+          if (dy > 0) {
+            upPressed = false; downPressed = true;
+            leftPressed = false; rightPressed = false;
+            player.facing = 'down';
+          } else {
+            upPressed = true; downPressed = false;
+            leftPressed = false; rightPressed = false;
+            player.facing = 'up';
+          }
         }
-        enemies.push({
-            x: ex * cellSize + cellSize/2,
-            y: ey * cellSize + cellSize/2,
-            size: 20,
-            speed: enemySpeed,
-            dx: 0,
-            dy: 0
-        });
+      }
     }
-    bullets = [];
-    powerUps = [];
-    // Update HUD
-    hudScore.textContent = `Score: ${score}`;
-    hudLevel.textContent = `Level: ${currentLevel}`;
-    hudPowers.textContent = `Power-up: None`;
-    // Enter playing state
+  });
+  canvas.addEventListener('touchmove', function(e) {
+    for (let touch of e.changedTouches) {
+      if (touch.identifier === joystickTouchId) {
+        const dx = touch.clientX - touchCenterX();
+        const dy = touch.clientY - touchCenterY();
+        if (Math.abs(dx) > Math.abs(dy)) {
+          if (dx > 0) {
+            leftPressed = false; rightPressed = true;
+            upPressed = false; downPressed = false;
+            player.facing = 'right';
+          } else {
+            leftPressed = true; rightPressed = false;
+            upPressed = false; downPressed = false;
+            player.facing = 'left';
+          }
+        } else {
+          if (dy > 0) {
+            upPressed = false; downPressed = true;
+            leftPressed = false; rightPressed = false;
+            player.facing = 'down';
+          } else {
+            upPressed = true; downPressed = false;
+            leftPressed = false; rightPressed = false;
+            player.facing = 'up';
+          }
+        }
+      }
+    }
+  });
+  canvas.addEventListener('touchend', function(e) {
+    for (let touch of e.changedTouches) {
+      if (touch.identifier === joystickTouchId) {
+        joystickTouchId = null;
+        upPressed = downPressed = leftPressed = rightPressed = false;
+      }
+      if (touch.identifier === fireTouchId) {
+        fireTouchId = null;
+        firePressed = false;
+      }
+    }
+  });
+  canvas.addEventListener('touchcancel', function(e) {
+    for (let touch of e.changedTouches) {
+      if (touch.identifier === joystickTouchId) {
+        joystickTouchId = null;
+        upPressed = downPressed = leftPressed = rightPressed = false;
+      }
+      if (touch.identifier === fireTouchId) {
+        fireTouchId = null;
+        firePressed = false;
+      }
+    }
+  });
+
+  // Start or restart the game
+  function startGame() {
+    score = 0;
+    level = 1;
     gameState = 'playing';
-    overlay.style.display = 'none';
-}
+    player.shieldActive = player.speedActive = player.rapidActive = false;
+    // Reset any game-over text
+    document.querySelector('#gameOverScreen h1').textContent = 'Game Over';
+    lastShotTime = 0;
+    spawnLevel();
+    startScreen.classList.add('hidden');
+    gameOverScreen.classList.add('hidden');
+    lastTime = performance.now();
+  }
 
-/* Check for game-over condition or level completion. */
-function checkGameStatus() {
-    // Level complete: all dirt is dug
-    let anyDirt = false;
-    for (let x = 0; x < gridCols; x++) {
-        for (let y = 0; y < gridRows; y++) {
-            if (grid[x][y]) { anyDirt = true; break; }
+  // Prepare a level: spawn enemies, reset player
+  function spawnLevel() {
+    enemies = [];
+    bullets = [];
+    powerups = [];
+    player.x = canvas.width / 2;
+    player.y = canvas.height / 2;
+    player.facing = 'up';
+    player.shieldActive = player.speedActive = player.rapidActive = false;
+    // Determine enemy count and speed for this level
+    let numEnemies = 3 + (level - 1) * 2;       // 3, 5, 7
+    let enemySpeed = 100 + (level - 1) * 50;    // 100, 150, 200
+    for (let i = 0; i < numEnemies; i++) {
+      spawnEnemy(enemySpeed);
+    }
+    updateHUD();
+  }
+
+  // Create a single enemy at a random edge
+  function spawnEnemy(speed) {
+    const enemy = { x: 0, y: 0, radius: 12, speed: speed };
+    const side = Math.floor(Math.random() * 4);
+    if (side === 0) {           // Top edge
+      enemy.x = Math.random() * canvas.width;
+      enemy.y = -enemy.radius;
+    } else if (side === 1) {    // Bottom
+      enemy.x = Math.random() * canvas.width;
+      enemy.y = canvas.height + enemy.radius;
+    } else if (side === 2) {    // Left
+      enemy.x = -enemy.radius;
+      enemy.y = Math.random() * canvas.height;
+    } else {                    // Right
+      enemy.x = canvas.width + enemy.radius;
+      enemy.y = Math.random() * canvas.height;
+    }
+    enemies.push(enemy);
+  }
+
+  // Update score and level display
+  function updateHUD() {
+    scoreEl.textContent = 'Score: ' + score;
+    levelEl.textContent = 'Level: ' + level;
+    finalScoreEl.textContent = score;
+  }
+
+  // Main update function (called each frame)
+  function update(dt) {
+    if (gameState !== 'playing') return;
+
+    // --- Player movement ---
+    let dx = 0, dy = 0;
+    if (upPressed) dy -= 1;
+    if (downPressed) dy += 1;
+    if (leftPressed) dx -= 1;
+    if (rightPressed) dx += 1;
+    // Normalize diagonal speed
+    if (dx !== 0 && dy !== 0) {
+      dx *= Math.SQRT1_2;
+      dy *= Math.SQRT1_2;
+    }
+    let moveSpeed = player.speed * (player.speedActive ? 2 : 1);
+    player.x += dx * moveSpeed * dt;
+    player.y += dy * moveSpeed * dt;
+    // Keep player on-screen
+    if (player.x < player.radius) player.x = player.radius;
+    if (player.x > canvas.width - player.radius) player.x = canvas.width - player.radius;
+    if (player.y < player.radius) player.y = player.radius;
+    if (player.y > canvas.height - player.radius) player.y = canvas.height - player.radius;
+
+    // --- Shooting ---
+    const now = performance.now();
+    const cooldown = player.rapidActive ? BULLET_COOLDOWN / 2 : BULLET_COOLDOWN;
+    if (firePressed && now - lastShotTime > cooldown) {
+      shootBullet();
+      lastShotTime = now;
+    }
+
+    // --- Update bullets ---
+    for (let i = bullets.length - 1; i >= 0; i--) {
+      const b = bullets[i];
+      b.x += b.vx * dt;
+      b.y += b.vy * dt;
+      // Remove off-screen bullets
+      if (b.x < -b.radius || b.x > canvas.width + b.radius ||
+          b.y < -b.radius || b.y > canvas.height + b.radius) {
+        bullets.splice(i, 1);
+      }
+    }
+
+    // --- Update enemies ---
+    for (let i = enemies.length - 1; i >= 0; i--) {
+      const e = enemies[i];
+      // Move towards the player
+      const diffX = player.x - e.x;
+      const diffY = player.y - e.y;
+      const dist = Math.hypot(diffX, diffY);
+      if (dist > 0) {
+        e.x += (diffX / dist) * e.speed * dt;
+        e.y += (diffY / dist) * e.speed * dt;
+      }
+      // Check collision with player
+      if (Math.hypot(e.x - player.x, e.y - player.y) < e.radius + player.radius) {
+        if (player.shieldActive) {
+          // Destroy enemy instead of ending game
+          enemies.splice(i, 1);
+          score += 10;
+          updateHUD();
+        } else {
+          // Trigger game over
+          gameState = 'gameover';
+          gameOverScreen.classList.remove('hidden');
+          finalScoreEl.textContent = score;
+          return;
         }
-        if (anyDirt) break;
+      }
     }
-    if (!anyDirt) {
-        gameState = 'levelComplete';
-        overlayTitle.textContent = `Level ${currentLevel} Complete!`;
-        overlayMessage.textContent = 'Click to continue';
-        overlayButton.textContent = (currentLevel > 1 ? 'Next Level' : 'Restart Game');
-        overlay.style.display = 'block';
-    }
-}
 
-/* Main game update loop (called via requestAnimationFrame). */
-function update(timestamp) {
-    if (!lastTimestamp) lastTimestamp = timestamp;
-    const delta = (timestamp - lastTimestamp) / 1000; // seconds
-    lastTimestamp = timestamp;
+    // --- Bullet-enemy collisions ---
+    for (let i = bullets.length - 1; i >= 0; i--) {
+      for (let j = enemies.length - 1; j >= 0; j--) {
+        const b = bullets[i];
+        const e = enemies[j];
+        if (Math.hypot(b.x - e.x, b.y - e.y) < b.radius + e.radius) {
+          // Hit detected: remove both bullet and enemy
+          bullets.splice(i, 1);
+          enemies.splice(j, 1);
+          score += 10;
+          updateHUD();
+          // Possibly spawn a power-up where the enemy died
+          if (Math.random() < POWERUP_CHANCE) {
+            spawnPowerup(e.x, e.y);
+          }
+          break;
+        }
+      }
+    }
+
+    // --- Power-up collection ---
+    for (let i = powerups.length - 1; i >= 0; i--) {
+      const p = powerups[i];
+      if (Math.hypot(p.x - player.x, p.y - player.y) < p.radius + player.radius) {
+        // Activate power-up
+        if (p.type === 'shield') {
+          player.shieldActive = true;
+          player.shieldEnd = now + POWERUP_DURATION;
+        } else if (p.type === 'speed') {
+          player.speedActive = true;
+          player.speedEnd = now + POWERUP_DURATION;
+        } else if (p.type === 'rapid') {
+          player.rapidActive = true;
+          player.rapidEnd = now + POWERUP_DURATION;
+        }
+        powerups.splice(i, 1);
+      }
+    }
+
+    // --- Power-up duration timers ---
+    if (player.shieldActive && now > player.shieldEnd)   player.shieldActive = false;
+    if (player.speedActive && now > player.speedEnd)     player.speedActive = false;
+    if (player.rapidActive && now > player.rapidEnd)     player.rapidActive = false;
+
+    // --- Level progression ---
+    if (gameState === 'playing' && enemies.length === 0) {
+      level++;
+      if (level > 3) {
+        // Completed all levels: player wins
+        gameState = 'gameover';
+        document.querySelector('#gameOverScreen h1').textContent = 'You Win!';
+        gameOverScreen.classList.remove('hidden');
+        finalScoreEl.textContent = score;
+        return;
+      } else {
+        // Next level
+        spawnLevel();
+      }
+    }
+
+    // --- Update power-up timers in HUD ---
+    shieldTimerEl.textContent = player.shieldActive
+      ? 'Shield: ' + Math.ceil((player.shieldEnd - now)/1000) + 's' : '';
+    speedTimerEl.textContent = player.speedActive
+      ? 'Speed: ' + Math.ceil((player.speedEnd - now)/1000) + 's' : '';
+    rapidTimerEl.textContent = player.rapidActive
+      ? 'Rapid: ' + Math.ceil((player.rapidEnd - now)/1000) + 's' : '';
+  }
+
+  // Create a bullet based on player's facing direction
+  function shootBullet() {
+    const bullet = { x: player.x, y: player.y, vx: 0, vy: 0, radius: 5 };
+    if (player.facing === 'up')    bullet.vy = -BULLET_SPEED;
+    if (player.facing === 'down')  bullet.vy =  BULLET_SPEED;
+    if (player.facing === 'left')  bullet.vx = -BULLET_SPEED;
+    if (player.facing === 'right') bullet.vx =  BULLET_SPEED;
+    bullets.push(bullet);
+  }
+
+  // Spawn a random power-up at (x,y)
+  function spawnPowerup(x, y) {
+    const types = ['shield', 'speed', 'rapid'];
+    const type = types[Math.floor(Math.random() * types.length)];
+    const powerup = { x: x, y: y, radius: 10, type: type };
+    powerups.push(powerup);
+  }
+
+  // Draw all game elements
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (gameState === 'playing') {
-        // Player movement
-        let moveX = 0, moveY = 0;
-        if (keys.ArrowLeft)  moveX -= 1;
-        if (keys.ArrowRight) moveX += 1;
-        if (keys.ArrowUp)    moveY -= 1;
-        if (keys.ArrowDown)  moveY += 1;
-        // Normalize diagonal speed
-        if (moveX !== 0 && moveY !== 0) {
-            moveX *= Math.SQRT1_2;
-            moveY *= Math.SQRT1_2;
-        }
-        let currentSpeed = player.speed * (player.speedActive ? 2 : 1);
-        player.x += moveX * currentSpeed * delta;
-        player.y += moveY * currentSpeed * delta;
-        // Keep player inside bounds
-        player.x = Math.max(0, Math.min(canvasWidth, player.x));
-        player.y = Math.max(0, Math.min(canvasHeight, player.y));
-        // Update last direction if moving
-        if (moveX !== 0 || moveY !== 0) {
-            player.lastDir = { x: Math.sign(moveX), y: Math.sign(moveY) };
-        }
-        // Digging: remove dirt under player
-        const cellX = Math.floor(player.x / cellSize);
-        const cellY = Math.floor(player.y / cellSize);
-        if (grid[cellX] && grid[cellX][cellY]) {
-            grid[cellX][cellY] = false;
-            score += 10;
-            hudScore.textContent = `Score: ${score}`;
-        }
-
-        // Enemy AI and movement
-        enemies.forEach(enemy => {
-            // Decide direction: smarter per level
-            let dx = player.x - enemy.x;
-            let dy = player.y - enemy.y;
-            const dist = Math.hypot(dx, dy);
-            if (currentLevel === 1 || (currentLevel === 2 && dist < 200) || (currentLevel === 3 && dist < 100)) {
-                // Chase player (normalize direction)
-                if (dist > 0) {
-                    enemy.dx = (dx / dist) * enemy.speed;
-                    enemy.dy = (dy / dist) * enemy.speed;
-                }
-            } else {
-                // Random wandering: occasionally change direction
-                if (Math.random() < 0.01) {
-                    const angle = Math.random() * 2 * Math.PI;
-                    enemy.dx = Math.cos(angle) * enemy.speed;
-                    enemy.dy = Math.sin(angle) * enemy.speed;
-                }
-            }
-            // Move enemy
-            enemy.x += enemy.dx * delta;
-            enemy.y += enemy.dy * delta;
-            // Bounce off borders
-            if (enemy.x < 0 || enemy.x > canvasWidth) enemy.dx *= -1;
-            if (enemy.y < 0 || enemy.y > canvasHeight) enemy.dy *= -1;
-            // Check collision with player
-            const px = player.x - enemy.x, py = player.y - enemy.y;
-            if (Math.hypot(px, py) < (player.size + enemy.size) / 2) {
-                if (player.shieldActive) {
-                    // Lose shield instead of game over
-                    player.shieldActive = false;
-                    hudPowers.textContent = `Power-up: None`;
-                } else {
-                    // Game over
-                    gameState = 'gameover';
-                    overlayTitle.textContent = 'Game Over!';
-                    overlayMessage.textContent = 'Click to restart';
-                    overlayButton.textContent = 'Restart';
-                    overlay.style.display = 'block';
-                }
-            }
-        });
-
-        // Shooting: handle spacebar trigger
-        if (keys.Space) {
-            // Create a bullet if Space just pressed (debounce)
-            if (!player._spacePressed) {
-                player._spacePressed = true;
-                shootBullet();
-            }
-        } else {
-            player._spacePressed = false;
-        }
-
-        // Update bullets
-        bullets.forEach((bullet, b) => {
-            bullet.x += bullet.dx * bullet.speed * delta;
-            bullet.y += bullet.dy * bullet.speed * delta;
-            // Remove if off-screen
-            if (bullet.x < 0 || bullet.x > canvasWidth || bullet.y < 0 || bullet.y > canvasHeight) {
-                bullets.splice(b, 1);
-            } else {
-                // Check collision with enemies
-                enemies.forEach((enemy, e) => {
-                    const bx = bullet.x - enemy.x, by = bullet.y - enemy.y;
-                    if (Math.hypot(bx, by) < enemy.size/2) {
-                        // Hit enemy
-                        enemies.splice(e, 1);
-                        bullets.splice(b, 1);
-                        score += 100;
-                        hudScore.textContent = `Score: ${score}`;
-                        // Possibly drop a power-up at this location
-                        if (Math.random() < 0.3) {
-                            const puX = Math.floor(enemy.x / cellSize) * cellSize + cellSize/2;
-                            const puY = Math.floor(enemy.y / cellSize) * cellSize + cellSize/2;
-                            const types = ['shield', 'speed', 'fire'];
-                            const type = types[Math.floor(Math.random() * types.length)];
-                            powerUps.push({ x: puX, y: puY, type: type, spawnTime: performance.now() });
-                        }
-                    }
-                });
-            }
-        });
-
-        // Update power-ups (spawn from kills or random)
-        powerUps.forEach((pu, i) => {
-            // Auto-expire after 10 seconds
-            if (performance.now() - pu.spawnTime > 10000) {
-                powerUps.splice(i, 1);
-            }
-            // Check pickup by player
-            const dx = player.x - pu.x, dy = player.y - pu.y;
-            if (Math.hypot(dx, dy) < player.size) {
-                // Activate corresponding power-up
-                if (pu.type === 'speed') {
-                    player.speedActive = true;
-                    setTimeout(() => { player.speedActive = false; hudPowers.textContent = `Power-up: None`; }, 5000);
-                    hudPowers.textContent = `Power-up: Speed`;
-                } else if (pu.type === 'shield') {
-                    player.shieldActive = true;
-                    setTimeout(() => { player.shieldActive = false; hudPowers.textContent = `Power-up: None`; }, 5000);
-                    hudPowers.textContent = `Power-up: Shield`;
-                } else if (pu.type === 'fire') {
-                    player.fireActive = true;
-                    setTimeout(() => { player.fireActive = false; hudPowers.textContent = `Power-up: None`; }, 5000);
-                    hudPowers.textContent = `Power-up: Fire`;
-                }
-                powerUps.splice(i, 1);
-            }
-        });
-
-        // Check if level is complete (all dirt gone)
-        checkGameStatus();
-    }
-
-    drawGame();
-
-    // Loop
-    requestAnimationFrame(update);
-}
-
-/* Shoot a bullet from the player. Support multiple bullets if 'fire' power-up active. */
-function shootBullet() {
-    // Determine bullet directions
-    const dirs = [];
-    const dir = player.lastDir;
-    if (dir.x === 0 && dir.y === 0) {
-        // No movement direction; default to up
-        dirs.push({x: 0, y: -1});
-    } else {
-        dirs.push({x: dir.x, y: dir.y});
-        // If fire power-up, add spread bullets
-        if (player.fireActive) {
-            if (dir.x !== 0) {
-                // Shooting left/right -> add up-left and down-left or up-right/down-right
-                dirs.push({x: dir.x, y: 0.5});
-                dirs.push({x: dir.x, y: -0.5});
-            } else {
-                // Shooting up/down -> add left/up-left and right/up-right
-                dirs.push({x: 0.5, y: dir.y});
-                dirs.push({x: -0.5, y: dir.y});
-            }
-        }
-    }
-    // Create bullet(s)
-    dirs.forEach(d => {
-        const mag = Math.hypot(d.x, d.y);
-        bullets.push({
-            x: player.x,
-            y: player.y,
-            dx: d.x / mag,
-            dy: d.y / mag,
-            speed: 300,
-            size: 5
-        });
-    });
-}
-
-/* Draw all game elements on the canvas. */
-function drawGame() {
-    // Clear
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-    // Draw dirt blocks
-    ctx.fillStyle = '#654321';
-    for (let x = 0; x < gridCols; x++) {
-        for (let y = 0; y < gridRows; y++) {
-            if (grid[x][y]) {
-                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-            }
-        }
-    }
-
-    // Draw power-ups
-    powerUps.forEach(pu => {
-        if (pu.type === 'speed') ctx.fillStyle = 'cyan';
-        else if (pu.type === 'shield') ctx.fillStyle = 'yellow';
-        else if (pu.type === 'fire') ctx.fillStyle = 'orange';
+      // Draw player
+      ctx.save();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.radius, 0, Math.PI*2);
+      ctx.fill();
+      // Draw shield outline
+      if (player.shieldActive) {
+        ctx.strokeStyle = '#00f';
+        ctx.lineWidth = 5;
         ctx.beginPath();
-        ctx.arc(pu.x, pu.y, 12, 0, 2*Math.PI);
-        ctx.fill();
-    });
-
-    // Draw player
-    ctx.fillStyle = player.shieldActive ? '#FFD700' : '#00FF00';
-    ctx.beginPath();
-    ctx.arc(player.x, player.y, player.size/2, 0, 2*Math.PI);
-    ctx.fill();
-
-    // Draw enemies
-    ctx.fillStyle = '#FF0000';
-    enemies.forEach(enemy => {
+        ctx.arc(player.x, player.y, player.radius + 5, 0, Math.PI*2);
+        ctx.stroke();
+      }
+      // Draw speed effect
+      if (player.speedActive) {
+        ctx.strokeStyle = '#0f0';
+        ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.arc(enemy.x, enemy.y, enemy.size/2, 0, 2*Math.PI);
-        ctx.fill();
-    });
-
-    // Draw bullets
-    ctx.fillStyle = '#FFFFFF';
-    bullets.forEach(bullet => {
+        ctx.arc(player.x, player.y, player.radius + 10, 0, Math.PI*2);
+        ctx.stroke();
+      }
+      // Draw rapid-fire effect
+      if (player.rapidActive) {
+        ctx.strokeStyle = '#ff0';
+        ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.arc(bullet.x, bullet.y, bullet.size, 0, 2*Math.PI);
+        ctx.arc(player.x, player.y, player.radius + 15, 0, Math.PI*2);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Draw enemies
+      ctx.fillStyle = '#f00';
+      for (const e of enemies) {
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, e.radius, 0, Math.PI*2);
         ctx.fill();
-    });
-}
+      }
 
-// Start the animation loop
-requestAnimationFrame(update);
+      // Draw bullets
+      ctx.fillStyle = '#fff';
+      for (const b of bullets) {
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2);
+        ctx.fill();
+      }
 
-/* === Event Handlers === */
-
-// Keyboard input
-window.addEventListener('keydown', function(e) {
-    if (e.code in keys) {
-        keys[e.code] = true;
-        e.preventDefault();
+      // Draw power-ups
+      for (const p of powerups) {
+        if (p.type === 'shield') ctx.fillStyle = '#00f';
+        if (p.type === 'speed')  ctx.fillStyle = '#0f0';
+        if (p.type === 'rapid')  ctx.fillStyle = '#ff0';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2);
+        ctx.fill();
+      }
     }
-    // Restart with 'R'
-    if (e.key === 'r' || e.key === 'R') {
-        if (gameState !== 'playing') startLevel(3);
-    }
-});
-window.addEventListener('keyup', function(e) {
-    if (e.code in keys) {
-        keys[e.code] = false;
-        e.preventDefault();
-    }
-});
+  }
 
-// Overlay button (Start/Next/Restart)
-overlayButton.addEventListener('click', () => {
-    if (gameState === 'menu' || gameState === 'gameover') {
-        startLevel(3);
-    } else if (gameState === 'levelComplete') {
-        if (currentLevel > 1) {
-            startLevel(currentLevel - 1);
-        } else {
-            // Completed last level -> restart from easiest
-            startLevel(3);
-        }
-    }
-});
-
-// On-screen touch controls: map to keys
-const controlMap = {
-    up:    ['ArrowUp'],
-    down:  ['ArrowDown'],
-    left:  ['ArrowLeft'],
-    right: ['ArrowRight'],
-    fire:  ['Space']
+  // Main game loop
+  function gameLoop(timestamp) {
+    const dt = (timestamp - lastTime) / 1000;
+    lastTime = timestamp;
+    update(dt);
+    draw();
+    window.requestAnimationFrame(gameLoop);
+  }
+  window.requestAnimationFrame(gameLoop);
 };
-for (let id in controlMap) {
-    const btn = document.getElementById(id);
-    btn.addEventListener('touchstart', e => { e.preventDefault(); controlMap[id].forEach(k => keys[k] = true); });
-    btn.addEventListener('touchend',   e => { e.preventDefault(); controlMap[id].forEach(k => keys[k] = false); });
-    btn.addEventListener('mousedown',  e => { e.preventDefault(); controlMap[id].forEach(k => keys[k] = true); });
-    btn.addEventListener('mouseup',    e => { e.preventDefault(); controlMap[id].forEach(k => keys[k] = false); });
-}
