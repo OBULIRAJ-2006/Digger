@@ -1,27 +1,35 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Digger Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <!-- Start Screen -->
-  <div id="start-screen" class="screen">
-    <h1>Digger Game</h1>
-    <button id="startButton">Start Game</button>
-  </div>
-
-  <!-- Game Screen -->
-  <div id="game-screen" class="screen hidden">
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
-    <div id="controls">
-      <div id="joystick"></div>
-      <button id="fireButton">Fire</button>
+  <div class="game-wrapper">
+    <canvas id="game-canvas" width="400" height="400"></canvas>
+    <div id="ui-overlay">
+      <div id="scoreboard">Score: <span id="score">0</span></div>
+      <div id="buttons">
+        <button id="start-button">Start</button>
+        <button id="restart-button" style="display:none">Restart</button>
+        <button id="next-level-button" style="display:none">Next Level</button>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="left-controls">
+        <button id="fire-button">Fire</button>
+      </div>
+      <div class="right-controls">
+        <button id="up-button">▲</button><br>
+        <button id="left-button">◀</button>
+        <button id="right-button">▶</button><br>
+        <button id="down-button">▼</button>
+      </div>
     </div>
   </div>
-
   <script src="game.js"></script>
 </body>
 </html>
