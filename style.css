@@ -1,81 +1,72 @@
-body {
+/* Global reset */
+body, html {
   margin: 0;
   padding: 0;
-  background: #000;
-  color: #0f0;
-  font-family: 'Press Start 2P', monospace;
+  height: 100%;
 }
+
+/* Screen container styles */
 .screen {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.85);
-  color: #0f0;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  width: 800px;
+  height: 600px;
+  margin: 0 auto;
+  background-size: cover;
+  background-position: center;
 }
+
+/* Start screen background */
+#start-screen {
+  background-image: url('classic-bg.png');
+}
+
+/* Game screen background and border */
+#game-screen {
+  background-image: url('dugsand.png');
+  border: 20px solid transparent;
+  /* Decorative rock border around game area */
+  border-image: url('rock-border.png') 20 round;
+}
+
+/* Utility class to hide elements */
 .hidden {
   display: none;
 }
-.title {
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-.blink {
-  animation: blink 1s steps(2) infinite;
-}
-@keyframes blink {
-  50% { opacity: 0; }
-}
-#hud {
+
+/* Controls container (for joystick and fire button) */
+#controls {
   position: absolute;
   top: 0;
+  left: 0;
   width: 100%;
-  display: flex;
-  justify-content: space-between;
-  padding: 10px;
-  box-sizing: border-box;
-  font-size: 14px;
+  height: 100%;
+  pointer-events: none; /* Let canvas receive touch events if needed */
 }
-#gameCanvas {
-  display: block;
-  margin: 0 auto;
-  background: #000;
-  image-rendering: pixelated;
-}
-#controls {
-  position: fixed;
+
+/* Joystick on left */
+#joystick {
+  position: absolute;
   bottom: 10px;
-  width: 100%;
-  text-align: center;
+  left: 10px;
+  width: 100px;
+  height: 100px;
+  background: rgba(200,200,200,0.5);
+  border-radius: 50%;
+  /* placeholder style for joystick area */
+  pointer-events: auto;
 }
-#controls .btn {
-  width: 50px;
-  height: 50px;
-  margin: 0 5px;
-  font-size: 24px;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid #fff;
-  border-radius: 5px;
-}
-#gameOver h1, #levelUp h1 {
-  font-size: 18px;
-  margin-bottom: 10px;
-}
-button {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 14px;
-  padding: 10px 20px;
-  cursor: pointer;
-  background: #111;
-  color: #0f0;
-  border: 2px solid #0f0;
-  outline: none;
-}
-button:hover {
-  background: #222;
+
+/* Fire button on right */
+#fireButton {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 80px;
+  height: 80px;
+  background: rgba(255,0,0,0.8);
+  border: none;
+  border-radius: 40%;
+  color: white;
+  font-weight: bold;
+  pointer-events: auto;
 }
