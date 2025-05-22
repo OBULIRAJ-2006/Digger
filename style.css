@@ -1,72 +1,84 @@
-/* Global reset */
-body, html {
+/* style.css */
+html, body {
   margin: 0;
   padding: 0;
   height: 100%;
+  background: #000;
+  font-family: Arial, sans-serif;
+  color: #fff;
+  text-align: center;
 }
-
-/* Screen container styles */
-.screen {
+.game-wrapper {
   position: relative;
-  width: 800px;
-  height: 600px;
-  margin: 0 auto;
-  background-size: cover;
-  background-position: center;
-}
-
-/* Start screen background */
-#start-screen {
-  background-image: url('classic-bg.png');
-}
-
-/* Game screen background and border */
-#game-screen {
-  background-image: url('dugsand.png');
-  border: 20px solid transparent;
-  /* Decorative rock border around game area */
-  border-image: url('rock-border.png') 20 round;
-}
-
-/* Utility class to hide elements */
-.hidden {
-  display: none;
-}
-
-/* Controls container (for joystick and fire button) */
-#controls {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
-  height: 100%;
-  pointer-events: none; /* Let canvas receive touch events if needed */
+  max-width: 500px;
+  margin: 20px auto;
+  border: 10px solid #8B4513;      /* brown solid border */
+  border-radius: 10px;
+  box-sizing: border-box;
 }
-
-/* Joystick on left */
-#joystick {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  width: 100px;
-  height: 100px;
-  background: rgba(200,200,200,0.5);
-  border-radius: 50%;
-  /* placeholder style for joystick area */
-  pointer-events: auto;
+#game-canvas {
+  display: block;
+  width: 100%;
+  background: url('dug-sand.png');
+  background-size: cover;
 }
-
-/* Fire button on right */
-#fireButton {
+#ui-overlay {
   position: absolute;
-  bottom: 10px;
-  right: 10px;
-  width: 80px;
-  height: 80px;
-  background: rgba(255,0,0,0.8);
-  border: none;
-  border-radius: 40%;
-  color: white;
-  font-weight: bold;
-  pointer-events: auto;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  box-sizing: border-box;
+  pointer-events: none;  /* allow clicks through overlay except on buttons */
+}
+#scoreboard {
+  text-shadow: 1px 1px 2px #000;
+}
+#buttons {
+  pointer-events: auto;  /* enable button clicks */
+}
+#buttons button {
+  margin-left: 5px;
+  font-size: 1em;
+  padding: 5px 10px;
+}
+.controls {
+  display: flex;
+  justify-content: space-between;
+  position: absolute;
+  bottom: 10px; left: 0; right: 0;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+.left-controls button, .right-controls button {
+  font-size: 1.2em;
+  padding: 10px 20px;
+}
+.right-controls {
+  text-align: center;
+}
+.right-controls button {
+  width: 50px;
+  margin: 2px;
+}
+@media (max-width: 600px) {
+  /* Stack controls on narrow screens */
+  .controls {
+    flex-direction: column;
+    align-items: center;
+  }
+  .left-controls, .right-controls {
+    width: 100%;
+    margin: 5px 0;
+    display: flex;
+    justify-content: center;
+  }
+  .right-controls button {
+    width: 40px;
+    padding: 8px;
+  }
+  #scoreboard { font-size: 0.9em; }
+  #buttons button { font-size: 0.9em; padding: 4px 8px; }
 }
