@@ -1,38 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Digger Game</title>
-  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="menu" class="screen">
-    <h1 class="title blink">DIGGER</h1>
-    <button id="startBtn">START GAME</button>
+
+  <!-- Start Screen -->
+  <div id="start-screen" class="screen">
+    <h1>Digger Game</h1>
+    <button id="startButton">Start Game</button>
   </div>
-  <div id="hud">
-    <span id="score">Score: 0</span>
-    <span id="lives">Lives: 3</span>
+
+  <!-- Game Screen -->
+  <div id="game-screen" class="screen hidden">
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div id="controls">
+      <div id="joystick"></div>
+      <button id="fireButton">Fire</button>
+    </div>
   </div>
-  <canvas id="gameCanvas"></canvas>
-  <div id="gameOver" class="screen hidden">
-    <h1>GAME OVER</h1>
-    <p id="finalScore"></p>
-    <button id="restartBtn">RESTART</button>
-  </div>
-  <div id="levelUp" class="screen hidden">
-    <h1>LEVEL COMPLETE!</h1>
-    <button id="nextLevelBtn">NEXT LEVEL</button>
-  </div>
-  <div id="controls">
-    <button class="btn" id="upBtn">&#9650;</button>
-    <button class="btn" id="leftBtn">&#9664;</button>
-    <button class="btn" id="downBtn">&#9660;</button>
-    <button class="btn" id="rightBtn">&#9654;</button>
-    <button class="btn" id="fireBtn">&#9899;</button>
-  </div>
+
   <script src="game.js"></script>
 </body>
 </html>
