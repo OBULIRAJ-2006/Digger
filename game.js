@@ -1,209 +1,260 @@
+// game.js
+
 // Game constants
-const TILE_SIZE = 32;
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 600;
+const TILE_SIZE = 40;
+const MAP_COLS = 10;
+const MAP_ROWS = 10;
 
-// Load images
-const emeraldImage = new Image();
-emeraldImage.src = 'emeralds.png';
-
-// Game state variables
-let canvas, ctx;
-let player, enemies = [], emeralds = [], mapGrid = [];
-let gameInterval;
-
-// Represents a tile grid: 0 = empty (tunnel), 1 = dirt
-// This example uses a simple empty grid for demonstration.
-const ROWS = CANVAS_HEIGHT / TILE_SIZE;
-const COLS = CANVAS_WIDTH / TILE_SIZE;
-for (let r = 0; r < ROWS; r++) {
-  mapGrid[r] = [];
-  for (let c = 0; c < COLS; c++) {
-    mapGrid[r][c] = 1; // Initialize all as dirt
+// Level definitions (0=sand, 1=open tunnel, 2=emerald)
+const levels = [
+  {
+    map: [
+      [1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,2,0,0,0,0,2,1],
+      [1,0,0,0,0,0,2,0,0,1],
+      [1,0,2,0,0,0,0,0,0,1],
+      [1,0,0,0,0,2,0,0,0,1],
+      [1,0,0,0,0,0,0,2,0,1],
+      [1,2,0,0,0,0,0,0,0,1],
+      [1,0,0,0,2,0,0,0,0,1],
+      [1,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,1,1,1,1,1,1]
+    ],
+    playerStart: {x:5, y:5},
+    enemies: [{x:1,y:1}, {x:8,y:8}]
+  },
+  {
+    map: [
+      [1,1,1,1,1,1,1,1,1,1],
+      [1,2,0,0,0,0,0,0,2,1],
+      [1,0,1,0,0,0,0,1,0,1],
+      [1,0,0,1,0,0,1,0,0,1],
+      [1,0,0,0,1,1,0,0,0,1],
+      [1,0,0,0,1,1,0,0,0,1],
+      [1,0,0,1,0,0,1,0,0,1],
+      [1,0,1,0,0,0,0,1,0,1],
+      [1,2,0,0,0,0,0,0,2,1],
+      [1,1,1,1,1,1,1,1,1,1]
+    ],
+    playerStart: {x:5, y:5},
+    enemies: [{x:2,y:2}, {x:7,y:7}]
   }
-}
+];
 
-// Helper: convert pixel coordinate to grid coordinate
-function toGridCoord(x) {
-  return Math.floor(x / TILE_SIZE);
-}
+let currentLevel = 0;
+let gameMap, player, enemies, score;
+let gameRunning = false;
 
-// Initialize the game when 'Start Game' is clicked
-document.getElementById('startButton').addEventListener('click', () => {
-  document.getElementById('start-screen').classList.add('hidden');
-  document.getElementById('game-screen').classList.remove('hidden');
-  initGame();
+// Get DOM elements
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+const startBtn = document.getElementById('start-button');
+const restartBtn = document.getElementById('restart-button');
+const nextBtn = document.getElementById('next-level-button');
+const fireBtn = document.getElementById('fire-button');
+const upBtn = document.getElementById('up-button');
+const leftBtn = document.getElementById('left-button');
+const rightBtn = document.getElementById('right-button');
+const downBtn = document.getElementById('down-button');
+
+// Initialize event listeners
+startBtn.addEventListener('click', () => startGame());
+restartBtn.addEventListener('click', () => resetGame());
+nextBtn.addEventListener('click', () => nextLevel());
+fireBtn.addEventListener('click', () => {
+  // Placeholder for fire action
+  console.log('Fire button pressed');
+});
+upBtn.addEventListener('click', () => movePlayer(0, -1));
+downBtn.addEventListener('click', () => movePlayer(0, 1));
+leftBtn.addEventListener('click', () => movePlayer(-1, 0));
+rightBtn.addEventListener('click', () => movePlayer(1, 0));
+window.addEventListener('keydown', (e) => {
+  if (!gameRunning) return;
+  switch(e.key) {
+    case 'ArrowUp':    movePlayer(0, -1); break;
+    case 'ArrowDown':  movePlayer(0, 1); break;
+    case 'ArrowLeft':  movePlayer(-1, 0); break;
+    case 'ArrowRight': movePlayer(1, 0); break;
+  }
 });
 
-// Player object
-class Player {
-  constructor() {
-    this.x = TILE_SIZE * 5;
-    this.y = TILE_SIZE * 5;
-    this.speed = 2;
-    this.width = TILE_SIZE;
-    this.height = TILE_SIZE;
+// Start or restart the game
+function startGame() {
+  const level = levels[currentLevel];
+  // Deep copy the map so we can modify it
+  gameMap = level.map.map(row => row.slice());
+  player = { x: level.playerStart.x, y: level.playerStart.y };
+  enemies = level.enemies.map(e => ({ x: e.x, y: e.y }));
+  score = 0;
+  scoreEl.textContent = score;
+  gameRunning = true;
+  startBtn.style.display = 'none';
+  restartBtn.style.display = 'none';
+  nextBtn.style.display = 'none';
+  requestAnimationFrame(gameLoop);
+}
+
+// Move player by (dx, dy) in grid units
+function movePlayer(dx, dy) {
+  if (!gameRunning) return;
+  const nx = player.x + dx;
+  const ny = player.y + dy;
+  // Check bounds
+  if (nx < 0 || nx >= MAP_COLS || ny < 0 || ny >= MAP_ROWS) return;
+  const cell = gameMap[ny][nx];
+  if (cell === 0) {
+    // Dig sand (0->1)
+    gameMap[ny][nx] = 1;
+    player.x = nx; player.y = ny;
+  } else if (cell === 1) {
+    player.x = nx; player.y = ny;
+  } else if (cell === 2) {
+    // Collect emerald
+    gameMap[ny][nx] = 1;
+    player.x = nx; player.y = ny;
+    score++;
+    scoreEl.textContent = score;
+    checkLevelComplete();
   }
-  move(dx, dy) {
-    // Move player and dig out dirt (set to empty)
-    this.x += dx * this.speed;
-    this.y += dy * this.speed;
-    let gx = toGridCoord(this.x);
-    let gy = toGridCoord(this.y);
-    // Dig tunnel in current cell
-    if (gy >= 0 && gx >= 0 && gy < ROWS && gx < COLS) {
-      mapGrid[gy][gx] = 0;
+  // After player moves, move enemies and check collisions
+  moveEnemies();
+  checkCollisions();
+}
+
+// Move each enemy one step toward the player using BFS pathfinding
+function moveEnemies() {
+  for (let enemy of enemies) {
+    const path = bfs(enemy.x, enemy.y, player.x, player.y);
+    if (path.length > 0) {
+      // Move one step along the path (path[0] is next step from enemy position)
+      enemy.x = path[0].x;
+      enemy.y = path[0].y;
     }
-  }
-  draw() {
-    ctx.fillStyle = 'blue';
-    ctx.fillRect(this.x, this.y, this.width, this.height);
   }
 }
 
-// Enemy object
-class Enemy {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-    this.width = TILE_SIZE;
-    this.height = TILE_SIZE;
-    this.speed = 1;
-  }
-  update() {
-    // Pathfinding: find next step towards player through tunnels
-    let start = { x: toGridCoord(this.x), y: toGridCoord(this.y) };
-    let goal = { x: toGridCoord(player.x), y: toGridCoord(player.y) };
-    let path = findPath(mapGrid, start, goal);
-    if (path && path.length > 1) {
-      let next = path[1];
-      // Move enemy one step toward next tile (center to center)
-      this.x = next.x * TILE_SIZE;
-      this.y = next.y * TILE_SIZE;
+// Check if any enemy has caught the player
+function checkCollisions() {
+  for (let enemy of enemies) {
+    if (enemy.x === player.x && enemy.y === player.y) {
+      gameOver();
+      break;
     }
-    // If path is null (no reachable path), the enemy can idle or roam (not implemented)
-  }
-  draw() {
-    ctx.fillStyle = 'red';
-    ctx.fillRect(this.x, this.y, this.width, this.height);
   }
 }
 
-// Breadth-first search pathfinding on the grid of tunnels
-function findPath(grid, start, goal) {
-  let queue = [start];
-  let visited = new Set();
-  let parent = {};
-  visited.add(start.x + ',' + start.y);
+// Check if all emeralds are collected
+function checkLevelComplete() {
+  for (let row of gameMap) {
+    if (row.includes(2)) return; // still emeralds left
+  }
+  // Level complete
+  gameRunning = false;
+  nextBtn.style.display = 'inline';
+}
 
-  const directions = [
-    { dx: 0, dy: -1 },
-    { dx: 0, dy: 1 },
-    { dx: -1, dy: 0 },
-    { dx: 1, dy: 0 }
-  ];
+// End the game (player caught)
+function gameOver() {
+  gameRunning = false;
+  restartBtn.style.display = 'inline';
+}
 
-  while (queue.length > 0) {
-    let current = queue.shift();
-    if (current.x === goal.x && current.y === goal.y) {
-      // Reached goal; reconstruct path
-      let path = [];
-      let node = current.x + ',' + current.y;
-      while (node) {
-        let parts = node.split(',');
-        path.push({ x: parseInt(parts[0]), y: parseInt(parts[1]) });
-        node = parent[node];
+// Reset the game to level 0
+function resetGame() {
+  currentLevel = 0;
+  startBtn.style.display = 'inline';
+  restartBtn.style.display = 'none';
+  nextBtn.style.display = 'none';
+}
+
+// Advance to the next level
+function nextLevel() {
+  currentLevel++;
+  if (currentLevel >= levels.length) {
+    // No more levels: just restart the first level
+    currentLevel = 0;
+  }
+  startGame();
+}
+
+// The main animation loop
+function gameLoop() {
+  if (!gameRunning) return;
+  // Clear canvas and redraw scene
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Draw emeralds
+  for (let y = 0; y < MAP_ROWS; y++) {
+    for (let x = 0; x < MAP_COLS; x++) {
+      if (gameMap[y][x] === 2) {
+        // Draw emerald sprite (placeholder: yellow circle)
+        ctx.fillStyle = 'yellow';
+        ctx.beginPath();
+        ctx.arc(
+          x * TILE_SIZE + TILE_SIZE/2,
+          y * TILE_SIZE + TILE_SIZE/2,
+          TILE_SIZE/4, 0, 2*Math.PI
+        );
+        ctx.fill();
       }
-      return path.reverse();
     }
-    for (let {dx, dy} of directions) {
-      let nx = current.x + dx;
-      let ny = current.y + dy;
-      if (nx >= 0 && ny >= 0 && nx < COLS && ny < ROWS) {
-        // Only move through dug tunnels (grid[ny][nx] === 0)
-        if (grid[ny][nx] === 0) {
-          let neighborKey = nx + ',' + ny;
-          if (!visited.has(neighborKey)) {
-            visited.add(neighborKey);
-            parent[neighborKey] = current.x + ',' + current.y;
-            queue.push({ x: nx, y: ny });
-          }
+  }
+  // Draw player (blue square)
+  ctx.fillStyle = 'blue';
+  ctx.fillRect(player.x * TILE_SIZE, player.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+  // Draw enemies (red squares)
+  ctx.fillStyle = 'red';
+  for (let enemy of enemies) {
+    ctx.fillRect(enemy.x * TILE_SIZE, enemy.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+  }
+  // Next frame
+  requestAnimationFrame(gameLoop);
+}
+
+// Breadth-first search on the grid from (sx,sy) to (tx,ty), returning path as list of points
+function bfs(sx, sy, tx, ty) {
+  const dirs = [
+    {dx: 1, dy: 0},
+    {dx: -1, dy: 0},
+    {dx: 0, dy: 1},
+    {dx: 0, dy: -1}
+  ];
+  // Setup visited and parent trackers
+  let visited = Array.from({length: MAP_ROWS}, () => Array(MAP_COLS).fill(false));
+  let parent = {};
+  let queue = [];
+  visited[sy][sx] = true;
+  queue.push({x: sx, y: sy});
+  parent[sy + "," + sx] = null;
+  // BFS loop
+  while (queue.length > 0) {
+    const cur = queue.shift();
+    if (cur.x === tx && cur.y === ty) break;
+    for (let d of dirs) {
+      const nx = cur.x + d.dx;
+      const ny = cur.y + d.dy;
+      // Check bounds and passability
+      if (nx >= 0 && nx < MAP_COLS && ny >= 0 && ny < MAP_ROWS) {
+        if (!visited[ny][nx] && gameMap[ny][nx] !== 0) {
+          visited[ny][nx] = true;
+          parent[ny + "," + nx] = {x: cur.x, y: cur.y};
+          queue.push({x: nx, y: ny});
         }
       }
     }
   }
-  return null; // No path found
-}
-
-// Game initialization
-function initGame() {
-  canvas = document.getElementById('gameCanvas');
-  ctx = canvas.getContext('2d');
-  player = new Player();
-  enemies = [new Enemy(TILE_SIZE * 10, TILE_SIZE * 10)]; // Example enemy
-  // Place some emeralds on the map (random positions for demo)
-  emeralds = [
-    { x: 15, y: 8 },
-    { x: 20, y: 12 }
-  ];
-  // Initial digging at player start position
-  mapGrid[toGridCoord(player.y)][toGridCoord(player.x)] = 0;
-
-  // Start main game loop
-  gameInterval = setInterval(gameLoop, 1000 / 30);
-}
-
-// Main game loop
-function gameLoop() {
-  update();
-  draw();
-}
-
-// Update game state
-function update() {
-  // For demo, move player randomly or by some control (not implemented)
-  // Here we skip player movement code for brevity.
-
-  // Update enemies
-  enemies.forEach(enemy => enemy.update());
-
-  // Check for player-emerald collisions
-  let playerGridX = toGridCoord(player.x);
-  let playerGridY = toGridCoord(player.y);
-  emeralds = emeralds.filter(e => {
-    if (e.x === playerGridX && e.y === playerGridY) {
-      // Player collected an emerald (increase score)
-      // score++;
-      return false; // remove from array
-    }
-    return true;
-  });
-}
-
-// Draw everything
-function draw() {
-  // Clear canvas
-  ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-  // Draw map (dirt as gray, tunnels as light)
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      if (mapGrid[r][c] === 1) {
-        ctx.fillStyle = '#888'; // dirt
-        ctx.fillRect(c * TILE_SIZE, r * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-      } else {
-        ctx.fillStyle = '#ccccaa'; // dug tunnel
-        ctx.fillRect(c * TILE_SIZE, r * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-      }
-    }
+  // No path found
+  if (!visited[ty][tx]) {
+    return [];
   }
-
-  // Draw emeralds
-  emeralds.forEach(e => {
-    ctx.drawImage(emeraldImage, e.x * TILE_SIZE, e.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-  });
-
-  // Draw player and enemies
-  player.draw();
-  enemies.forEach(enemy => enemy.draw());
+  // Reconstruct path from target to start
+  let path = [];
+  let px = tx, py = ty;
+  while (!(px === sx && py === sy)) {
+    path.unshift({x: px, y: py});
+    const p = parent[py + "," + px];
+    px = p.x; py = p.y;
+  }
+  return path;
 }
