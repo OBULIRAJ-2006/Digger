@@ -1,106 +1,27 @@
-/* ================================================================== */
-/* Full Reset & Base Styles                                               */
-/* ================================================================== */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { width: 100%; height: 100%; overflow: hidden; background: #111; font-family: 'Press Start 2P', cursive; color: #fff; }
+/* --- Reset & Base --- */
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; overflow:hidden; background:#000; font-family:'Press Start 2P',monospace; color:#0f0; }
+.screen { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center; background:rgba(0,0,0,0.85); text-align:center; }
+.hidden { display:none; }
+@keyframes blink { 50% { opacity:0; } }
+@keyframes pulse { 0%,100%{transform:scale(1);}50%{transform:scale(1.05);} }
 
-/* ================================================================== */
-/* Screen Containers                                                    */
-/* ================================================================== */
-.screen { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.85); text-align: center; }
-.hidden { display: none; }
-@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+/* --- Start & Win Screens --- */
+#startScreen h1, #winScreen h1 { font-size:4vw; color:gold; text-shadow:2px2px8px#000; animation:pulse 2s infinite; }
+.main-btn { padding:1vw 2vw; font-size:1.5vw; border:3px solid gold; border-radius:1vw; background:gold; color:#000; cursor:pointer; transition:0.3s; }
+.main-btn:hover { background:#ffd633; transform:scale(1.1); }
 
-/* ================================================================== */
-/* Start & Win Screens                                                   */
-/* ================================================================== */
-#startScreen h1,
-#winScreen h1 {
-  font-size: 4vw;
-  color: gold;
-  text-shadow: 2px 2px 8px #000;
-  animation: pulse 2s infinite;
-}
-.main-btn {
-  padding: 1vw 2vw;
-  font-size: 1.5vw;
-  border: 3px solid gold;
-  border-radius: 1vw;
-  background: gold;
-  color: #000;
-  cursor: pointer;
-  transition: background 0.3s, transform 0.2s;
-}
-.main-btn:hover {
-  background: #ffd633;
-  transform: scale(1.1);
-}
+/* --- Game Container & HUD --- */
+#gameContainer { position:absolute; inset:0; background:#111; border:8px solid gold; border-radius:1vw; overflow:hidden; }
+header { position:absolute; top:0; width:100%; padding:1vw; display:flex; justify-content:space-between; font-size:1.5vw; }
+#powerupDisplay { font-size:1vw; color:lightgreen; }
+#gameCanvas { width:100%; height:100%; image-rendering:pixelated; display:block; }
 
-/* ================================================================== */
-/* Game Container & HUD                                                  */
-/* ================================================================== */
-#gameContainer {
-  position: absolute;
-  inset: 0;
-  background: #000;
-  border: 8px solid gold;
-  border-radius: 1vw;
-  overflow: hidden;
-}
-header {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  padding: 1vw;
-  display: flex;
-  justify-content: space-between;
-  font-size: 1.5vw;
-  color: lightgreen;
-}
-#powerupDisplay {
-  font-size: 1vw;
-}
-#gameCanvas {
-  width: 100%;
-  height: 100%;
-  image-rendering: pixelated;
-}
+/* --- Controls --- */
+#controls { position:absolute; bottom:1vw; left:50%; transform:translateX(-50%); display:flex; gap:1vw; }
+.control-btn { width:4vw; height:4vw; font-size:2vw; border:2px solid #0f0; border-radius:0.5vw; background:rgba(0,255,0,0.1); }
+.control-btn.fire { width:6vw; height:6vw; border-radius:50%; background:#e91e63; }
+.control-btn:hover { transform:scale(1.1); }
 
-/* ================================================================== */
-/* Controls                                                              */
-/* ================================================================== */
-#controls {
-  position: absolute;
-  bottom: 1vw;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 1vw;
-}
-.control-btn {
-  width: 4vw;
-  height: 4vw;
-  border: 2px solid #fff;
-  border-radius: 0.5vw;
-  font-size: 2vw;
-  background: rgba(255,255,255,0.1);
-  transition: transform 0.2s;
-}
-.control-btn.fire {
-  width: 6vw;
-  height: 6vw;
-  border-radius: 50%;
-  background: #e91e63;
-}
-.control-btn:hover {
-  transform: scale(1.1);
-}
-
-/* ================================================================== */
-/* Responsive Overrides                                                  */
-/* ================================================================== */
-@media (max-width: 768px) {
-  .main-btn { font-size: 3vw; padding: 2vw 4vw; }
-  #controls { gap: 2vw; }
-  .control-btn { width: 8vw; height: 8vw; font-size: 4vw; }
-}
+/* --- Responsive --- */
+@media(max-width:768px){ .main-btn{font-size:3vw;padding:2vw 4vw;} .control-btn{width:8vw;height:8vw;font-size:4vw;} }
