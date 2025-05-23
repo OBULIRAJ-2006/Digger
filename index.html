@@ -11,10 +11,23 @@
   <!-- Start Screen -->
   <div id="startScreen" class="screen">
     <h1>DIGGER</h1>
-    <button id="startButton" class="main-btn">START GAME</button>
+    <button id="startBtn" class="main-btn">START GAME</button>
   </div>
 
-  <!-- Game Container -->
+  <!-- Game Over Screen -->
+  <div id="gameOverScreen" class="screen hidden">
+    <h1>GAME OVER</h1>
+    <p id="overScore"></p>
+    <button id="restartBtn" class="main-btn">RESTART</button>
+  </div>
+
+  <!-- Level Complete Screen -->
+  <div id="levelUpScreen" class="screen hidden">
+    <h1>LEVEL COMPLETE!</h1>
+    <button id="nextLevelBtn" class="main-btn">NEXT LEVEL</button>
+  </div>
+
+  <!-- Canvas & HUD Container -->
   <div id="gameContainer" class="hidden">
     <header>
       <div id="scoreDisplay">Score: 0</div>
@@ -22,20 +35,22 @@
       <div id="powerupDisplay"></div>
     </header>
     <canvas id="gameCanvas"></canvas>
+    <!-- Touch Controls -->
     <div id="controls">
-      <button class="control-btn" id="upBtn">&#9650;</button>
-      <button class="control-btn" id="leftBtn">&#9664;</button>
-      <button class="control-btn" id="downBtn">&#9660;</button>
-      <button class="control-btn" id="rightBtn">&#9654;</button>
-      <button class="control-btn fire" id="fireBtn">&#9899;</button>
+      <div id="fireControl">
+        <button id="fireBtn" class="control-btn fire">FIRE</button>
+      </div>
+      <div id="joystickControl">
+        <div id="joystick">
+          <button id="upBtn" class="arrow-btn">▲</button>
+          <div class="horizontal">
+            <button id="leftBtn" class="arrow-btn">◀</button>
+            <button id="rightBtn" class="arrow-btn">▶</button>
+          </div>
+          <button id="downBtn" class="arrow-btn">▼</button>
+        </div>
+      </div>
     </div>
-  </div>
-
-  <!-- Win Screen -->
-  <div id="winScreen" class="screen hidden">
-    <h1>CONGRATULATIONS!</h1>
-    <p id="winScore"></p>
-    <button id="restartButton" class="main-btn">PLAY AGAIN</button>
   </div>
 
   <script src="game.js"></script>
