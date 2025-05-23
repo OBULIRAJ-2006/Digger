@@ -11,13 +11,14 @@
   <!-- Start Screen -->
   <div id="startScreen" class="screen">
     <h1>DIGGER</h1>
-    <button class="main-btn" id="startButton">START GAME</button>
+    <button id="startButton" class="main-btn">START GAME</button>
   </div>
 
   <!-- Game Container -->
   <div id="gameContainer" class="hidden">
     <header>
       <div id="scoreDisplay">Score: 0</div>
+      <div id="livesDisplay">Lives: 3</div>
       <div id="powerupDisplay"></div>
     </header>
     <canvas id="gameCanvas"></canvas>
@@ -34,7 +35,7 @@
   <div id="winScreen" class="screen hidden">
     <h1>CONGRATULATIONS!</h1>
     <p id="winScore"></p>
-    <button class="main-btn" id="restartWinBtn">PLAY AGAIN</button>
+    <button id="restartButton" class="main-btn">PLAY AGAIN</button>
   </div>
 
   <script src="game.js"></script>
