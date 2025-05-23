@@ -1,35 +1,42 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Digger Game</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="game-wrapper">
-    <canvas id="game-canvas" width="400" height="400"></canvas>
-    <div id="ui-overlay">
-      <div id="scoreboard">Score: <span id="score">0</span></div>
-      <div id="buttons">
-        <button id="start-button">Start</button>
-        <button id="restart-button" style="display:none">Restart</button>
-        <button id="next-level-button" style="display:none">Next Level</button>
-      </div>
-    </div>
-    <div class="controls">
-      <div class="left-controls">
-        <button id="fire-button">Fire</button>
-      </div>
-      <div class="right-controls">
-        <button id="up-button">▲</button><br>
-        <button id="left-button">◀</button>
-        <button id="right-button">▶</button><br>
-        <button id="down-button">▼</button>
-      </div>
+  <!-- Start Screen -->
+  <div id="startScreen" class="screen">
+    <h1>DIGGER</h1>
+    <button class="main-btn" id="startButton">START GAME</button>
+  </div>
+
+  <!-- Game Container -->
+  <div id="gameContainer" class="hidden">
+    <header>
+      <div id="scoreDisplay">Score: 0</div>
+      <div id="powerupDisplay"></div>
+    </header>
+    <canvas id="gameCanvas"></canvas>
+    <div id="controls">
+      <button class="control-btn" id="upBtn">&#9650;</button>
+      <button class="control-btn" id="leftBtn">&#9664;</button>
+      <button class="control-btn" id="downBtn">&#9660;</button>
+      <button class="control-btn" id="rightBtn">&#9654;</button>
+      <button class="control-btn fire" id="fireBtn">&#9899;</button>
     </div>
   </div>
+
+  <!-- Win Screen -->
+  <div id="winScreen" class="screen hidden">
+    <h1>CONGRATULATIONS!</h1>
+    <p id="winScore"></p>
+    <button class="main-btn" id="restartWinBtn">PLAY AGAIN</button>
+  </div>
+
   <script src="game.js"></script>
 </body>
 </html>
