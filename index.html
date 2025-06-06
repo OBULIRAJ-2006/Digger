@@ -1,38 +1,414 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Digger Game</title>
-  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Modern Digger</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1000px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .screen {
+      background: rgba(25, 25, 45, 0.9);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      padding: 30px;
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .screen::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #ffd166);
+      z-index: 10;
+    }
+    
+    h1 {
+      font-size: 3.5rem;
+      margin-bottom: 20px;
+      background: linear-gradient(45deg, #ffd166, #ff6b6b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      font-weight: 800;
+      letter-spacing: 2px;
+    }
+    
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 15px;
+      color: #ffd166;
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      max-width: 600px;
+      margin-bottom: 30px;
+      color: #b0b0d0;
+      line-height: 1.6;
+    }
+    
+    .btn {
+      background: linear-gradient(45deg, #4ecdc4, #2a9d8f);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 1.2rem;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      letter-spacing: 1px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      margin: 10px 0;
+      width: 220px;
+      text-transform: uppercase;
+    }
+    
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      background: linear-gradient(45deg, #2a9d8f, #4ecdc4);
+    }
+    
+    .btn:active {
+      transform: translateY(1px);
+    }
+    
+    .btn.fire {
+      background: linear-gradient(45deg, #ff6b6b, #e63946);
+    }
+    
+    .btn.fire:hover {
+      background: linear-gradient(45deg, #e63946, #ff6b6b);
+    }
+    
+    #gameContainer {
+      position: relative;
+      width: 100%;
+      background: #0c1021;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 20px 0;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    }
+    
+    canvas {
+      display: block;
+      margin: 0 auto;
+    }
+    
+    #hud {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      padding: 15px;
+      background: rgba(30, 30, 50, 0.7);
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    
+    #controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      width: 100%;
+      margin-top: 20px;
+    }
+    
+    #joystick {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .horizontal {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .arrow-btn {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(50, 50, 80, 0.8);
+      border: 2px solid #4ecdc4;
+      color: white;
+      font-size: 1.8rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    .arrow-btn:active {
+      background: rgba(78, 205, 196, 0.8);
+      transform: scale(0.95);
+    }
+    
+    #fireButton {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    
+    .powerup-display {
+      display: flex;
+      gap: 15px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .powerup {
+      background: rgba(40, 40, 60, 0.8);
+      border-radius: 10px;
+      padding: 10px 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      min-width: 140px;
+    }
+    
+    .powerup-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    
+    .powerup.speed .powerup-icon { background: #4ecdc4; }
+    .powerup.shield .powerup-icon { background: #ffd166; }
+    .powerup.firepower .powerup-icon { background: #ff6b6b; }
+    
+    .instructions {
+      background: rgba(30, 30, 50, 0.7);
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+      width: 100%;
+      text-align: left;
+    }
+    
+    .instructions h3 {
+      color: #ffd166;
+      margin-bottom: 10px;
+    }
+    
+    .instructions ul {
+      padding-left: 20px;
+      line-height: 1.6;
+    }
+    
+    .instructions li {
+      margin-bottom: 8px;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+    
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2.5rem;
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+      
+      .btn {
+        padding: 12px 30px;
+        font-size: 1rem;
+        width: 180px;
+      }
+      
+      .arrow-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+      }
+      
+      #fireButton {
+        width: 100px;
+        height: 100px;
+      }
+      
+      #gameContainer {
+        margin: 10px 0;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .screen {
+        padding: 20px 15px;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .subtitle {
+        font-size: 1rem;
+      }
+      
+      .btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+        width: 160px;
+      }
+      
+      .arrow-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+      }
+      
+      #fireButton {
+        width: 80px;
+        height: 80px;
+        font-size: 1.2rem;
+      }
+      
+      .powerup {
+        font-size: 0.8rem;
+        min-width: 120px;
+      }
+    }
+    
+    /* Animations */
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    .floating {
+      animation: float 3s ease-in-out infinite;
+    }
+  </style>
 </head>
 <body>
-  <div id="menu" class="screen">
-    <h1 class="title blink">DIGGER</h1>
-    <button id="startBtn">START GAME</button>
+  <div class="container">
+    <!-- Start Screen -->
+    <div id="startScreen" class="screen">
+      <h1>MODERN DIGGER</h1>
+      <div class="subtitle">
+        Dig through the terrain, collect treasures, and defeat enemies in this modern twist on the classic digger game!
+      </div>
+      <button id="startButton" class="btn floating">START GAME</button>
+      
+      <div class="instructions">
+        <h3>How to Play:</h3>
+        <ul>
+          <li><strong>Arrow Keys</strong> or <strong>Touch Controls</strong> to move your character</li>
+          <li><strong>Spacebar</strong> or <strong>Fire Button</strong> to shoot</li>
+          <li>Collect <strong>Emeralds</strong> and <strong>Gold Bags</strong> for points</li>
+          <li>Use <strong>Power-ups</strong> to gain special abilities</li>
+          <li>Avoid enemies or destroy them with your bullets</li>
+          <li>Complete each level by collecting all emeralds</li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen hidden">
+      <h2>MODERN DIGGER</h2>
+      
+      <div id="hud">
+        <div id="scoreDisplay">SCORE: 0</div>
+        <div id="livesDisplay">LIVES: 3</div>
+        <div id="levelDisplay">LEVEL: 1</div>
+      </div>
+      
+      <div id="gameContainer">
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+      </div>
+      
+      <div id="powerupDisplay" class="powerup-display">
+        <div class="powerup speed">
+          <div class="powerup-icon">S</div>
+          <div>Speed: 0s</div>
+        </div>
+        <div class="powerup shield">
+          <div class="powerup-icon">D</div>
+          <div>Shield: 0s</div>
+        </div>
+        <div class="powerup firepower">
+          <div class="powerup-icon">F</div>
+          <div>Firepower: 0s</div>
+        </div>
+      </div>
+      
+      <div id="controls">
+        <div id="fireContainer">
+          <button id="fireButton" class="btn fire">FIRE</button>
+        </div>
+        <div id="joystick">
+          <button id="upBtn" class="arrow-btn">▲</button>
+          <div class="horizontal">
+            <button id="leftBtn" class="arrow-btn">◀</button>
+            <button id="rightBtn" class="arrow-btn">▶</button>
+          </div>
+          <button id="downBtn" class="arrow-btn">▼</button>
+        </div>
+      </div>
+      
+      <button id="restartButton" class="btn hidden">RESTART</button>
+    </div>
   </div>
-  <div id="hud">
-    <span id="score">Score: 0</span>
-    <span id="lives">Lives: 3</span>
-  </div>
-  <canvas id="gameCanvas"></canvas>
-  <div id="gameOver" class="screen hidden">
-    <h1>GAME OVER</h1>
-    <p id="finalScore"></p>
-    <button id="restartBtn">RESTART</button>
-  </div>
-  <div id="levelUp" class="screen hidden">
-    <h1>LEVEL COMPLETE!</h1>
-    <button id="nextLevelBtn">NEXT LEVEL</button>
-  </div>
-  <div id="controls">
-    <button class="btn" id="upBtn">&#9650;</button>
-    <button class="btn" id="leftBtn">&#9664;</button>
-    <button class="btn" id="downBtn">&#9660;</button>
-    <button class="btn" id="rightBtn">&#9654;</button>
-    <button class="btn" id="fireBtn">&#9899;</button>
-  </div>
-  <script src="game.js"></script>
-</body>
-</html>
