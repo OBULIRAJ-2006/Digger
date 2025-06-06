@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Modern Digger</title>
+  <title>Modern Digger - Basic</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Arial', sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
     
     body {
@@ -20,1355 +21,74 @@
       justify-content: center;
       align-items: center;
       overflow: hidden;
-      padding: 20px;
+      touch-action: manipulation;
     }
     
     .container {
-      max-width: 1000px;
       width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-    }
-    /*screen*/
-  
-    
-    h1 {
-      font-size: 3.5rem;
-      margin-bottom: 20px;
-      background: linear-gradient(45deg, #ffd166, #ff6b6b);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-      font-weight: 800;
-      letter-spacing: 2px;
-    }
-    
-    h2 {
-      font-size: 2rem;
-      margin-bottom: 15px;
-      color: #ffd166;
-    }
-    
-    .subtitle {
-      font-size: 1.2rem;
-      max-width: 600px;
-      margin-bottom: 30px;
-      color: #b0b0d0;
-      line-height: 1.6;
-    }
-    
-    .btn {
-      background: linear-gradient(45deg, #4ecdc4, #2a9d8f);
-      color: white;
-      border: none;
-      padding: 15px 40px;
-      font-size: 1.2rem;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 600;
-      letter-spacing: 1px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-      margin: 10px 0;
-      width: 220px;
-      text-transform: uppercase;
-    }
-    
-    .btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-      background: linear-gradient(45deg, #2a9d8f, #4ecdc4);
-    }
-    
-    .btn:active {
-      transform: translateY(1px);
-    }
-    
-    .btn.fire {
-      background: linear-gradient(45deg, #ff6b6b, #e63946);
-    }
-    
-    .btn.fire:hover {
-      background: linear-gradient(45deg, #e63946, #ff6b6b);
-    }
-    
-    #gameContainer {
-      position: relative;
-      width: 100%;
-      background: #0c1021;
-      border-radius: 10px;
-      overflow: hidden;
-      margin: 20px 0;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-    }
-    
-    canvas {
-      display: block;
-      margin: 0 auto;
-    }
-    
-    #hud {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      padding: 15px;
-      background: rgba(30, 30, 50, 0.7);
-      border-radius: 10px;
-      margin-bottom: 15px;
-    }
-    
-    #controls {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      width: 100%;
-      margin-top: 20px;
-    }
-    
-    #joystick {
+      max-width: 800px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 10px;
-    }
-    
-    .horizontal {
-      display: flex;
-      gap: 10px;
-    }
-    
-    .arrow-btn {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      background: rgba(50, 50, 80, 0.8);
-      border: 2px solid #4ecdc4;
-      color: white;
-      font-size: 1.8rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
-    
-    .arrow-btn:active {
-      background: rgba(78, 205, 196, 0.8);
-      transform: scale(0.95);
-    }
-    
-    #fireButton {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
-    
-    .powerup-display {
-      display: flex;
-      gap: 15px;
-      margin-top: 15px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    
-    .powerup {
-      background: rgba(40, 40, 60, 0.8);
-      border-radius: 10px;
-      padding: 10px 15px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.9rem;
-      min-width: 140px;
-    }
-    
-    .powerup-icon {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 0.8rem;
-      font-weight: bold;
-    }
-    
-    .powerup.speed .powerup-icon { background: #4ecdc4; }
-    .powerup.shield .powerup-icon { background: #ffd166; }
-    .powerup.firepower .powerup-icon { background: #ff6b6b; }
-    
-    .instructions {
-      background: rgba(30, 30, 50, 0.7);
-      border-radius: 10px;
-      padding: 20px;
-      margin-top: 20px;
-      width: 100%;
-      text-align: left;
-    }
-    
-    .instructions h3 {
-      color: #ffd166;
-      margin-bottom: 10px;
-    }
-    
-    .instructions ul {
-      padding-left: 20px;
-      line-height: 1.6;
-    }
-    
-    .instructions li {
-      margin-bottom: 8px;
-    }
-    
-    .hidden {
-      display: none !important;
-    }
-    
-    .particle {
-      position: absolute;
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 100;
-    }
-    
-    /* Responsive design */
-    @media (max-width: 768px) {
-      h1 {
-        font-size: 2.5rem;
-      }
-      
-      h2 {
-        font-size: 1.5rem;
-      }
-      
-      .btn {
-        padding: 12px 30px;
-        font-size: 1rem;
-        width: 180px;
-      }
-      
-      .arrow-btn {
-        width: 60px;
-        height: 60px;
-        font-size: 1.5rem;
-      }
-      
-      #fireButton {
-        width: 100px;
-        height: 100px;
-      }
-      
-      #gameContainer {
-        margin: 10px 0;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .screen {
-        padding: 20px 15px;
-      }
-      
-      h1 {
-        font-size: 2rem;
-      }
-      
-      .subtitle {
-        font-size: 1rem;
-      }
-      
-      .btn {
-        padding: 10px 20px;
-        font-size: 0.9rem;
-        width: 160px;
-      }
-      
-      .arrow-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 1.2rem;
-      }
-      
-      #fireButton {
-        width: 80px;
-        height: 80px;
-        font-size: 1.2rem;
-      }
-      
-      .powerup {
-        font-size: 0.8rem;
-        min-width: 120px;
-      }
-    }
-    
-    /* Animations */
-    @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-      100% { transform: translateY(0px); }
-    }
-    
-    .floating {
-      animation: float 3s ease-in-out infinite;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <!-- Start Screen -->
-    <div id="startScreen" class="screen">
-      <h1>MODERN DIGGER</h1>
-      <div class="subtitle">
-        Dig through the terrain, collect treasures, and defeat enemies in this modern twist on the classic digger game!
-      </div>
-      <button id="startButton" class="btn floating">START GAME</button>
-      
-      <div class="instructions">
-        <h3>How to Play:</h3>
-        <ul>
-          <li><strong>Arrow Keys</strong> or <strong>Touch Controls</strong> to move your character</li>
-          <li><strong>Spacebar</strong> or <strong>Fire Button</strong> to shoot</li>
-          <li>Collect <strong>Emeralds</strong> and <strong>Gold Bags</strong> for points</li>
-          <li>Use <strong>Power-ups</strong> to gain special abilities</li>
-          <li>Avoid enemies or destroy them with your bullets</li>
-          <li>Complete each level by collecting all emeralds</li>
-        </ul>
-      </div>
-    </div>
-    
-    <!-- Game Screen -->
-    <div id="gameScreen" class="screen hidden">
-      <h2>MODERN DIGGER</h2>
-      
-      <div id="hud">
-        <div id="scoreDisplay">SCORE: 0</div>
-        <div id="livesDisplay">LIVES: 3</div>
-        <div id="levelDisplay">LEVEL: 1</div>
-      </div>
-      
-      <div id="gameContainer">
-        <canvas id="gameCanvas" width="800" height="500"></canvas>
-      </div>
-      
-      <div id="powerupDisplay" class="powerup-display">
-        <div class="powerup speed">
-          <div class="powerup-icon">S</div>
-          <div>Speed: 0s</div>
-        </div>
-        <div class="powerup shield">
-          <div class="powerup-icon">D</div>
-          <div>Shield: 0s</div>
-        </div>
-        <div class="powerup firepower">
-          <div class="powerup-icon">F</div>
-          <div>Firepower: 0s</div>
-        </div>
-      </div>
-      
-      <div id="controls">
-        <div id="fireContainer">
-          <button id="fireButton" class="btn fire">FIRE</button>
-        </div>
-        <div id="joystick">
-          <button id="upBtn" class="arrow-btn">▲</button>
-          <div class="horizontal">
-            <button id="leftBtn" class="arrow-btn">◀</button>
-            <button id="rightBtn" class="arrow-btn">▶</button>
-          </div>
-          <button id="downBtn" class="arrow-btn">▼</button>
-        </div>
-      </div>
-      
-      <button id="restartButton" class="btn hidden">RESTART</button>
-    </div>
-  </div>
-
-  <script>
-    // ==================================================================
-    // Initialization and Constants
-    // ==================================================================
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    const startScreen = document.getElementById("startScreen");
-    const gameScreen = document.getElementById("gameScreen");
-    const startButton = document.getElementById("startButton");
-    const scoreDisplay = document.getElementById("scoreDisplay");
-    const livesDisplay = document.getElementById("livesDisplay");
-    const levelDisplay = document.getElementById("levelDisplay");
-    const restartButton = document.getElementById("restartButton");
-    const powerupElements = {
-      speed: document.querySelector('.powerup.speed div:last-child'),
-      shield: document.querySelector('.powerup.shield div:last-child'),
-      firepower: document.querySelector('.powerup.firepower div:last-child')
-    };
-    
-    // Game constants
-    const CELL_SIZE = 40;
-    const COLS = Math.floor(canvas.width / CELL_SIZE);
-    const ROWS = Math.floor(canvas.height / CELL_SIZE);
-    const PLAYER_SPEED = 5;
-    const ENEMY_SPEED = 2.5;
-    const BULLET_SPEED = 10;
-    
-    // Game state
-    let score = 0;
-    let level = 1;
-    let lives = 3;
-    let gameOver = false;
-    let gameActive = false;
-    let terrain = [];
-    let enemies = [];
-    let emeralds = [];
-    let goldBags = [];
-    let powerups = [];
-    let bullets = [];
-    let particles = [];
-    let lastTime = 0;
-    let enemySpawnTimer = 0;
-    let tunnelRow = 0;
-    
-    // Player object
-    const player = {
-      x: CELL_SIZE * 2,
-      y: CELL_SIZE * 2,
-      width: CELL_SIZE - 10,
-      height: CELL_SIZE - 10,
-      dx: 0,
-      dy: 0,
-      lastDirection: { x: 1, y: 0 },
-      baseSpeed: PLAYER_SPEED,
-      speed: PLAYER_SPEED,
-      powerupTime: 0,
-      shieldTime: 0,
-      firepowerTime: 0,
-      shootCooldown: 0,
-      shootSlowTimer: 0,
-      color: '#FFD166'
-    };
-    
-    // ==================================================================
-    // Game Initialization
-    // ==================================================================
-    function initGame() {
-      startButton.addEventListener('click', startGame);
-      restartButton.addEventListener('click', startGame);
-      
-      // Touch controls
-      document.getElementById("upBtn").addEventListener("touchstart", () => { player.dy = -player.speed; });
-      document.getElementById("upBtn").addEventListener("touchend", () => { player.dy = 0; });
-      document.getElementById("downBtn").addEventListener("touchstart", () => { player.dy = player.speed; });
-      document.getElementById("downBtn").addEventListener("touchend", () => { player.dy = 0; });
-      document.getElementById("leftBtn").addEventListener("touchstart", () => { player.dx = -player.speed; });
-      document.getElementById("leftBtn").addEventListener("touchend", () => { player.dx = 0; });
-      document.getElementById("rightBtn").addEventListener("touchstart", () => { player.dx = player.speed; });
-      document.getElementById("rightBtn").addEventListener("touchend", () => { player.dx = 0; });
-      document.getElementById("fireButton").addEventListener("touchstart", fireBullet);
-      
-      // Keyboard controls
-      document.addEventListener("keydown", handleKeyDown);
-      document.addEventListener("keyup", handleKeyUp);
-      
-      // Initialize game
-      startGame();
-    }
-    
-    function startGame() {
-      startScreen.classList.add('hidden');
-      gameScreen.classList.remove('hidden');
-      restartButton.classList.add('hidden');
-      
-      // Reset game state
-      score = 0;
-      level = 1;
-      lives = 3;
-      gameOver = false;
-      gameActive = true;
-      enemies = [];
-      emeralds = [];
-      goldBags = [];
-      powerups = [];
-      bullets = [];
-      particles = [];
-      
-      // Reset player
-      player.x = CELL_SIZE * 2;
-      player.y = CELL_SIZE * 2;
-      player.dx = 0;
-      player.dy = 0;
-      player.speed = player.baseSpeed;
-      player.powerupTime = 0;
-      player.shieldTime = 0;
-      player.firepowerTime = 0;
-      player.shootCooldown = 0;
-      player.shootSlowTimer = 0;
-      
-      // Initialize terrain
-      initTerrain();
-      generateTunnel();
-      
-      // Spawn game objects
-      spawnEmeralds();
-      spawnGoldBags();
-      spawnPowerups();
-      spawnEnemy();
-      
-      // Update HUD
-      updateHUD();
-      
-      // Start game loop
-      lastTime = performance.now();
-      requestAnimationFrame(gameLoop);
-    }
-    
-    function initTerrain() {
-      terrain = [];
-      for (let r = 0; r < ROWS; r++) {
-        terrain[r] = [];
-        for (let c = 0; c < COLS; c++) {
-          terrain[r][c] = true; // true indicates undug dirt
-        }
-      }
-    }
-    
-    function generateTunnel() {
-      let currentRow = Math.floor(Math.random() * ROWS);
-      for (let c = 0; c < COLS; c++) {
-        terrain[currentRow][c] = false;
-        if (Math.random() < 0.3) {
-          if (currentRow > 0 && Math.random() < 0.5) currentRow--;
-          else if (currentRow < ROWS - 1) currentRow++;
-          terrain[currentRow][c] = false;
-        }
-      }
-      tunnelRow = currentRow;
-    }
-    
-    // ==================================================================
-    // Spawning Functions
-    // ==================================================================
-    function spawnEmeralds() {
-      emeralds = [];
-      let count = 5 + level * 2;
-      while (count > 0) {
-        let col = Math.floor(Math.random() * COLS);
-        let row = Math.floor(Math.random() * ROWS);
-        if (terrain[row][col] === true) {
-          emeralds.push({
-            x: col * CELL_SIZE + (CELL_SIZE - 20) / 2,
-            y: row * CELL_SIZE + (CELL_SIZE - 20) / 2,
-            width: 20,
-            height: 20,
-            collected: false,
-            color: '#06D6A0'
-          });
-          count--;
-        }
-      }
-    }
-    
-    function spawnGoldBags() {
-      goldBags = [];
-      let count = 3 + level;
-      while (count > 0) {
-        let col = Math.floor(Math.random() * COLS);
-        let row = Math.floor(Math.random() * ROWS);
-        if (terrain[row][col] === true) {
-          goldBags.push({
-            x: col * CELL_SIZE,
-            y: row * CELL_SIZE,
-            width: CELL_SIZE,
-            height: CELL_SIZE,
-            falling: false,
-            vy: 0,
-            startFallY: null,
-            color: '#FFD166'
-          });
-          count--;
-        }
-      }
-    }
-    
-    function spawnEnemy() {
-      if (enemies.length >= 2 + level) return;
-      
-      let spawnX = canvas.width - CELL_SIZE - 10;
-      let spawnY = tunnelRow * CELL_SIZE + (CELL_SIZE - 30) / 2;
-      let col = Math.floor(spawnX / CELL_SIZE);
-      let row = Math.floor(spawnY / CELL_SIZE);
-      
-      if (terrain[row][col]) terrain[row][col] = false;
-      
-      enemies.push({
-        x: spawnX,
-        y: spawnY,
-        width: 30,
-        height: 30,
-        speed: ENEMY_SPEED + level * 0.2,
-        dx: 0,
-        dy: 0,
-        color: '#EF476F'
-      });
-    }
-    
-    function spawnPowerups() {
-      powerups = [];
-      if (Math.random() < 0.3) {
-        let col = Math.floor(Math.random() * COLS);
-        let row = Math.floor(Math.random() * ROWS);
-        const types = ["speed", "shield", "firepower"];
-        const type = types[Math.floor(Math.random() * types.length)];
-        
-        powerups.push({
-          x: col * CELL_SIZE + (CELL_SIZE - 20) / 2,
-          y: row * CELL_SIZE + (CELL_SIZE - 20) / 2,
-          width: 20,
-          height: 20,
-          type: type,
-          color: type === "speed" ? '#118AB2' : 
-                 type === "shield" ? '#FFD166' : 
-                 '#EF476F'
-        });
-      }
-    }
-    
-    function createParticles(x, y, color, count) {
-      for (let i = 0; i < count; i++) {
-        particles.push({
-          x: x,
-          y: y,
-          size: Math.random() * 5 + 2,
-          vx: (Math.random() - 0.5) * 6,
-          vy: (Math.random() - 0.5) * 6,
-          color: color,
-          life: Math.random() * 30 + 20
-        });
-      }
-    }
-    
-    // ==================================================================
-    // Game Logic
-    // ==================================================================
-    function updatePlayer(deltaTime) {
-      // Apply movement
-      player.x += player.dx * deltaTime;
-      player.y += player.dy * deltaTime;
-      
-      // Boundary checks
-      player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
-      player.y = Math.max(0, Math.min(canvas.height - player.height, player.y));
-      
-      // Shooting slowdown
-      if (player.shootSlowTimer > 0) {
-        player.speed = player.baseSpeed * 0.5;
-        player.shootSlowTimer -= deltaTime;
-      } else {
-        player.speed = player.baseSpeed;
-      }
-      
-      // Update direction
-      if (player.dx !== 0 || player.dy !== 0) {
-        player.lastDirection = {
-          x: player.dx !== 0 ? Math.sign(player.dx) : 0,
-          y: player.dy !== 0 ? Math.sign(player.dy) : 0
-        };
-      }
-      
-      // Dig terrain at player position
-      let col = Math.floor((player.x + player.width / 2) / CELL_SIZE);
-      let row = Math.floor((player.y + player.height / 2) / CELL_SIZE);
-      
-      if (row >= 0 && row < ROWS && col >= 0 && col < COLS && terrain[row][col]) {
-        terrain[row][col] = false;
-        createParticles(
-          col * CELL_SIZE + CELL_SIZE / 2, 
-          row * CELL_SIZE + CELL_SIZE / 2,
-          '#8B4513',
-          10
-        );
-      }
-      
-      // Collect emeralds
-      emeralds.forEach(emerald => {
-        if (!emerald.collected && isColliding(player, emerald)) {
-          emerald.collected = true;
-          score += 10;
-          createParticles(
-            emerald.x + emerald.width / 2,
-            emerald.y + emerald.height / 2,
-            '#06D6A0',
-            15
-          );
-          updateHUD();
-        }
-      });
-      
-      // Cooldown timers
-      if (player.shootCooldown > 0) {
-        player.shootCooldown -= deltaTime;
-      }
-    }
-    
-    function updateEnemies(deltaTime) {
-      enemies.forEach((enemy, index) => {
-        // Simple AI: Move towards player
-        const dx = player.x - enemy.x;
-        const dy = player.y - enemy.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        
-        if (dist > 0) {
-          enemy.dx = (dx / dist) * enemy.speed;
-          enemy.dy = (dy / dist) * enemy.speed;
-        }
-        
-        // Apply movement
-        enemy.x += enemy.dx * deltaTime;
-        enemy.y += enemy.dy * deltaTime;
-        
-        // Boundary checks
-        enemy.x = Math.max(0, Math.min(canvas.width - enemy.width, enemy.x));
-        enemy.y = Math.max(0, Math.min(canvas.height - enemy.height, enemy.y));
-        
-        // Collision with player
-        if (isColliding(player, enemy)) {
-          if (player.shieldTime <= 0) {
-            lives--;
-            createParticles(
-              player.x + player.width / 2,
-              player.y + player.height / 2,
-              '#EF476F',
-              30
-            );
-            updateHUD();
-            
-            if (lives <= 0) {
-              gameOver = true;
-            } else {
-              // Respawn player
-              player.x = CELL_SIZE * 2;
-              player.y = CELL_SIZE * 2;
-              player.dx = 0;
-              player.dy = 0;
-            }
-          }
-          enemies.splice(index, 1);
-          createParticles(
-            enemy.x + enemy.width / 2,
-            enemy.y + enemy.height / 2,
-            '#EF476F',
-            20
-          );
-        }
-      });
-    }
-    
-    function updateBullets(deltaTime) {
-      bullets.forEach((bullet, index) => {
-        // Apply movement
-        bullet.x += bullet.dx * deltaTime;
-        bullet.y += bullet.dy * deltaTime;
-        
-        // Boundary check
-        if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
-          bullets.splice(index, 1);
-          return;
-        }
-        
-        // Terrain collision
-        const col = Math.floor(bullet.x / CELL_SIZE);
-        const row = Math.floor(bullet.y / CELL_SIZE);
-        
-        if (row >= 0 && row < ROWS && col >= 0 && col < COLS && terrain[row][col]) {
-          bullets.splice(index, 1);
-          createParticles(
-            bullet.x,
-            bullet.y,
-            '#118AB2',
-            10
-          );
-          return;
-        }
-        
-        // Enemy collision
-        enemies.forEach((enemy, eIndex) => {
-          if (isColliding(bullet, enemy)) {
-            bullets.splice(index, 1);
-            enemies.splice(eIndex, 1);
-            score += 20;
-            createParticles(
-              enemy.x + enemy.width / 2,
-              enemy.y + enemy.height / 2,
-              '#EF476F',
-              20
-            );
-            updateHUD();
-          }
-        });
-      });
-    }
-    
-    function updateGoldBags(deltaTime) {
-      goldBags.forEach((bag, index) => {
-        // Check if bag should fall
-        const col = Math.floor(bag.x / CELL_SIZE);
-        let rowBelow = Math.floor((bag.y + bag.height) / CELL_SIZE);
-        
-        if (rowBelow < ROWS && terrain[rowBelow][col]) {
-          bag.falling = false;
-          bag.vy = 0;
-          bag.startFallY = null;
-        } else {
-          if (!bag.falling) {
-            bag.falling = true;
-            bag.startFallY = bag.y;
-          }
-          
-          // Apply gravity
-          bag.vy += 0.5;
-          bag.y += bag.vy * deltaTime;
-          
-          // Bottom boundary
-          if (bag.y + bag.height >= canvas.height) {
-            bag.y = canvas.height - bag.height;
-            bag.vy = 0;
-            bag.falling = false;
-          }
-          
-          // Check if falling more than 2 cells
-          if (bag.startFallY !== null && (bag.y - bag.startFallY > CELL_SIZE * 2)) {
-            // Check collision with enemies
-            enemies.forEach((enemy, eIndex) => {
-              if (isColliding(bag, enemy)) {
-                enemies.splice(eIndex, 1);
-                score += 25;
-                createParticles(
-                  enemy.x + enemy.width / 2,
-                  enemy.y + enemy.height / 2,
-                  '#EF476F',
-                  20
-                );
-                updateHUD();
-                goldBags.splice(index, 1);
-              }
-            });
-            
-            // Check collision with player
-            if (isColliding(bag, player) && player.shieldTime <= 0) {
-              lives--;
-              createParticles(
-                player.x + player.width / 2,
-                player.y + player.height / 2,
-                '#EF476F',
-                30
-              );
-              updateHUD();
-              
-              if (lives <= 0) {
-                gameOver = true;
-              }
-              
-              goldBags.splice(index, 1);
-            }
-          }
-        }
-      });
-    }
-    
-    function updatePowerups(deltaTime) {
-      powerups.forEach((powerup, index) => {
-        if (isColliding(player, powerup)) {
-          // Apply powerup effect
-          switch (powerup.type) {
-            case "speed":
-              player.speed = player.baseSpeed * 1.5;
-              player.powerupTime = 300;
-              break;
-            case "shield":
-              player.shieldTime = 300;
-              break;
-            case "firepower":
-              player.firepowerTime = 300;
-              break;
-          }
-          
-          createParticles(
-            powerup.x + powerup.width / 2,
-            powerup.y + powerup.height / 2,
-            powerup.color,
-            20
-          );
-          
-          powerups.splice(index, 1);
-        }
-      });
-      
-      // Update powerup timers
-      if (player.powerupTime > 0) {
-        player.powerupTime -= deltaTime;
-        powerupElements.speed.textContent = `Speed: ${Math.ceil(player.powerupTime/60)}s`;
-        if (player.powerupTime <= 0) {
-          player.speed = player.baseSpeed;
-          powerupElements.speed.textContent = "Speed: 0s";
-        }
-      }
-      
-      if (player.shieldTime > 0) {
-        player.shieldTime -= deltaTime;
-        powerupElements.shield.textContent = `Shield: ${Math.ceil(player.shieldTime/60)}s`;
-        if (player.shieldTime <= 0) {
-          powerupElements.shield.textContent = "Shield: 0s";
-        }
-      }
-      
-      if (player.firepowerTime > 0) {
-        player.firepowerTime -= deltaTime;
-        powerupElements.firepower.textContent = `Firepower: ${Math.ceil(player.firepowerTime/60)}s`;
-        if (player.firepowerTime <= 0) {
-          powerupElements.firepower.textContent = "Firepower: 0s";
-        }
-      }
-    }
-    
-    function updateParticles(deltaTime) {
-      particles.forEach((particle, index) => {
-        particle.x += particle.vx * deltaTime;
-        particle.y += particle.vy * deltaTime;
-        particle.life -= deltaTime;
-        
-        if (particle.life <= 0) {
-          particles.splice(index, 1);
-        }
-      });
-    }
-    
-    function fireBullet() {
-      if (player.shootCooldown > 0) return;
-      
-      const direction = player.lastDirection;
-      const speedMultiplier = (player.firepowerTime > 0) ? BULLET_SPEED * 1.5 : BULLET_SPEED;
-      
-      bullets.push({
-        x: player.x + player.width / 2 - 4,
-        y: player.y + player.height / 2 - 4,
-        width: 8,
-        height: 8,
-        dx: direction.x * speedMultiplier,
-        dy: direction.y * speedMultiplier,
-        color: '#118AB2'
-      });
-      
-      player.shootCooldown = 0.5;
-      player.shootSlowTimer = 0.2;
-      
-      createParticles(
-        player.x + player.width / 2,
-        player.y + player.height / 2,
-        '#118AB2',
-        10
-      );
-    }
-    
-    function checkLevelComplete() {
-      const allEmeraldsCollected = emeralds.every(e => e.collected);
-      if (allEmeraldsCollected) {
-        level++;
-        updateHUD();
-        spawnEmeralds();
-        spawnGoldBags();
-        spawnPowerups();
-        spawnEnemy();
-      }
-    }
-    
-    function isColliding(a, b) {
-      return a.x < b.x + b.width &&
-             a.x + a.width > b.x &&
-             a.y < b.y + b.height &&
-             a.y + a.height > b.y;
-    }
-    
-    function updateHUD() {
-      scoreDisplay.textContent = `SCORE: ${score}`;
-      livesDisplay.textContent = `LIVES: ${lives}`;
-      levelDisplay.textContent = `LEVEL: ${level}`;
-    }
-    
-    // ==================================================================
-    // Rendering
-    // ==================================================================
-    function drawTerrain() {
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          if (terrain[r][c]) {
-            // Draw dirt
-            ctx.fillStyle = '#8B4513';
-            ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-            
-            // Draw dirt pattern
-            ctx.fillStyle = '#6B2D00';
-            for (let i = 0; i < 4; i++) {
-              const x = c * CELL_SIZE + Math.random() * CELL_SIZE;
-              const y = r * CELL_SIZE + Math.random() * CELL_SIZE;
-              ctx.beginPath();
-              ctx.arc(x, y, 2, 0, Math.PI * 2);
-              ctx.fill();
-            }
-          } else {
-            // Draw dug sand
-            ctx.fillStyle = '#C2B280';
-            ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-          }
-        }
-      }
-    }
-    
-    function drawPlayer() {
-      // Draw player
-      ctx.fillStyle = player.color;
-      ctx.fillRect(player.x, player.y, player.width, player.height);
-      
-      // Draw player details
-      ctx.fillStyle = '#1A1A2E';
-      ctx.fillRect(player.x + 8, player.y + 8, player.width - 16, player.height - 16);
-      
-      // Draw shield if active
-      if (player.shieldTime > 0) {
-        ctx.strokeStyle = 'rgba(255, 209, 102, 0.7)';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(
-          player.x + player.width / 2,
-          player.y + player.height / 2,
-          player.width / 2 + 5,
-          0,
-          Math.PI * 2
-        );
-        ctx.stroke();
-      }
-    }
-    
-    function drawEnemies() {
-      enemies.forEach(enemy => {
-        // Draw enemy
-        ctx.fillStyle = enemy.color;
-        ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-        
-        // Draw enemy eyes
-        ctx.fillStyle = '#1A1A2E';
-        ctx.fillRect(enemy.x + 8, enemy.y + 8, 6, 6);
-        ctx.fillRect(enemy.x + enemy.width - 14, enemy.y + 8, 6, 6);
-      });
-    }
-    
-    function drawEmeralds() {
-      emeralds.forEach(emerald => {
-        if (!emerald.collected) {
-          // Draw emerald
-          ctx.fillStyle = emerald.color;
-          ctx.beginPath();
-          ctx.moveTo(emerald.x, emerald.y + emerald.height / 2);
-          ctx.lineTo(emerald.x + emerald.width / 2, emerald.y);
-          ctx.lineTo(emerald.x + emerald.width, emerald.y + emerald.height / 2);
-          ctx.lineTo(emerald.x + emerald.width / 2, emerald.y + emerald.height);
-          ctx.closePath();
-          ctx.fill();
-          
-          // Draw shine
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-          ctx.beginPath();
-          ctx.moveTo(emerald.x + emerald.width * 0.3, emerald.y + emerald.height * 0.3);
-          ctx.lineTo(emerald.x + emerald.width * 0.4, emerald.y + emerald.height * 0.2);
-          ctx.lineTo(emerald.x + emerald.width * 0.5, emerald.y + emerald.height * 0.3);
-          ctx.closePath();
-          ctx.fill();
-        }
-      });
-    }
-    
-    function drawGoldBags() {
-      goldBags.forEach(bag => {
-        // Draw gold bag
-        ctx.fillStyle = bag.color;
-        ctx.fillRect(bag.x, bag.y, bag.width, bag.height);
-        
-        // Draw bag details
-        ctx.fillStyle = '#D4A017';
-        ctx.fillRect(bag.x + 5, bag.y + 5, bag.width - 10, bag.height - 10);
-        
-        ctx.fillStyle = '#B8860B';
-        ctx.fillRect(bag.x, bag.y + bag.height - 10, bag.width, 5);
-      });
-    }
-    
-    function drawPowerups() {
-      powerups.forEach(powerup => {
-        // Draw powerup
-        ctx.fillStyle = powerup.color;
-        ctx.beginPath();
-        ctx.arc(
-          powerup.x + powerup.width / 2,
-          powerup.y + powerup.height / 2,
-          powerup.width / 2,
-          0,
-          Math.PI * 2
-        );
-        ctx.fill();
-        
-        // Draw icon based on type
-        ctx.fillStyle = '#1A1A2E';
-        ctx.font = '14px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        if (powerup.type === "speed") {
-          ctx.fillText('S', powerup.x + powerup.width / 2, powerup.y + powerup.height / 2);
-        } else if (powerup.type === "shield") {
-          ctx.fillText('D', powerup.x + powerup.width / 2, powerup.y + powerup.height / 2);
-        } else if (powerup.type === "firepower") {
-          ctx.fillText('F', powerup.x + powerup.width / 2, powerup.y + powerup.height / 2);
-        }
-      });
-    }
-    
-    function drawBullets() {
-      bullets.forEach(bullet => {
-        ctx.fillStyle = bullet.color;
-        ctx.beginPath();
-        ctx.arc(bullet.x, bullet.y, bullet.width / 2, 0, Math.PI * 2);
-        ctx.fill();
-      });
-    }
-    
-    function drawParticles() {
-      particles.forEach(particle => {
-        ctx.fillStyle = particle.color;
-        ctx.globalAlpha = particle.life / 50;
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fill();
-      });
-      ctx.globalAlpha = 1.0;
-    }
-    
-    // ==================================================================
-    // Game Loop
-    // ==================================================================
-    function gameLoop(timestamp) {
-      if (!lastTime) lastTime = timestamp;
-      const deltaTime = (timestamp - lastTime) / 16.666; // Normalize to 60fps
-      lastTime = timestamp;
-      
-      if (gameActive) {
-        // Update game state
-        updatePlayer(deltaTime);
-        updateEnemies(deltaTime);
-        updateBullets(deltaTime);
-        updateGoldBags(deltaTime);
-        updatePowerups(deltaTime);
-        updateParticles(deltaTime);
-        
-        // Spawn enemies periodically
-        enemySpawnTimer += deltaTime;
-        if (enemySpawnTimer > 150) {
-          spawnEnemy();
-          enemySpawnTimer = 0;
-        }
-        
-        // Check level completion
-        checkLevelComplete();
-        
-        // Check game over
-        if (gameOver) {
-          endGame();
-          return;
-        }
-        
-        // Draw everything
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawTerrain();
-        drawEmeralds();
-        drawGoldBags();
-        drawPowerups();
-        drawEnemies();
-        drawBullets();
-        drawParticles();
-        drawPlayer();
-      }
-      
-      requestAnimationFrame(gameLoop);
-    }
-    
-    // ==================================================================
-    // Input Handling
-    // ==================================================================
-    function handleKeyDown(e) {
-      switch (e.key) {
-        case "ArrowUp":
-          player.dy = -player.speed;
-          break;
-        case "ArrowDown":
-          player.dy = player.speed;
-          break;
-        case "ArrowLeft":
-          player.dx = -player.speed;
-          break;
-        case "ArrowRight":
-          player.dx = player.speed;
-          break;
-        case " ":
-        case "f":
-          fireBullet();
-          break;
-      }
-    }
-    
-    function handleKeyUp(e) {
-      switch (e.key) {
-        case "ArrowUp":
-        case "ArrowDown":
-          player.dy = 0;
-          break;
-        case "ArrowLeft":
-        case "ArrowRight":
-          player.dx = 0;
-          break;
-      }
-    }
-    
-    function endGame() {
-      gameActive = false;
-      restartButton.classList.remove('hidden');
-      
-      // Draw game over message
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      ctx.fillStyle = '#EF476F';
-      ctx.font = 'bold 48px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 40);
-      
-      ctx.fillStyle = '#FFD166';
-      ctx.font = '36px Arial';
-      ctx.fillText(`FINAL SCORE: ${score}`, canvas.width / 2, canvas.height / 2 + 20);
-    }
-    
-    // Initialize game when page loads
-    window.addEventListener('load', initGame);
-  </script>
-</body>
-</html> <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Modern Digger</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    body {
-      background: linear-gradient(135deg, #1a1a2e, #16213e);
-      color: #fff;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      padding: 20px;
-    }
-    
-    .container {
-      max-width: 1000px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
     }
     
     .screen {
       background: rgba(25, 25, 45, 0.9);
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      padding: 20px;
       width: 100%;
-      max-width: 800px;
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
-      transition: transform 0.5s ease, opacity 0.5s ease;
       position: relative;
       overflow: hidden;
     }
     
-    .screen::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 5px;
-      background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #ffd166);
-      z-index: 10;
-    }
-    
     h1 {
-      font-size: 3.5rem;
-      margin-bottom: 20px;
+      font-size: 2.5rem;
+      margin-bottom: 15px;
       background: linear-gradient(45deg, #ffd166, #ff6b6b);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
       font-weight: 800;
-      letter-spacing: 2px;
     }
     
     h2 {
-      font-size: 2rem;
-      margin-bottom: 15px;
+      font-size: 1.5rem;
+      margin-bottom: 10px;
       color: #ffd166;
     }
     
     .subtitle {
-      font-size: 1.2rem;
-      max-width: 600px;
-      margin-bottom: 30px;
+      font-size: 1rem;
+      max-width: 500px;
+      margin-bottom: 20px;
       color: #b0b0d0;
-      line-height: 1.6;
+      line-height: 1.4;
     }
     
     .btn {
       background: linear-gradient(45deg, #4ecdc4, #2a9d8f);
       color: white;
       border: none;
-      padding: 15px 40px;
-      font-size: 1.2rem;
+      padding: 12px 30px;
+      font-size: 1rem;
       border-radius: 50px;
       cursor: pointer;
       transition: all 0.3s ease;
       font-weight: 600;
-      letter-spacing: 1px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-      margin: 10px 0;
-      width: 220px;
-      text-transform: uppercase;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      margin: 8px 0;
+      width: 180px;
     }
     
     .btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-      background: linear-gradient(45deg, #2a9d8f, #4ecdc4);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
     }
     
     .btn:active {
@@ -1379,196 +99,83 @@
       background: linear-gradient(45deg, #ff6b6b, #e63946);
     }
     
-    .btn.fire:hover {
-      background: linear-gradient(45deg, #e63946, #ff6b6b);
-    }
-    
     #gameContainer {
       position: relative;
       width: 100%;
+      max-width: 600px;
       background: #0c1021;
-      border-radius: 10px;
+      border-radius: 8px;
       overflow: hidden;
-      margin: 20px 0;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+      margin: 10px 0;
     }
     
     canvas {
       display: block;
-      margin: 0 auto;
+      width: 100%;
+      image-rendering: pixelated;
     }
     
     #hud {
       display: flex;
       justify-content: space-between;
       width: 100%;
-      padding: 15px;
+      padding: 10px;
       background: rgba(30, 30, 50, 0.7);
-      border-radius: 10px;
-      margin-bottom: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
     }
     
     #controls {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 20px;
+      gap: 15px;
       width: 100%;
-      margin-top: 20px;
-    }
-    
-    #joystick {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .horizontal {
-      display: flex;
-      gap: 10px;
+      margin-top: 15px;
     }
     
     .arrow-btn {
-      width: 70px;
-      height: 70px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       background: rgba(50, 50, 80, 0.8);
       border: 2px solid #4ecdc4;
       color: white;
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       display: flex;
       justify-content: center;
       align-items: center;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     }
     
     .arrow-btn:active {
       background: rgba(78, 205, 196, 0.8);
-      transform: scale(0.95);
     }
     
     #fireButton {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      font-size: 1.5rem;
+      width: 80px;
+      height: 80px;
+      font-size: 1.2rem;
       font-weight: bold;
-    }
-    
-    .powerup-display {
-      display: flex;
-      gap: 15px;
-      margin-top: 15px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    
-    .powerup {
-      background: rgba(40, 40, 60, 0.8);
-      border-radius: 10px;
-      padding: 10px 15px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.9rem;
-      min-width: 140px;
-    }
-    
-    .powerup-icon {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 0.8rem;
-      font-weight: bold;
-    }
-    
-    .powerup.speed .powerup-icon { background: #4ecdc4; }
-    .powerup.shield .powerup-icon { background: #ffd166; }
-    .powerup.firepower .powerup-icon { background: #ff6b6b; }
-    
-    .instructions {
-      background: rgba(30, 30, 50, 0.7);
-      border-radius: 10px;
-      padding: 20px;
-      margin-top: 20px;
-      width: 100%;
-      text-align: left;
-    }
-    
-    .instructions h3 {
-      color: #ffd166;
-      margin-bottom: 10px;
-    }
-    
-    .instructions ul {
-      padding-left: 20px;
-      line-height: 1.6;
-    }
-    
-    .instructions li {
-      margin-bottom: 8px;
     }
     
     .hidden {
       display: none !important;
     }
     
-    .particle {
-      position: absolute;
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 100;
-    }
-    
-    /* Responsive design */
-    @media (max-width: 768px) {
-      h1 {
-        font-size: 2.5rem;
+    @media (max-width: 600px) {
+      .container {
+        padding: 5px;
       }
       
-      h2 {
-        font-size: 1.5rem;
-      }
-      
-      .btn {
-        padding: 12px 30px;
-        font-size: 1rem;
-        width: 180px;
-      }
-      
-      .arrow-btn {
-        width: 60px;
-        height: 60px;
-        font-size: 1.5rem;
-      }
-      
-      #fireButton {
-        width: 100px;
-        height: 100px;
-      }
-      
-      #gameContainer {
-        margin: 10px 0;
-      }
-    }
-    
-    @media (max-width: 480px) {
       .screen {
-        padding: 20px 15px;
+        padding: 15px;
       }
       
       h1 {
         font-size: 2rem;
-      }
-      
-      .subtitle {
-        font-size: 1rem;
       }
       
       .btn {
@@ -1584,26 +191,21 @@
       }
       
       #fireButton {
-        width: 80px;
-        height: 80px;
-        font-size: 1.2rem;
+        width: 70px;
+        height: 70px;
+      }
+    }
+    
+    @media (orientation: landscape) {
+      .container {
+        flex-direction: row;
+        align-items: flex-start;
+        padding-top: 20px;
       }
       
-      .powerup {
-        font-size: 0.8rem;
-        min-width: 120px;
+      #gameContainer {
+        max-width: 500px;
       }
-    }
-    
-    /* Animations */
-    @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-      100% { transform: translateY(0px); }
-    }
-    
-    .floating {
-      animation: float 3s ease-in-out infinite;
     }
   </style>
 </head>
@@ -1613,351 +215,320 @@
     <div id="startScreen" class="screen">
       <h1>MODERN DIGGER</h1>
       <div class="subtitle">
-        Dig through the terrain, collect treasures, and defeat enemies in this modern twist on the classic digger game!
+        Dig through the terrain, collect emeralds, and avoid enemies in this modern twist on the classic game!
       </div>
-      <button id="startButton" class="btn floating">START GAME</button>
-      
-      <div class="instructions">
-        <h3>How to Play:</h3>
-        <ul>
-          <li><strong>Arrow Keys</strong> or <strong>Touch Controls</strong> to move your character</li>
-          <li><strong>Spacebar</strong> or <strong>Fire Button</strong> to shoot</li>
-          <li>Collect <strong>Emeralds</strong> and <strong>Gold Bags</strong> for points</li>
-          <li>Use <strong>Power-ups</strong> to gain special abilities</li>
-          <li>Avoid enemies or destroy them with your bullets</li>
-          <li>Complete each level by collecting all emeralds</li>
-        </ul>
+      <button id="startButton" class="btn">START GAME</button>
+      <div class="subtitle">
+        Use arrow keys or touch controls to move. Spacebar or Fire button to shoot.
       </div>
     </div>
     
     <!-- Game Screen -->
     <div id="gameScreen" class="screen hidden">
-      <h2>MODERN DIGGER</h2>
+      <h2>LEVEL <span id="levelDisplay">1</span></h2>
       
       <div id="hud">
         <div id="scoreDisplay">SCORE: 0</div>
         <div id="livesDisplay">LIVES: 3</div>
-        <div id="levelDisplay">LEVEL: 1</div>
+        <div id="emeraldsDisplay">EMERALDS: 0/5</div>
       </div>
       
       <div id="gameContainer">
-        <canvas id="gameCanvas" width="800" height="500"></canvas>
-      </div>
-      
-      <div id="powerupDisplay" class="powerup-display">
-        <div class="powerup speed">
-          <div class="powerup-icon">S</div>
-          <div>Speed: 0s</div>
-        </div>
-        <div class="powerup shield">
-          <div class="powerup-icon">D</div>
-          <div>Shield: 0s</div>
-        </div>
-        <div class="powerup firepower">
-          <div class="powerup-icon">F</div>
-          <div>Firepower: 0s</div>
-        </div>
+        <canvas id="gameCanvas"></canvas>
       </div>
       
       <div id="controls">
-        <div id="fireContainer">
-          <button id="fireButton" class="btn fire">FIRE</button>
-        </div>
-        <div id="joystick">
-          <button id="upBtn" class="arrow-btn">▲</button>
-          <div class="horizontal">
-            <button id="leftBtn" class="arrow-btn">◀</button>
-            <button id="rightBtn" class="arrow-btn">▶</button>
+        <button id="fireButton" class="btn fire">FIRE</button>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <button id="upBtn" class="arrow-btn">↑</button>
+          <div>
+            <button id="leftBtn" class="arrow-btn">←</button>
+            <button id="rightBtn" class="arrow-btn">→</button>
           </div>
-          <button id="downBtn" class="arrow-btn">▼</button>
+          <button id="downBtn" class="arrow-btn">↓</button>
         </div>
       </div>
-      
-      <button id="restartButton" class="btn hidden">RESTART</button>
+    </div>
+    
+    <!-- Game Over Screen -->
+    <div id="endScreen" class="screen hidden">
+      <h1 id="endTitle">GAME OVER</h1>
+      <div id="endMessage" class="subtitle" style="font-size: 1.2rem; margin: 20px 0;"></div>
+      <button id="restartButton" class="btn">PLAY AGAIN</button>
     </div>
   </div>
 
   <script>
-    // ==================================================================
-    // Initialization and Constants
-    // ==================================================================
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    const startScreen = document.getElementById("startScreen");
-    const gameScreen = document.getElementById("gameScreen");
-    const startButton = document.getElementById("startButton");
-    const scoreDisplay = document.getElementById("scoreDisplay");
-    const livesDisplay = document.getElementById("livesDisplay");
-    const levelDisplay = document.getElementById("levelDisplay");
-    const restartButton = document.getElementById("restartButton");
-    const powerupElements = {
-      speed: document.querySelector('.powerup.speed div:last-child'),
-      shield: document.querySelector('.powerup.shield div:last-child'),
-      firepower: document.querySelector('.powerup.firepower div:last-child')
-    };
-    
-    // Game constants
+    // Game Constants
     const CELL_SIZE = 40;
-    const COLS = Math.floor(canvas.width / CELL_SIZE);
-    const ROWS = Math.floor(canvas.height / CELL_SIZE);
     const PLAYER_SPEED = 5;
-    const ENEMY_SPEED = 2.5;
-    const BULLET_SPEED = 10;
-    
-    // Game state
-    let score = 0;
-    let level = 1;
-    let lives = 3;
-    let gameOver = false;
+    const ENEMY_SPEED = 2;
+    const BULLET_SPEED = 8;
+    const LEVELS = [
+      { emeralds: 5, enemies: 1, enemySpeed: 2 },  // Level 1
+      { emeralds: 7, enemies: 2, enemySpeed: 2.5 }, // Level 2
+      { emeralds: 10, enemies: 3, enemySpeed: 3 }   // Level 3
+    ];
+
+    // Game Elements
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const startScreen = document.getElementById('startScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const endScreen = document.getElementById('endScreen');
+    const startButton = document.getElementById('startButton');
+    const restartButton = document.getElementById('restartButton');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const livesDisplay = document.getElementById('livesDisplay');
+    const emeraldsDisplay = document.getElementById('emeraldsDisplay');
+    const levelDisplay = document.getElementById('levelDisplay');
+    const endTitle = document.getElementById('endTitle');
+    const endMessage = document.getElementById('endMessage');
+
+    // Game State
     let gameActive = false;
+    let score = 0;
+    let lives = 3;
+    let currentLevel = 0;
+    let emeraldsCollected = 0;
     let terrain = [];
-    let enemies = [];
     let emeralds = [];
-    let goldBags = [];
-    let powerups = [];
+    let enemies = [];
     let bullets = [];
-    let particles = [];
-    let lastTime = 0;
-    let enemySpawnTimer = 0;
-    let tunnelRow = 0;
-    
-    // Player object
+    let cols, rows;
+
+    // Player Object
     const player = {
       x: CELL_SIZE * 2,
       y: CELL_SIZE * 2,
-      width: CELL_SIZE - 10,
-      height: CELL_SIZE - 10,
+      width: CELL_SIZE - 8,
+      height: CELL_SIZE - 8,
       dx: 0,
       dy: 0,
       lastDirection: { x: 1, y: 0 },
-      baseSpeed: PLAYER_SPEED,
       speed: PLAYER_SPEED,
-      powerupTime: 0,
-      shieldTime: 0,
-      firepowerTime: 0,
-      shootCooldown: 0,
-      shootSlowTimer: 0,
+      canShoot: true,
       color: '#FFD166'
     };
-    
-    // ==================================================================
-    // Game Initialization
-    // ==================================================================
+
+    // Initialize Game
     function initGame() {
+      // Set canvas size based on device
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+      
+      // Event Listeners
       startButton.addEventListener('click', startGame);
       restartButton.addEventListener('click', startGame);
       
       // Touch controls
-      document.getElementById("upBtn").addEventListener("touchstart", () => { player.dy = -player.speed; });
-      document.getElementById("upBtn").addEventListener("touchend", () => { player.dy = 0; });
-      document.getElementById("downBtn").addEventListener("touchstart", () => { player.dy = player.speed; });
-      document.getElementById("downBtn").addEventListener("touchend", () => { player.dy = 0; });
-      document.getElementById("leftBtn").addEventListener("touchstart", () => { player.dx = -player.speed; });
-      document.getElementById("leftBtn").addEventListener("touchend", () => { player.dx = 0; });
-      document.getElementById("rightBtn").addEventListener("touchstart", () => { player.dx = player.speed; });
-      document.getElementById("rightBtn").addEventListener("touchend", () => { player.dx = 0; });
-      document.getElementById("fireButton").addEventListener("touchstart", fireBullet);
+      document.getElementById('upBtn').addEventListener('touchstart', () => player.dy = -player.speed);
+      document.getElementById('upBtn').addEventListener('touchend', () => player.dy = 0);
+      document.getElementById('downBtn').addEventListener('touchstart', () => player.dy = player.speed);
+      document.getElementById('downBtn').addEventListener('touchend', () => player.dy = 0);
+      document.getElementById('leftBtn').addEventListener('touchstart', () => player.dx = -player.speed);
+      document.getElementById('leftBtn').addEventListener('touchend', () => player.dx = 0);
+      document.getElementById('rightBtn').addEventListener('touchstart', () => player.dx = player.speed);
+      document.getElementById('rightBtn').addEventListener('touchend', () => player.dx = 0);
+      document.getElementById('fireButton').addEventListener('touchstart', fireBullet);
       
       // Keyboard controls
-      document.addEventListener("keydown", handleKeyDown);
-      document.addEventListener("keyup", handleKeyUp);
-      
-      // Initialize game
-      startGame();
+      document.addEventListener('keydown', handleKeyDown);
+      document.addEventListener('keyup', handleKeyUp);
     }
-    
+
+    function resizeCanvas() {
+      // Adjust canvas size based on screen orientation
+      const maxWidth = Math.min(600, window.innerWidth - 40);
+      const maxHeight = window.innerHeight - 300;
+      
+      // Calculate grid size that fits the screen
+      const calculatedCols = Math.floor(maxWidth / CELL_SIZE);
+      const calculatedRows = Math.floor(maxHeight / CELL_SIZE);
+      
+      // Ensure we have at least 10x10 grid
+      cols = Math.max(10, calculatedCols);
+      rows = Math.max(10, calculatedRows);
+      
+      canvas.width = cols * CELL_SIZE;
+      canvas.height = rows * CELL_SIZE;
+      
+      // Redraw if game is active
+      if (gameActive) {
+        drawGame();
+      }
+    }
+
     function startGame() {
       startScreen.classList.add('hidden');
       gameScreen.classList.remove('hidden');
-      restartButton.classList.add('hidden');
+      endScreen.classList.add('hidden');
       
       // Reset game state
-      score = 0;
-      level = 1;
-      lives = 3;
-      gameOver = false;
       gameActive = true;
-      enemies = [];
-      emeralds = [];
-      goldBags = [];
-      powerups = [];
-      bullets = [];
-      particles = [];
+      score = 0;
+      lives = 3;
+      currentLevel = 0;
+      emeraldsCollected = 0;
       
-      // Reset player
-      player.x = CELL_SIZE * 2;
-      player.y = CELL_SIZE * 2;
-      player.dx = 0;
-      player.dy = 0;
-      player.speed = player.baseSpeed;
-      player.powerupTime = 0;
-      player.shieldTime = 0;
-      player.firepowerTime = 0;
-      player.shootCooldown = 0;
-      player.shootSlowTimer = 0;
-      
-      // Initialize terrain
-      initTerrain();
-      generateTunnel();
-      
-      // Spawn game objects
-      spawnEmeralds();
-      spawnGoldBags();
-      spawnPowerups();
-      spawnEnemy();
+      // Initialize level
+      initLevel();
       
       // Update HUD
       updateHUD();
       
       // Start game loop
-      lastTime = performance.now();
       requestAnimationFrame(gameLoop);
     }
-    
-    function initTerrain() {
+
+    function initLevel() {
+      // Reset arrays
       terrain = [];
-      for (let r = 0; r < ROWS; r++) {
-        terrain[r] = [];
-        for (let c = 0; c < COLS; c++) {
-          terrain[r][c] = true; // true indicates undug dirt
-        }
-      }
-    }
-    
-    function generateTunnel() {
-      let currentRow = Math.floor(Math.random() * ROWS);
-      for (let c = 0; c < COLS; c++) {
-        terrain[currentRow][c] = false;
-        if (Math.random() < 0.3) {
-          if (currentRow > 0 && Math.random() < 0.5) currentRow--;
-          else if (currentRow < ROWS - 1) currentRow++;
-          terrain[currentRow][c] = false;
-        }
-      }
-      tunnelRow = currentRow;
-    }
-    
-    // ==================================================================
-    // Spawning Functions
-    // ==================================================================
-    function spawnEmeralds() {
       emeralds = [];
-      let count = 5 + level * 2;
-      while (count > 0) {
-        let col = Math.floor(Math.random() * COLS);
-        let row = Math.floor(Math.random() * ROWS);
-        if (terrain[row][col] === true) {
-          emeralds.push({
-            x: col * CELL_SIZE + (CELL_SIZE - 20) / 2,
-            y: row * CELL_SIZE + (CELL_SIZE - 20) / 2,
-            width: 20,
-            height: 20,
-            collected: false,
-            color: '#06D6A0'
-          });
-          count--;
+      enemies = [];
+      bullets = [];
+      
+      // Initialize terrain (all solid)
+      for (let r = 0; r < rows; r++) {
+        terrain[r] = [];
+        for (let c = 0; c < cols; c++) {
+          terrain[r][c] = true;
         }
       }
-    }
-    
-    function spawnGoldBags() {
-      goldBags = [];
-      let count = 3 + level;
-      while (count > 0) {
-        let col = Math.floor(Math.random() * COLS);
-        let row = Math.floor(Math.random() * ROWS);
-        if (terrain[row][col] === true) {
-          goldBags.push({
-            x: col * CELL_SIZE,
-            y: row * CELL_SIZE,
-            width: CELL_SIZE,
-            height: CELL_SIZE,
-            falling: false,
-            vy: 0,
-            startFallY: null,
-            color: '#FFD166'
-          });
-          count--;
-        }
+      
+      // Create a winding tunnel from left to right
+      createWindingTunnel();
+      
+      // Place player at start of tunnel
+      player.x = CELL_SIZE;
+      player.y = Math.floor(rows/2) * CELL_SIZE;
+      player.dx = 0;
+      player.dy = 0;
+      
+      // Spawn emeralds
+      spawnEmeralds(LEVELS[currentLevel].emeralds);
+      
+      // Spawn enemies
+      for (let i = 0; i < LEVELS[currentLevel].enemies; i++) {
+        spawnEnemy();
       }
+      
+      // Update level display
+      levelDisplay.textContent = currentLevel + 1;
+      emeraldsDisplay.textContent = `EMERALDS: 0/${LEVELS[currentLevel].emeralds}`;
     }
-    
-    function spawnEnemy() {
-      if (enemies.length >= 2 + level) return;
+
+    function createWindingTunnel() {
+      // Create a winding tunnel that ensures enemies can always reach player
+      let tunnelY = Math.floor(rows / 2);
+      const directionChanges = Math.floor(cols / 10);
       
-      let spawnX = canvas.width - CELL_SIZE - 10;
-      let spawnY = tunnelRow * CELL_SIZE + (CELL_SIZE - 30) / 2;
-      let col = Math.floor(spawnX / CELL_SIZE);
-      let row = Math.floor(spawnY / CELL_SIZE);
-      
-      if (terrain[row][col]) terrain[row][col] = false;
-      
-      enemies.push({
-        x: spawnX,
-        y: spawnY,
-        width: 30,
-        height: 30,
-        speed: ENEMY_SPEED + level * 0.2,
-        dx: 0,
-        dy: 0,
-        color: '#EF476F'
-      });
-    }
-    
-    function spawnPowerups() {
-      powerups = [];
-      if (Math.random() < 0.3) {
-        let col = Math.floor(Math.random() * COLS);
-        let row = Math.floor(Math.random() * ROWS);
-        const types = ["speed", "shield", "firepower"];
-        const type = types[Math.floor(Math.random() * types.length)];
+      for (let c = 0; c < cols; c++) {
+        // Clear tunnel path
+        terrain[tunnelY][c] = false;
+        terrain[tunnelY+1][c] = false;
         
-        powerups.push({
-          x: col * CELL_SIZE + (CELL_SIZE - 20) / 2,
-          y: row * CELL_SIZE + (CELL_SIZE - 20) / 2,
-          width: 20,
-          height: 20,
-          type: type,
-          color: type === "speed" ? '#118AB2' : 
-                 type === "shield" ? '#FFD166' : 
-                 '#EF476F'
-        });
+        // Random direction changes
+        if (c % 10 === 0 && c > 0 && c < cols - 10) {
+          const dir = Math.random() > 0.5 ? 1 : -1;
+          const steps = Math.floor(Math.random() * 3) + 1;
+          
+          for (let s = 0; s < steps; s++) {
+            tunnelY = Math.max(2, Math.min(rows-3, tunnelY + dir));
+            terrain[tunnelY][c+s] = false;
+            terrain[tunnelY+1][c+s] = false;
+          }
+        }
       }
     }
-    
-    function createParticles(x, y, color, count) {
+
+    function spawnEmeralds(count) {
       for (let i = 0; i < count; i++) {
-        particles.push({
-          x: x,
-          y: y,
-          size: Math.random() * 5 + 2,
-          vx: (Math.random() - 0.5) * 6,
-          vy: (Math.random() - 0.5) * 6,
-          color: color,
-          life: Math.random() * 30 + 20
-        });
+        let placed = false;
+        let attempts = 0;
+        
+        while (!placed && attempts < 100) {
+          const col = Math.floor(Math.random() * cols);
+          const row = Math.floor(Math.random() * rows);
+          
+          if (terrain[row][col] && !emeralds.some(e => e.col === col && e.row === row)) {
+            emeralds.push({
+              col,
+              row,
+              x: col * CELL_SIZE + CELL_SIZE/4,
+              y: row * CELL_SIZE + CELL_SIZE/4,
+              width: CELL_SIZE/2,
+              height: CELL_SIZE/2,
+              collected: false,
+              color: '#06D6A0'
+            });
+            placed = true;
+          }
+          attempts++;
+        }
       }
     }
-    
-    // ==================================================================
-    // Game Logic
-    // ==================================================================
+
+    function spawnEnemy() {
+      // Find a position that has a clear path to player
+      let placed = false;
+      let attempts = 0;
+      
+      while (!placed && attempts < 100) {
+        const col = Math.floor(Math.random() * (cols - 10)) + 5;
+        const row = Math.floor(Math.random() * (rows - 5)) + 2;
+        
+        if (!terrain[row][col] && hasPathToPlayer(col, row)) {
+          enemies.push({
+            x: col * CELL_SIZE + 5,
+            y: row * CELL_SIZE + 5,
+            width: CELL_SIZE - 10,
+            height: CELL_SIZE - 10,
+            speed: LEVELS[currentLevel].enemySpeed,
+            dx: 0,
+            dy: 0,
+            color: '#EF476F',
+            type: currentLevel > 1 ? 'hobbin' : 'nobbin'
+          });
+          placed = true;
+        }
+        attempts++;
+      }
+    }
+
+    function hasPathToPlayer(enemyCol, enemyRow) {
+      // Simple pathfinding check to ensure enemy can reach player
+      const playerCol = Math.floor(player.x / CELL_SIZE);
+      const playerRow = Math.floor(player.y / CELL_SIZE);
+      
+      // Check if there's a direct horizontal or vertical path
+      if (enemyRow === playerRow) {
+        const step = enemyCol < playerCol ? 1 : -1;
+        for (let c = enemyCol; c !== playerCol; c += step) {
+          if (terrain[enemyRow][c]) return false;
+        }
+        return true;
+      }
+      
+      if (enemyCol === playerCol) {
+        const step = enemyRow < playerRow ? 1 : -1;
+        for (let r = enemyRow; r !== playerRow; r += step) {
+          if (terrain[r][enemyCol]) return false;
+        }
+        return true;
+      }
+      
+      return false;
+    }
+
     function updatePlayer(deltaTime) {
-      // Apply movement
+      // Update position
       player.x += player.dx * deltaTime;
       player.y += player.dy * deltaTime;
       
       // Boundary checks
       player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
       player.y = Math.max(0, Math.min(canvas.height - player.height, player.y));
-      
-      // Shooting slowdown
-      if (player.shootSlowTimer > 0) {
-        player.speed = player.baseSpeed * 0.5;
-        player.shootSlowTimer -= deltaTime;
-      } else {
-        player.speed = player.baseSpeed;
-      }
       
       // Update direction
       if (player.dx !== 0 || player.dy !== 0) {
@@ -1968,40 +539,29 @@
       }
       
       // Dig terrain at player position
-      let col = Math.floor((player.x + player.width / 2) / CELL_SIZE);
-      let row = Math.floor((player.y + player.height / 2) / CELL_SIZE);
+      const col = Math.floor((player.x + player.width/2) / CELL_SIZE);
+      const row = Math.floor((player.y + player.height/2) / CELL_SIZE);
       
-      if (row >= 0 && row < ROWS && col >= 0 && col < COLS && terrain[row][col]) {
+      if (row >= 0 && row < rows && col >= 0 && col < cols && terrain[row][col]) {
         terrain[row][col] = false;
-        createParticles(
-          col * CELL_SIZE + CELL_SIZE / 2, 
-          row * CELL_SIZE + CELL_SIZE / 2,
-          '#8B4513',
-          10
-        );
       }
       
       // Collect emeralds
       emeralds.forEach(emerald => {
         if (!emerald.collected && isColliding(player, emerald)) {
           emerald.collected = true;
+          emeraldsCollected++;
           score += 10;
-          createParticles(
-            emerald.x + emerald.width / 2,
-            emerald.y + emerald.height / 2,
-            '#06D6A0',
-            15
-          );
           updateHUD();
+          
+          // Check level completion
+          if (emeraldsCollected >= LEVELS[currentLevel].emeralds) {
+            completeLevel();
+          }
         }
       });
-      
-      // Cooldown timers
-      if (player.shootCooldown > 0) {
-        player.shootCooldown -= deltaTime;
-      }
     }
-    
+
     function updateEnemies(deltaTime) {
       enemies.forEach((enemy, index) => {
         // Simple AI: Move towards player
@@ -2018,1332 +578,24 @@
         enemy.x += enemy.dx * deltaTime;
         enemy.y += enemy.dy * deltaTime;
         
-        // Boundary checks
-        enemy.x = Math.max(0, Math.min(canvas.width - enemy.width, enemy.x));
-        enemy.y = Math.max(0, Math.min(canvas.height - enemy.height, enemy.y));
-        
         // Collision with player
         if (isColliding(player, enemy)) {
-          if (player.shieldTime <= 0) {
-            lives--;
-            createParticles(
-              player.x + player.width / 2,
-              player.y + player.height / 2,
-              '#EF476F',
-              30
-            );
-            updateHUD();
-            
-            if (lives <= 0) {
-              gameOver = true;
-            } else {
-              // Respawn player
-              player.x = CELL_SIZE * 2;
-              player.y = CELL_SIZE * 2;
-              player.dx = 0;
-              player.dy = 0;
-            }
-          }
-          enemies.splice(index, 1);
-          createParticles(
-            enemy.x + enemy.width / 2,
-            enemy.y + enemy.height / 2,
-            '#EF476F',
-            20
-          );
-        }
-      });
-    }
-    
-    function updateBullets(deltaTime) {
-      bullets.forEach((bullet, index) => {
-        // Apply movement
-        bullet.x += bullet.dx * deltaTime;
-        bullet.y += bullet.dy * deltaTime;
-        
-        // Boundary check
-        if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
-          bullets.splice(index, 1);
-          return;
-        }
-        
-        // Terrain collision
-        const col = Math.floor(bullet.x / CELL_SIZE);
-        const row = Math.floor(bullet.y / CELL_SIZE);
-        
-        if (row >= 0 && row < ROWS && col >= 0 && col < COLS && terrain[row][col]) {
-          bullets.splice(index, 1);
-          createParticles(
-            bullet.x,
-            bullet.y,
-            '#118AB2',
-            10
-          );
-          return;
-        }
-        
-        // Enemy collision
-        enemies.forEach((enemy, eIndex) => {
-          if (isColliding(bullet, enemy)) {
-            bullets.splice(index, 1);
-            enemies.splice(eIndex, 1);
-            score += 20;
-            createParticles(
-              enemy.x + enemy.width / 2,
-              enemy.y + enemy.height / 2,
-              '#EF476F',
-              20
-            );
-            updateHUD();
-          }
-        });
-      });
-    }
-    
-    function updateGoldBags(deltaTime) {
-      goldBags.forEach((bag, index) => {
-        // Check if bag should fall
-        const col = Math.floor(bag.x / CELL_SIZE);
-        let rowBelow = Math.floor((bag.y + bag.height) / CELL_SIZE);
-        
-        if (rowBelow < ROWS && terrain[rowBelow][col]) {
-          bag.falling = false;
-          bag.vy = 0;
-          bag.startFallY = null;
-        } else {
-          if (!bag.falling) {
-            bag.falling = true;
-            bag.startFallY = bag.y;
-          }
-          
-          // Apply gravity
-          bag.vy += 0.5;
-          bag.y += bag.vy * deltaTime;
-          
-          // Bottom boundary
-          if (bag.y + bag.height >= canvas.height) {
-            bag.y = canvas.height - bag.height;
-            bag.vy = 0;
-            bag.falling = false;
-          }
-          
-          // Check if falling more than 2 cells
-          if (bag.startFallY !== null && (bag.y - bag.startFallY > CELL_SIZE * 2)) {
-            // Check collision with enemies
-            enemies.forEach((enemy, eIndex) => {
-              if (isColliding(bag, enemy)) {
-                enemies.splice(eIndex, 1);
-                score += 25;
-                createParticles(
-                  enemy.x + enemy.width / 2,
-                  enemy.y + enemy.height / 2,
-                  '#EF476F',
-                  20
-                );
-                updateHUD();
-                goldBags.splice(index, 1);
-              }
-            });
-            
-            // Check collision with player
-            if (isColliding(bag, player) && player.shieldTime <= 0) {
-              lives--;
-              createParticles(
-                player.x + player.width / 2,
-                player.y + player.height / 2,
-                '#EF476F',
-                30
-              );
-              updateHUD();
-              
-              if (lives <= 0) {
-                gameOver = true;
-              }
-              
-              goldBags.splice(index, 1);
-            }
-          }
-        }
-      });
-    }
-    
-    function updatePowerups(deltaTime) {
-      powerups.forEach((powerup, index) => {
-        if (isColliding(player, powerup)) {
-          // Apply powerup effect
-          switch (powerup.type) {
-            case "speed":
-              player.speed = player.baseSpeed * 1.5;
-              player.powerupTime = 300;
-              break;
-            case "shield":
-              player.shieldTime = 300;
-              break;
-            case "firepower":
-              player.firepowerTime = 300;
-              break;
-          }
-          
-          createParticles(
-            powerup.x + powerup.width / 2,
-            powerup.y + powerup.height / 2,
-            powerup.color,
-            20
-          );
-          
-          powerups.splice(index, 1);
-        }
-      });
-      
-      // Update powerup timers
-      if (player.powerupTime > 0) {
-        player.powerupTime -= deltaTime;
-        powerupElements.speed.textContent = `Speed: ${Math.ceil(player.powerupTime/60)}s`;
-        if (player.powerupTime <= 0) {
-          player.speed = player.baseSpeed;
-          powerupElements.speed.textContent = "Speed: 0s";
-        }
-      }
-      
-      if (player.shieldTime > 0) {
-        player.shieldTime -= deltaTime;
-        powerupElements.shield.textContent = `Shield: ${Math.ceil(player.shieldTime/60)}s`;
-        if (player.shieldTime <= 0) {
-          powerupElements.shield.textContent = "Shield: 0s";
-        }
-      }
-      
-      if (player.firepowerTime > 0) {
-        player.firepowerTime -= deltaTime;
-        powerupElements.firepower.textContent = `Firepower: ${Math.ceil(player.firepowerTime/60)}s`;
-        if (player.firepowerTime <= 0) {
-          powerupElements.firepower.textContent = "Firepower: 0s";
-        }
-      }
-    }
-    
-    function updateParticles(deltaTime) {
-      particles.forEach((particle, index) => {
-        particle.x += particle.vx * deltaTime;
-        particle.y += particle.vy * deltaTime;
-        particle.life -= deltaTime;
-        
-        if (particle.life <= 0) {
-          particles.splice(index, 1);
-        }
-      });
-    }
-    
-    function fireBullet() {
-      if (player.shootCooldown > 0) return;
-      
-      const direction = player.lastDirection;
-      const speedMultiplier = (player.firepowerTime > 0) ? BULLET_SPEED * 1.5 : BULLET_SPEED;
-      
-      bullets.push({
-        x: player.x + player.width / 2 - 4,
-        y: player.y + player.height / 2 - 4,
-        width: 8,
-        height: 8,
-        dx: direction.x * speedMultiplier,
-        dy: direction.y * speedMultiplier,
-        color: '#118AB2'
-      });
-      
-      player.shootCooldown = 0.5;
-      player.shootSlowTimer = 0.2;
-      
-      createParticles(
-        player.x + player.width / 2,
-        player.y + player.height / 2,
-        '#118AB2',
-        10
-      );
-    }
-    
-    function checkLevelComplete() {
-      const allEmeraldsCollected = emeralds.every(e => e.collected);
-      if (allEmeraldsCollected) {
-        level++;
-        updateHUD();
-        spawnEmeralds();
-        spawnGoldBags();
-        spawnPowerups();
-        spawnEnemy();
-      }
-    }
-    
-    function isColliding(a, b) {
-      return a.x < b.x + b.width &&
-             a.x + a.width > b.x &&
-             a.y < b.y + b.height &&
-             a.y + a.height > b.y;
-    }
-    
-    function updateHUD() {
-      scoreDisplay.textContent = `SCORE: ${score}`;
-      livesDisplay.textContent = `LIVES: ${lives}`;
-      levelDisplay.textContent = `LEVEL: ${level}`;
-    }
-    
-    // ==================================================================
-    // Rendering
-    // ==================================================================
-    function drawTerrain() {
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          if (terrain[r][c]) {
-            // Draw dirt
-            ctx.fillStyle = '#8B4513';
-            ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-            
-            // Draw dirt pattern
-            ctx.fillStyle = '#6B2D00';
-            for (let i = 0; i < 4; i++) {
-              const x = c * CELL_SIZE + Math.random() * CELL_SIZE;
-              const y = r * CELL_SIZE + Math.random() * CELL_SIZE;
-              ctx.beginPath();
-              ctx.arc(x, y, 2, 0, Math.PI * 2);
-              ctx.fill();
-            }
-          } else {
-            // Draw dug sand
-            ctx.fillStyle = '#C2B280';
-            ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-          }
-        }
-      }
-    }
-    
-    function drawPlayer() {
-      // Draw player
-      ctx.fillStyle = player.color;
-      ctx.fillRect(player.x, player.y, player.width, player.height);
-      
-      // Draw player details
-      ctx.fillStyle = '#1A1A2E';
-      ctx.fillRect(player.x + 8, player.y + 8, player.width - 16, player.height - 16);
-      
-      // Draw shield if active
-      if (player.shieldTime > 0) {
-        ctx.strokeStyle = 'rgba(255, 209, 102, 0.7)';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(
-          player.x + player.width / 2,
-          player.y + player.height / 2,
-          player.width / 2 + 5,
-          0,
-          Math.PI * 2
-        );
-        ctx.stroke();
-      }
-    }
-    
-    function drawEnemies() {
-      enemies.forEach(enemy => {
-        // Draw enemy
-        ctx.fillStyle = enemy.color;
-        ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-        
-        // Draw enemy eyes
-        ctx.fillStyle = '#1A1A2E';
-        ctx.fillRect(enemy.x + 8, enemy.y + 8, 6, 6);
-        ctx.fillRect(enemy.x + enemy.width - 14, enemy.y + 8, 6, 6);
-      });
-    }
-    
-    function drawEmeralds() {
-      emeralds.forEach(emerald => {
-        if (!emerald.collected) {
-          // Draw emerald
-          ctx.fillStyle = emerald.color;
-          ctx.beginPath();
-          ctx.moveTo(emerald.x, emerald.y + emerald.height / 2);
-          ctx.lineTo(emerald.x + emerald.width / 2, emerald.y);
-          ctx.lineTo(emerald.x + emerald.width, emerald.y + emerald.height / 2);
-          ctx.lineTo(emerald.x + emerald.width / 2, emerald.y + emerald.height);
-          ctx.closePath();
-          ctx.fill();
-          
-          // Draw shine
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-          ctx.beginPath();
-          ctx.moveTo(emerald.x + emerald.width * 0.3, emerald.y + emerald.height * 0.3);
-          ctx.lineTo(emerald.x + emerald.width * 0.4, emerald.y + emerald.height * 0.2);
-          ctx.lineTo(emerald.x + emerald.width * 0.5, emerald.y + emerald.height * 0.3);
-          ctx.closePath();
-          ctx.fill();
-        }
-      });
-    }
-    
-    function drawGoldBags() {
-      goldBags.forEach(bag => {
-        // Draw gold bag
-        ctx.fillStyle = bag.color;
-        ctx.fillRect(bag.x, bag.y, bag.width, bag.height);
-        
-        // Draw bag details
-        ctx.fillStyle = '#D4A017';
-        ctx.fillRect(bag.x + 5, bag.y + 5, bag.width - 10, bag.height - 10);
-        
-        ctx.fillStyle = '#B8860B';
-        ctx.fillRect(bag.x, bag.y + bag.height - 10, bag.width, 5);
-      });
-    }
-    
-    function drawPowerups() {
-      powerups.forEach(powerup => {
-        // Draw powerup
-        ctx.fillStyle = powerup.color;
-        ctx.beginPath();
-        ctx.arc(
-          powerup.x + powerup.width / 2,
-          powerup.y + powerup.height / 2,
-          powerup.width / 2,
-          0,
-          Math.PI * 2
-        );
-        ctx.fill();
-        
-        // Draw icon based on type
-        ctx.fillStyle = '#1A1A2E';
-        ctx.font = '14px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        if (powerup.type === "speed") {
-          ctx.fillText('S', powerup.x + powerup.width / 2, powerup.y + powerup.height / 2);
-        } else if (powerup.type === "shield") {
-          ctx.fillText('D', powerup.x + powerup.width / 2, powerup.y + powerup.height / 2);
-        } else if (powerup.type === "firepower") {
-          ctx.fillText('F', powerup.x + powerup.width / 2, powerup.y + powerup.height / 2);
-        }
-      });
-    }
-    
-    function drawBullets() {
-      bullets.forEach(bullet => {
-        ctx.fillStyle = bullet.color;
-        ctx.beginPath();
-        ctx.arc(bullet.x, bullet.y, bullet.width / 2, 0, Math.PI * 2);
-        ctx.fill();
-      });
-    }
-    
-    function drawParticles() {
-      particles.forEach(particle => {
-        ctx.fillStyle = particle.color;
-        ctx.globalAlpha = particle.life / 50;
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fill();
-      });
-      ctx.globalAlpha = 1.0;
-    }
-    
-    // ==================================================================
-    // Game Loop
-    // ==================================================================
-    function gameLoop(timestamp) {
-      if (!lastTime) lastTime = timestamp;
-      const deltaTime = (timestamp - lastTime) / 16.666; // Normalize to 60fps
-      lastTime = timestamp;
-      
-      if (gameActive) {
-        // Update game state
-        updatePlayer(deltaTime);
-        updateEnemies(deltaTime);
-        updateBullets(deltaTime);
-        updateGoldBags(deltaTime);
-        updatePowerups(deltaTime);
-        updateParticles(deltaTime);
-        
-        // Spawn enemies periodically
-        enemySpawnTimer += deltaTime;
-        if (enemySpawnTimer > 150) {
-          spawnEnemy();
-          enemySpawnTimer = 0;
-        }
-        
-        // Check level completion
-        checkLevelComplete();
-        
-        // Check game over
-        if (gameOver) {
-          endGame();
-          return;
-        }
-        
-        // Draw everything
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawTerrain();
-        drawEmeralds();
-        drawGoldBags();
-        drawPowerups();
-        drawEnemies();
-        drawBullets();
-        drawParticles();
-        drawPlayer();
-      }
-      
-      requestAnimationFrame(gameLoop);
-    }
-    
-    // ==================================================================
-    // Input Handling
-    // ==================================================================
-    function handleKeyDown(e) {
-      switch (e.key) {
-        case "ArrowUp":
-          player.dy = -player.speed;
-          break;
-        case "ArrowDown":
-          player.dy = player.speed;
-          break;
-        case "ArrowLeft":
-          player.dx = -player.speed;
-          break;
-        case "ArrowRight":
-          player.dx = player.speed;
-          break;
-        case " ":
-        case "f":
-          fireBullet();
-          break;
-      }
-    }
-    
-    function handleKeyUp(e) {
-      switch (e.key) {
-        case "ArrowUp":
-        case "ArrowDown":
-          player.dy = 0;
-          break;
-        case "ArrowLeft":
-        case "ArrowRight":
-          player.dx = 0;
-          break;
-      }
-    }
-    
-    function endGame() {
-      gameActive = false;
-      restartButton.classList.remove('hidden');
-      
-      // Draw game over message
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      ctx.fillStyle = '#EF476F';
-      ctx.font = 'bold 48px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 40);
-      
-      ctx.fillStyle = '#FFD166';
-      ctx.font = '36px Arial';
-      ctx.fillText(`FINAL SCORE: ${score}`, canvas.width / 2, canvas.height / 2 + 20);
-    }
-    
-    // Initialize game when page loads
-    window.addEventListener('load', initGame);
-  </script>
-</body>
-</html> <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Modern Digger</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    body {
-      background: linear-gradient(135deg, #1a1a2e, #16213e);
-      color: #fff;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      padding: 20px;
-    }
-    
-    .container {
-      max-width: 1000px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-    }
-    
-    .screen {
-      background: rgba(25, 25, 45, 0.9);
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      padding: 30px;
-      width: 100%;
-      max-width: 800px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      transition: transform 0.5s ease, opacity 0.5s ease;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .screen::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 5px;
-      background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #ffd166);
-      z-index: 10;
-    }
-    
-    h1 {
-      font-size: 3.5rem;
-      margin-bottom: 20px;
-      background: linear-gradient(45deg, #ffd166, #ff6b6b);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-      font-weight: 800;
-      letter-spacing: 2px;
-    }
-    
-    h2 {
-      font-size: 2rem;
-      margin-bottom: 15px;
-      color: #ffd166;
-    }
-    
-    .subtitle {
-      font-size: 1.2rem;
-      max-width: 600px;
-      margin-bottom: 30px;
-      color: #b0b0d0;
-      line-height: 1.6;
-    }
-    
-    .btn {
-      background: linear-gradient(45deg, #4ecdc4, #2a9d8f);
-      color: white;
-      border: none;
-      padding: 15px 40px;
-      font-size: 1.2rem;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 600;
-      letter-spacing: 1px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-      margin: 10px 0;
-      width: 220px;
-      text-transform: uppercase;
-    }
-    
-    .btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-      background: linear-gradient(45deg, #2a9d8f, #4ecdc4);
-    }
-    
-    .btn:active {
-      transform: translateY(1px);
-    }
-    
-    .btn.fire {
-      background: linear-gradient(45deg, #ff6b6b, #e63946);
-    }
-    
-    .btn.fire:hover {
-      background: linear-gradient(45deg, #e63946, #ff6b6b);
-    }
-    
-    #gameContainer {
-      position: relative;
-      width: 100%;
-      background: #0c1021;
-      border-radius: 10px;
-      overflow: hidden;
-      margin: 20px 0;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-    }
-    
-    canvas {
-      display: block;
-      margin: 0 auto;
-    }
-    
-    #hud {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      padding: 15px;
-      background: rgba(30, 30, 50, 0.7);
-      border-radius: 10px;
-      margin-bottom: 15px;
-    }
-    
-    #controls {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      width: 100%;
-      margin-top: 20px;
-    }
-    
-    #joystick {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .horizontal {
-      display: flex;
-      gap: 10px;
-    }
-    
-    .arrow-btn {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      background: rgba(50, 50, 80, 0.8);
-      border: 2px solid #4ecdc4;
-      color: white;
-      font-size: 1.8rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
-    
-    .arrow-btn:active {
-      background: rgba(78, 205, 196, 0.8);
-      transform: scale(0.95);
-    }
-    
-    #fireButton {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
-    
-    .powerup-display {
-      display: flex;
-      gap: 15px;
-      margin-top: 15px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    
-    .powerup {
-      background: rgba(40, 40, 60, 0.8);
-      border-radius: 10px;
-      padding: 10px 15px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.9rem;
-      min-width: 140px;
-    }
-    
-    .powerup-icon {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 0.8rem;
-      font-weight: bold;
-    }
-    
-    .powerup.speed .powerup-icon { background: #4ecdc4; }
-    .powerup.shield .powerup-icon { background: #ffd166; }
-    .powerup.firepower .powerup-icon { background: #ff6b6b; }
-    
-    .instructions {
-      background: rgba(30, 30, 50, 0.7);
-      border-radius: 10px;
-      padding: 20px;
-      margin-top: 20px;
-      width: 100%;
-      text-align: left;
-    }
-    
-    .instructions h3 {
-      color: #ffd166;
-      margin-bottom: 10px;
-    }
-    
-    .instructions ul {
-      padding-left: 20px;
-      line-height: 1.6;
-    }
-    
-    .instructions li {
-      margin-bottom: 8px;
-    }
-    
-    .hidden {
-      display: none !important;
-    }
-    
-    .particle {
-      position: absolute;
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 100;
-    }
-    
-    /* Responsive design */
-    @media (max-width: 768px) {
-      h1 {
-        font-size: 2.5rem;
-      }
-      
-      h2 {
-        font-size: 1.5rem;
-      }
-      
-      .btn {
-        padding: 12px 30px;
-        font-size: 1rem;
-        width: 180px;
-      }
-      
-      .arrow-btn {
-        width: 60px;
-        height: 60px;
-        font-size: 1.5rem;
-      }
-      
-      #fireButton {
-        width: 100px;
-        height: 100px;
-      }
-      
-      #gameContainer {
-        margin: 10px 0;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .screen {
-        padding: 20px 15px;
-      }
-      
-      h1 {
-        font-size: 2rem;
-      }
-      
-      .subtitle {
-        font-size: 1rem;
-      }
-      
-      .btn {
-        padding: 10px 20px;
-        font-size: 0.9rem;
-        width: 160px;
-      }
-      
-      .arrow-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 1.2rem;
-      }
-      
-      #fireButton {
-        width: 80px;
-        height: 80px;
-        font-size: 1.2rem;
-      }
-      
-      .powerup {
-        font-size: 0.8rem;
-        min-width: 120px;
-      }
-    }
-    
-    /* Animations */
-    @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-      100% { transform: translateY(0px); }
-    }
-    
-    .floating {
-      animation: float 3s ease-in-out infinite;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <!-- Start Screen -->
-    <div id="startScreen" class="screen">
-      <h1>MODERN DIGGER</h1>
-      <div class="subtitle">
-        Dig through the terrain, collect treasures, and defeat enemies in this modern twist on the classic digger game!
-      </div>
-      <button id="startButton" class="btn floating">START GAME</button>
-      
-      <div class="instructions">
-        <h3>How to Play:</h3>
-        <ul>
-          <li><strong>Arrow Keys</strong> or <strong>Touch Controls</strong> to move your character</li>
-          <li><strong>Spacebar</strong> or <strong>Fire Button</strong> to shoot</li>
-          <li>Collect <strong>Emeralds</strong> and <strong>Gold Bags</strong> for points</li>
-          <li>Use <strong>Power-ups</strong> to gain special abilities</li>
-          <li>Avoid enemies or destroy them with your bullets</li>
-          <li>Complete each level by collecting all emeralds</li>
-        </ul>
-      </div>
-    </div>
-    
-    <!-- Game Screen -->
-    <div id="gameScreen" class="screen hidden">
-      <h2>MODERN DIGGER</h2>
-      
-      <div id="hud">
-        <div id="scoreDisplay">SCORE: 0</div>
-        <div id="livesDisplay">LIVES: 3</div>
-        <div id="levelDisplay">LEVEL: 1</div>
-      </div>
-      
-      <div id="gameContainer">
-        <canvas id="gameCanvas" width="800" height="500"></canvas>
-      </div>
-      
-      <div id="powerupDisplay" class="powerup-display">
-        <div class="powerup speed">
-          <div class="powerup-icon">S</div>
-          <div>Speed: 0s</div>
-        </div>
-        <div class="powerup shield">
-          <div class="powerup-icon">D</div>
-          <div>Shield: 0s</div>
-        </div>
-        <div class="powerup firepower">
-          <div class="powerup-icon">F</div>
-          <div>Firepower: 0s</div>
-        </div>
-      </div>
-      
-      <div id="controls">
-        <div id="fireContainer">
-          <button id="fireButton" class="btn fire">FIRE</button>
-        </div>
-        <div id="joystick">
-          <button id="upBtn" class="arrow-btn">▲</button>
-          <div class="horizontal">
-            <button id="leftBtn" class="arrow-btn">◀</button>
-            <button id="rightBtn" class="arrow-btn">▶</button>
-          </div>
-          <button id="downBtn" class="arrow-btn">▼</button>
-        </div>
-      </div>
-      
-      <button id="restartButton" class="btn hidden">RESTART</button>
-    </div>
-  </div>
-
-  <script>
-    // ==================================================================
-    // Initialization and Constants
-    // ==================================================================
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    const startScreen = document.getElementById("startScreen");
-    const gameScreen = document.getElementById("gameScreen");
-    const startButton = document.getElementById("startButton");
-    const scoreDisplay = document.getElementById("scoreDisplay");
-    const livesDisplay = document.getElementById("livesDisplay");
-    const levelDisplay = document.getElementById("levelDisplay");
-    const restartButton = document.getElementById("restartButton");
-    const powerupElements = {
-      speed: document.querySelector('.powerup.speed div:last-child'),
-      shield: document.querySelector('.powerup.shield div:last-child'),
-      firepower: document.querySelector('.powerup.firepower div:last-child')
-    };
-    
-    // Game constants
-    const CELL_SIZE = 40;
-    const COLS = Math.floor(canvas.width / CELL_SIZE);
-    const ROWS = Math.floor(canvas.height / CELL_SIZE);
-    const PLAYER_SPEED = 5;
-    const ENEMY_SPEED = 2.5;
-    const BULLET_SPEED = 10;
-    
-    // Game state
-    let score = 0;
-    let level = 1;
-    let lives = 3;
-    let gameOver = false;
-    let gameActive = false;
-    let terrain = [];
-    let enemies = [];
-    let emeralds = [];
-    let goldBags = [];
-    let powerups = [];
-    let bullets = [];
-    let particles = [];
-    let lastTime = 0;
-    let enemySpawnTimer = 0;
-    let tunnelRow = 0;
-    
-    // Player object
-    const player = {
-      x: CELL_SIZE * 2,
-      y: CELL_SIZE * 2,
-      width: CELL_SIZE - 10,
-      height: CELL_SIZE - 10,
-      dx: 0,
-      dy: 0,
-      lastDirection: { x: 1, y: 0 },
-      baseSpeed: PLAYER_SPEED,
-      speed: PLAYER_SPEED,
-      powerupTime: 0,
-      shieldTime: 0,
-      firepowerTime: 0,
-      shootCooldown: 0,
-      shootSlowTimer: 0,
-      color: '#FFD166'
-    };
-    
-    // ==================================================================
-    // Game Initialization
-    // ==================================================================
-    function initGame() {
-      startButton.addEventListener('click', startGame);
-      restartButton.addEventListener('click', startGame);
-      
-      // Touch controls
-      document.getElementById("upBtn").addEventListener("touchstart", () => { player.dy = -player.speed; });
-      document.getElementById("upBtn").addEventListener("touchend", () => { player.dy = 0; });
-      document.getElementById("downBtn").addEventListener("touchstart", () => { player.dy = player.speed; });
-      document.getElementById("downBtn").addEventListener("touchend", () => { player.dy = 0; });
-      document.getElementById("leftBtn").addEventListener("touchstart", () => { player.dx = -player.speed; });
-      document.getElementById("leftBtn").addEventListener("touchend", () => { player.dx = 0; });
-      document.getElementById("rightBtn").addEventListener("touchstart", () => { player.dx = player.speed; });
-      document.getElementById("rightBtn").addEventListener("touchend", () => { player.dx = 0; });
-      document.getElementById("fireButton").addEventListener("touchstart", fireBullet);
-      
-      // Keyboard controls
-      document.addEventListener("keydown", handleKeyDown);
-      document.addEventListener("keyup", handleKeyUp);
-      
-      // Initialize game
-      startGame();
-    }
-    
-    function startGame() {
-      startScreen.classList.add('hidden');
-      gameScreen.classList.remove('hidden');
-      restartButton.classList.add('hidden');
-      
-      // Reset game state
-      score = 0;
-      level = 1;
-      lives = 3;
-      gameOver = false;
-      gameActive = true;
-      enemies = [];
-      emeralds = [];
-      goldBags = [];
-      powerups = [];
-      bullets = [];
-      particles = [];
-      
-      // Reset player
-      player.x = CELL_SIZE * 2;
-      player.y = CELL_SIZE * 2;
-      player.dx = 0;
-      player.dy = 0;
-      player.speed = player.baseSpeed;
-      player.powerupTime = 0;
-      player.shieldTime = 0;
-      player.firepowerTime = 0;
-      player.shootCooldown = 0;
-      player.shootSlowTimer = 0;
-      
-      // Initialize terrain
-      initTerrain();
-      generateTunnel();
-      
-      // Spawn game objects
-      spawnEmeralds();
-      spawnGoldBags();
-      spawnPowerups();
-      spawnEnemy();
-      
-      // Update HUD
-      updateHUD();
-      
-      // Start game loop
-      lastTime = performance.now();
-      requestAnimationFrame(gameLoop);
-    }
-    
-    function initTerrain() {
-      terrain = [];
-      for (let r = 0; r < ROWS; r++) {
-        terrain[r] = [];
-        for (let c = 0; c < COLS; c++) {
-          terrain[r][c] = true; // true indicates undug dirt
-        }
-      }
-    }
-    
-    function generateTunnel() {
-      let currentRow = Math.floor(Math.random() * ROWS);
-      for (let c = 0; c < COLS; c++) {
-        terrain[currentRow][c] = false;
-        if (Math.random() < 0.3) {
-          if (currentRow > 0 && Math.random() < 0.5) currentRow--;
-          else if (currentRow < ROWS - 1) currentRow++;
-          terrain[currentRow][c] = false;
-        }
-      }
-      tunnelRow = currentRow;
-    }
-    
-    // ==================================================================
-    // Spawning Functions
-    // ==================================================================
-    function spawnEmeralds() {
-      emeralds = [];
-      let count = 5 + level * 2;
-      while (count > 0) {
-        let col = Math.floor(Math.random() * COLS);
-        let row = Math.floor(Math.random() * ROWS);
-        if (terrain[row][col] === true) {
-          emeralds.push({
-            x: col * CELL_SIZE + (CELL_SIZE - 20) / 2,
-            y: row * CELL_SIZE + (CELL_SIZE - 20) / 2,
-            width: 20,
-            height: 20,
-            collected: false,
-            color: '#06D6A0'
-          });
-          count--;
-        }
-      }
-    }
-    
-    function spawnGoldBags() {
-      goldBags = [];
-      let count = 3 + level;
-      while (count > 0) {
-        let col = Math.floor(Math.random() * COLS);
-        let row = Math.floor(Math.random() * ROWS);
-        if (terrain[row][col] === true) {
-          goldBags.push({
-            x: col * CELL_SIZE,
-            y: row * CELL_SIZE,
-            width: CELL_SIZE,
-            height: CELL_SIZE,
-            falling: false,
-            vy: 0,
-            startFallY: null,
-            color: '#FFD166'
-          });
-          count--;
-        }
-      }
-    }
-    
-    function spawnEnemy() {
-      if (enemies.length >= 2 + level) return;
-      
-      let spawnX = canvas.width - CELL_SIZE - 10;
-      let spawnY = tunnelRow * CELL_SIZE + (CELL_SIZE - 30) / 2;
-      let col = Math.floor(spawnX / CELL_SIZE);
-      let row = Math.floor(spawnY / CELL_SIZE);
-      
-      if (terrain[row][col]) terrain[row][col] = false;
-      
-      enemies.push({
-        x: spawnX,
-        y: spawnY,
-        width: 30,
-        height: 30,
-        speed: ENEMY_SPEED + level * 0.2,
-        dx: 0,
-        dy: 0,
-        color: '#EF476F'
-      });
-    }
-    
-    function spawnPowerups() {
-      powerups = [];
-      if (Math.random() < 0.3) {
-        let col = Math.floor(Math.random() * COLS);
-        let row = Math.floor(Math.random() * ROWS);
-        const types = ["speed", "shield", "firepower"];
-        const type = types[Math.floor(Math.random() * types.length)];
-        
-        powerups.push({
-          x: col * CELL_SIZE + (CELL_SIZE - 20) / 2,
-          y: row * CELL_SIZE + (CELL_SIZE - 20) / 2,
-          width: 20,
-          height: 20,
-          type: type,
-          color: type === "speed" ? '#118AB2' : 
-                 type === "shield" ? '#FFD166' : 
-                 '#EF476F'
-        });
-      }
-    }
-    
-    function createParticles(x, y, color, count) {
-      for (let i = 0; i < count; i++) {
-        particles.push({
-          x: x,
-          y: y,
-          size: Math.random() * 5 + 2,
-          vx: (Math.random() - 0.5) * 6,
-          vy: (Math.random() - 0.5) * 6,
-          color: color,
-          life: Math.random() * 30 + 20
-        });
-      }
-    }
-    
-    // ==================================================================
-    // Game Logic
-    // ==================================================================
-    function updatePlayer(deltaTime) {
-      // Apply movement
-      player.x += player.dx * deltaTime;
-      player.y += player.dy * deltaTime;
-      
-      // Boundary checks
-      player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
-      player.y = Math.max(0, Math.min(canvas.height - player.height, player.y));
-      
-      // Shooting slowdown
-      if (player.shootSlowTimer > 0) {
-        player.speed = player.baseSpeed * 0.5;
-        player.shootSlowTimer -= deltaTime;
-      } else {
-        player.speed = player.baseSpeed;
-      }
-      
-      // Update direction
-      if (player.dx !== 0 || player.dy !== 0) {
-        player.lastDirection = {
-          x: player.dx !== 0 ? Math.sign(player.dx) : 0,
-          y: player.dy !== 0 ? Math.sign(player.dy) : 0
-        };
-      }
-      
-      // Dig terrain at player position
-      let col = Math.floor((player.x + player.width / 2) / CELL_SIZE);
-      let row = Math.floor((player.y + player.height / 2) / CELL_SIZE);
-      
-      if (row >= 0 && row < ROWS && col >= 0 && col < COLS && terrain[row][col]) {
-        terrain[row][col] = false;
-        createParticles(
-          col * CELL_SIZE + CELL_SIZE / 2, 
-          row * CELL_SIZE + CELL_SIZE / 2,
-          '#8B4513',
-          10
-        );
-      }
-      
-      // Collect emeralds
-      emeralds.forEach(emerald => {
-        if (!emerald.collected && isColliding(player, emerald)) {
-          emerald.collected = true;
-          score += 10;
-          createParticles(
-            emerald.x + emerald.width / 2,
-            emerald.y + emerald.height / 2,
-            '#06D6A0',
-            15
-          );
+          lives--;
           updateHUD();
-        }
-      });
-      
-      // Cooldown timers
-      if (player.shootCooldown > 0) {
-        player.shootCooldown -= deltaTime;
-      }
-    }
-    
-    function updateEnemies(deltaTime) {
-      enemies.forEach((enemy, index) => {
-        // Simple AI: Move towards player
-        const dx = player.x - enemy.x;
-        const dy = player.y - enemy.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        
-        if (dist > 0) {
-          enemy.dx = (dx / dist) * enemy.speed;
-          enemy.dy = (dy / dist) * enemy.speed;
-        }
-        
-        // Apply movement
-        enemy.x += enemy.dx * deltaTime;
-        enemy.y += enemy.dy * deltaTime;
-        
-        // Boundary checks
-        enemy.x = Math.max(0, Math.min(canvas.width - enemy.width, enemy.x));
-        enemy.y = Math.max(0, Math.min(canvas.height - enemy.height, enemy.y));
-        
-        // Collision with player
-        if (isColliding(player, enemy)) {
-          if (player.shieldTime <= 0) {
-            lives--;
-            createParticles(
-              player.x + player.width / 2,
-              player.y + player.height / 2,
-              '#EF476F',
-              30
-            );
-            updateHUD();
-            
-            if (lives <= 0) {
-              gameOver = true;
-            } else {
-              // Respawn player
-              player.x = CELL_SIZE * 2;
-              player.y = CELL_SIZE * 2;
-              player.dx = 0;
-              player.dy = 0;
-            }
+          
+          if (lives <= 0) {
+            gameOver();
+          } else {
+            // Respawn player
+            player.x = CELL_SIZE;
+            player.y = Math.floor(rows/2) * CELL_SIZE;
           }
+          
           enemies.splice(index, 1);
-          createParticles(
-            enemy.x + enemy.width / 2,
-            enemy.y + enemy.height / 2,
-            '#EF476F',
-            20
-          );
         }
       });
     }
-    
+
     function updateBullets(deltaTime) {
       bullets.forEach((bullet, index) => {
         // Apply movement
@@ -3356,433 +608,151 @@
           return;
         }
         
-        // Terrain collision
+        // Check collision with terrain
         const col = Math.floor(bullet.x / CELL_SIZE);
         const row = Math.floor(bullet.y / CELL_SIZE);
         
-        if (row >= 0 && row < ROWS && col >= 0 && col < COLS && terrain[row][col]) {
+        if (row >= 0 && row < rows && col >= 0 && col < cols && terrain[row][col]) {
           bullets.splice(index, 1);
-          createParticles(
-            bullet.x,
-            bullet.y,
-            '#118AB2',
-            10
-          );
           return;
         }
         
-        // Enemy collision
+        // Check collision with enemies
         enemies.forEach((enemy, eIndex) => {
           if (isColliding(bullet, enemy)) {
             bullets.splice(index, 1);
             enemies.splice(eIndex, 1);
             score += 20;
-            createParticles(
-              enemy.x + enemy.width / 2,
-              enemy.y + enemy.height / 2,
-              '#EF476F',
-              20
-            );
             updateHUD();
           }
         });
       });
     }
-    
-    function updateGoldBags(deltaTime) {
-      goldBags.forEach((bag, index) => {
-        // Check if bag should fall
-        const col = Math.floor(bag.x / CELL_SIZE);
-        let rowBelow = Math.floor((bag.y + bag.height) / CELL_SIZE);
-        
-        if (rowBelow < ROWS && terrain[rowBelow][col]) {
-          bag.falling = false;
-          bag.vy = 0;
-          bag.startFallY = null;
-        } else {
-          if (!bag.falling) {
-            bag.falling = true;
-            bag.startFallY = bag.y;
-          }
-          
-          // Apply gravity
-          bag.vy += 0.5;
-          bag.y += bag.vy * deltaTime;
-          
-          // Bottom boundary
-          if (bag.y + bag.height >= canvas.height) {
-            bag.y = canvas.height - bag.height;
-            bag.vy = 0;
-            bag.falling = false;
-          }
-          
-          // Check if falling more than 2 cells
-          if (bag.startFallY !== null && (bag.y - bag.startFallY > CELL_SIZE * 2)) {
-            // Check collision with enemies
-            enemies.forEach((enemy, eIndex) => {
-              if (isColliding(bag, enemy)) {
-                enemies.splice(eIndex, 1);
-                score += 25;
-                createParticles(
-                  enemy.x + enemy.width / 2,
-                  enemy.y + enemy.height / 2,
-                  '#EF476F',
-                  20
-                );
-                updateHUD();
-                goldBags.splice(index, 1);
-              }
-            });
-            
-            // Check collision with player
-            if (isColliding(bag, player) && player.shieldTime <= 0) {
-              lives--;
-              createParticles(
-                player.x + player.width / 2,
-                player.y + player.height / 2,
-                '#EF476F',
-                30
-              );
-              updateHUD();
-              
-              if (lives <= 0) {
-                gameOver = true;
-              }
-              
-              goldBags.splice(index, 1);
-            }
-          }
-        }
-      });
-    }
-    
-    function updatePowerups(deltaTime) {
-      powerups.forEach((powerup, index) => {
-        if (isColliding(player, powerup)) {
-          // Apply powerup effect
-          switch (powerup.type) {
-            case "speed":
-              player.speed = player.baseSpeed * 1.5;
-              player.powerupTime = 300;
-              break;
-            case "shield":
-              player.shieldTime = 300;
-              break;
-            case "firepower":
-              player.firepowerTime = 300;
-              break;
-          }
-          
-          createParticles(
-            powerup.x + powerup.width / 2,
-            powerup.y + powerup.height / 2,
-            powerup.color,
-            20
-          );
-          
-          powerups.splice(index, 1);
-        }
-      });
-      
-      // Update powerup timers
-      if (player.powerupTime > 0) {
-        player.powerupTime -= deltaTime;
-        powerupElements.speed.textContent = `Speed: ${Math.ceil(player.powerupTime/60)}s`;
-        if (player.powerupTime <= 0) {
-          player.speed = player.baseSpeed;
-          powerupElements.speed.textContent = "Speed: 0s";
-        }
-      }
-      
-      if (player.shieldTime > 0) {
-        player.shieldTime -= deltaTime;
-        powerupElements.shield.textContent = `Shield: ${Math.ceil(player.shieldTime/60)}s`;
-        if (player.shieldTime <= 0) {
-          powerupElements.shield.textContent = "Shield: 0s";
-        }
-      }
-      
-      if (player.firepowerTime > 0) {
-        player.firepowerTime -= deltaTime;
-        powerupElements.firepower.textContent = `Firepower: ${Math.ceil(player.firepowerTime/60)}s`;
-        if (player.firepowerTime <= 0) {
-          powerupElements.firepower.textContent = "Firepower: 0s";
-        }
-      }
-    }
-    
-    function updateParticles(deltaTime) {
-      particles.forEach((particle, index) => {
-        particle.x += particle.vx * deltaTime;
-        particle.y += particle.vy * deltaTime;
-        particle.life -= deltaTime;
-        
-        if (particle.life <= 0) {
-          particles.splice(index, 1);
-        }
-      });
-    }
-    
+
     function fireBullet() {
-      if (player.shootCooldown > 0) return;
-      
-      const direction = player.lastDirection;
-      const speedMultiplier = (player.firepowerTime > 0) ? BULLET_SPEED * 1.5 : BULLET_SPEED;
+      if (!player.canShoot) return;
       
       bullets.push({
-        x: player.x + player.width / 2 - 4,
-        y: player.y + player.height / 2 - 4,
+        x: player.x + player.width/2 - 4,
+        y: player.y + player.height/2 - 4,
         width: 8,
         height: 8,
-        dx: direction.x * speedMultiplier,
-        dy: direction.y * speedMultiplier,
+        dx: player.lastDirection.x * BULLET_SPEED,
+        dy: player.lastDirection.y * BULLET_SPEED,
         color: '#118AB2'
       });
       
-      player.shootCooldown = 0.5;
-      player.shootSlowTimer = 0.2;
-      
-      createParticles(
-        player.x + player.width / 2,
-        player.y + player.height / 2,
-        '#118AB2',
-        10
-      );
+      player.canShoot = false;
+      setTimeout(() => player.canShoot = true, 300);
     }
-    
-    function checkLevelComplete() {
-      const allEmeraldsCollected = emeralds.every(e => e.collected);
-      if (allEmeraldsCollected) {
-        level++;
-        updateHUD();
-        spawnEmeralds();
-        spawnGoldBags();
-        spawnPowerups();
-        spawnEnemy();
-      }
-    }
-    
+
     function isColliding(a, b) {
       return a.x < b.x + b.width &&
              a.x + a.width > b.x &&
              a.y < b.y + b.height &&
              a.y + a.height > b.y;
     }
-    
+
     function updateHUD() {
       scoreDisplay.textContent = `SCORE: ${score}`;
       livesDisplay.textContent = `LIVES: ${lives}`;
-      levelDisplay.textContent = `LEVEL: ${level}`;
+      emeraldsDisplay.textContent = `EMERALDS: ${emeraldsCollected}/${LEVELS[currentLevel].emeralds}`;
     }
-    
-    // ==================================================================
-    // Rendering
-    // ==================================================================
-    function drawTerrain() {
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
+
+    function completeLevel() {
+      currentLevel++;
+      
+      if (currentLevel >= LEVELS.length) {
+        // Game completed
+        endTitle.textContent = "YOU WIN!";
+        endMessage.textContent = `Final Score: ${score}`;
+        gameOver();
+      } else {
+        // Start next level
+        emeraldsCollected = 0;
+        initLevel();
+      }
+    }
+
+    function gameOver() {
+      gameActive = false;
+      gameScreen.classList.add('hidden');
+      endScreen.classList.remove('hidden');
+    }
+
+    function drawGame() {
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw terrain
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
           if (terrain[r][c]) {
-            // Draw dirt
-            ctx.fillStyle = '#8B4513';
+            ctx.fillStyle = '#8B4513'; // Dirt
             ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-            
-            // Draw dirt pattern
-            ctx.fillStyle = '#6B2D00';
-            for (let i = 0; i < 4; i++) {
-              const x = c * CELL_SIZE + Math.random() * CELL_SIZE;
-              const y = r * CELL_SIZE + Math.random() * CELL_SIZE;
-              ctx.beginPath();
-              ctx.arc(x, y, 2, 0, Math.PI * 2);
-              ctx.fill();
-            }
           } else {
-            // Draw dug sand
-            ctx.fillStyle = '#C2B280';
+            ctx.fillStyle = '#C2B280'; // Tunnel
             ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
           }
         }
       }
-    }
-    
-    function drawPlayer() {
+      
+      // Draw emeralds
+      emeralds.forEach(emerald => {
+        if (!emerald.collected) {
+          ctx.fillStyle = emerald.color;
+          ctx.beginPath();
+          ctx.ellipse(
+            emerald.x + emerald.width/2,
+            emerald.y + emerald.height/2,
+            emerald.width/2,
+            emerald.height/2,
+            0, 0, Math.PI * 2
+          );
+          ctx.fill();
+        }
+      });
+      
+      // Draw enemies
+      enemies.forEach(enemy => {
+        ctx.fillStyle = enemy.color;
+        ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+        
+        // Draw eyes to indicate type
+        ctx.fillStyle = '#000';
+        ctx.fillRect(enemy.x + 8, enemy.y + 8, 6, 6);
+        ctx.fillRect(enemy.x + enemy.width - 14, enemy.y + 8, 6, 6);
+        
+        if (enemy.type === 'hobbin') {
+          // Draw angry eyebrows for hobbins
+          ctx.strokeStyle = '#000';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(enemy.x + 6, enemy.y + 6);
+          ctx.lineTo(enemy.x + 12, enemy.y + 4);
+          ctx.moveTo(enemy.x + enemy.width - 12, enemy.y + 4);
+          ctx.lineTo(enemy.x + enemy.width - 6, enemy.y + 6);
+          ctx.stroke();
+        }
+      });
+      
+      // Draw bullets
+      bullets.forEach(bullet => {
+        ctx.fillStyle = bullet.color;
+        ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+      });
+      
       // Draw player
       ctx.fillStyle = player.color;
       ctx.fillRect(player.x, player.y, player.width, player.height);
       
-      // Draw player details
-      ctx.fillStyle = '#1A1A2E';
-      ctx.fillRect(player.x + 8, player.y + 8, player.width - 16, player.height - 16);
-      
-      // Draw shield if active
-      if (player.shieldTime > 0) {
-        ctx.strokeStyle = 'rgba(255, 209, 102, 0.7)';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(
-          player.x + player.width / 2,
-          player.y + player.height / 2,
-          player.width / 2 + 5,
-          0,
-          Math.PI * 2
-        );
-        ctx.stroke();
-      }
+      // Draw player face
+      ctx.fillStyle = '#000';
+      const eyeX = player.lastDirection.x > 0 ? player.x + player.width - 12 : player.x + 6;
+      ctx.fillRect(eyeX, player.y + 8, 6, 6);
+      ctx.fillRect(eyeX + (player.lastDirection.x > 0 ? -12 : 12), player.y + 8, 6, 6);
     }
-    
-    function drawEnemies() {
-      enemies.forEach(enemy => {
-        // Draw enemy
-        ctx.fillStyle = enemy.color;
-        ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-        
-        // Draw enemy eyes
-        ctx.fillStyle = '#1A1A2E';
-        ctx.fillRect(enemy.x + 8, enemy.y + 8, 6, 6);
-        ctx.fillRect(enemy.x + enemy.width - 14, enemy.y + 8, 6, 6);
-      });
-    }
-    
-    function drawEmeralds() {
-      emeralds.forEach(emerald => {
-        if (!emerald.collected) {
-          // Draw emerald
-          ctx.fillStyle = emerald.color;
-          ctx.beginPath();
-          ctx.moveTo(emerald.x, emerald.y + emerald.height / 2);
-          ctx.lineTo(emerald.x + emerald.width / 2, emerald.y);
-          ctx.lineTo(emerald.x + emerald.width, emerald.y + emerald.height / 2);
-          ctx.lineTo(emerald.x + emerald.width / 2, emerald.y + emerald.height);
-          ctx.closePath();
-          ctx.fill();
-          
-          // Draw shine
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-          ctx.beginPath();
-          ctx.moveTo(emerald.x + emerald.width * 0.3, emerald.y + emerald.height * 0.3);
-          ctx.lineTo(emerald.x + emerald.width * 0.4, emerald.y + emerald.height * 0.2);
-          ctx.lineTo(emerald.x + emerald.width * 0.5, emerald.y + emerald.height * 0.3);
-          ctx.closePath();
-          ctx.fill();
-        }
-      });
-    }
-    
-    function drawGoldBags() {
-      goldBags.forEach(bag => {
-        // Draw gold bag
-        ctx.fillStyle = bag.color;
-        ctx.fillRect(bag.x, bag.y, bag.width, bag.height);
-        
-        // Draw bag details
-        ctx.fillStyle = '#D4A017';
-        ctx.fillRect(bag.x + 5, bag.y + 5, bag.width - 10, bag.height - 10);
-        
-        ctx.fillStyle = '#B8860B';
-        ctx.fillRect(bag.x, bag.y + bag.height - 10, bag.width, 5);
-      });
-    }
-    
-    function drawPowerups() {
-      powerups.forEach(powerup => {
-        // Draw powerup
-        ctx.fillStyle = powerup.color;
-        ctx.beginPath();
-        ctx.arc(
-          powerup.x + powerup.width / 2,
-          powerup.y + powerup.height / 2,
-          powerup.width / 2,
-          0,
-          Math.PI * 2
-        );
-        ctx.fill();
-        
-        // Draw icon based on type
-        ctx.fillStyle = '#1A1A2E';
-        ctx.font = '14px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        if (powerup.type === "speed") {
-          ctx.fillText('S', powerup.x + powerup.width / 2, powerup.y + powerup.height / 2);
-        } else if (powerup.type === "shield") {
-          ctx.fillText('D', powerup.x + powerup.width / 2, powerup.y + powerup.height / 2);
-        } else if (powerup.type === "firepower") {
-          ctx.fillText('F', powerup.x + powerup.width / 2, powerup.y + powerup.height / 2);
-        }
-      });
-    }
-    
-    function drawBullets() {
-      bullets.forEach(bullet => {
-        ctx.fillStyle = bullet.color;
-        ctx.beginPath();
-        ctx.arc(bullet.x, bullet.y, bullet.width / 2, 0, Math.PI * 2);
-        ctx.fill();
-      });
-    }
-    
-    function drawParticles() {
-      particles.forEach(particle => {
-        ctx.fillStyle = particle.color;
-        ctx.globalAlpha = particle.life / 50;
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fill();
-      });
-      ctx.globalAlpha = 1.0;
-    }
-    
-    // ==================================================================
-    // Game Loop
-    // ==================================================================
-    function gameLoop(timestamp) {
-      if (!lastTime) lastTime = timestamp;
-      const deltaTime = (timestamp - lastTime) / 16.666; // Normalize to 60fps
-      lastTime = timestamp;
-      
-      if (gameActive) {
-        // Update game state
-        updatePlayer(deltaTime);
-        updateEnemies(deltaTime);
-        updateBullets(deltaTime);
-        updateGoldBags(deltaTime);
-        updatePowerups(deltaTime);
-        updateParticles(deltaTime);
-        
-        // Spawn enemies periodically
-        enemySpawnTimer += deltaTime;
-        if (enemySpawnTimer > 150) {
-          spawnEnemy();
-          enemySpawnTimer = 0;
-        }
-        
-        // Check level completion
-        checkLevelComplete();
-        
-        // Check game over
-        if (gameOver) {
-          endGame();
-          return;
-        }
-        
-        // Draw everything
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawTerrain();
-        drawEmeralds();
-        drawGoldBags();
-        drawPowerups();
-        drawEnemies();
-        drawBullets();
-        drawParticles();
-        drawPlayer();
-      }
-      
-      requestAnimationFrame(gameLoop);
-    }
-    
-    // ==================================================================
-    // Input Handling
-    // ==================================================================
+
     function handleKeyDown(e) {
       switch (e.key) {
         case "ArrowUp":
@@ -3798,12 +768,11 @@
           player.dx = player.speed;
           break;
         case " ":
-        case "f":
           fireBullet();
           break;
       }
     }
-    
+
     function handleKeyUp(e) {
       switch (e.key) {
         case "ArrowUp":
@@ -3816,27 +785,26 @@
           break;
       }
     }
-    
-    function endGame() {
-      gameActive = false;
-      restartButton.classList.remove('hidden');
+
+    function gameLoop(timestamp) {
+      if (!gameActive) return;
       
-      // Draw game over message
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Calculate delta time for smooth movement
+      const deltaTime = 1; // Simplified for this basic version
       
-      ctx.fillStyle = '#EF476F';
-      ctx.font = 'bold 48px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 40);
+      // Update game state
+      updatePlayer(deltaTime);
+      updateEnemies(deltaTime);
+      updateBullets(deltaTime);
       
-      ctx.fillStyle = '#FFD166';
-      ctx.font = '36px Arial';
-      ctx.fillText(`FINAL SCORE: ${score}`, canvas.width / 2, canvas.height / 2 + 20);
+      // Draw everything
+      drawGame();
+      
+      // Continue game loop
+      requestAnimationFrame(gameLoop);
     }
-    
-    // Initialize game when page loads
+
+    // Start the game when page loads
     window.addEventListener('load', initGame);
   </script>
 </body>
