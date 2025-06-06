@@ -1,47 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Retro Digger</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Digger Game</title>
+  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Start Screen -->
-  <div id="startScreen" class="screen">
-    <h1>Retro Digger</h1>
-    <button id="startButton" class="main-btn">START</button>
+  <div id="menu" class="screen">
+    <h1 class="title blink">DIGGER</h1>
+    <button id="startBtn">START GAME</button>
   </div>
-
-  <!-- Game Screen -->
-  <div id="gameScreen" class="screen" style="display: none;">
-    <header>
-      <h2>Digger Game</h2>
-      <p id="scoreDisplay">Score: 0</p>
-      <div id="powerupDisplay"></div>
-    </header>
-    <!-- The game container has a plain black background for clarity -->
-    <div id="gameContainer">
-      <canvas id="gameCanvas" width="800" height="600"></canvas>
-    </div>
-    <div id="controls">
-      <div id="fireContainer">
-        <button id="fireButton" class="control-btn fire">FIRE</button>
-      </div>
-      <div id="joystickContainer">
-        <div id="joystick">
-          <button id="upBtn" class="arrow-btn">▲</button>
-          <div class="horizontal">
-            <button id="leftBtn" class="arrow-btn">◀</button>
-            <button id="rightBtn" class="arrow-btn">▶</button>
-          </div>
-          <button id="downBtn" class="arrow-btn">▼</button>
-        </div>
-      </div>
-    </div>
-    <button id="restartButton" class="main-btn" style="display: none;">RESTART</button>
+  <div id="hud">
+    <span id="score">Score: 0</span>
+    <span id="lives">Lives: 3</span>
   </div>
-
+  <canvas id="gameCanvas"></canvas>
+  <div id="gameOver" class="screen hidden">
+    <h1>GAME OVER</h1>
+    <p id="finalScore"></p>
+    <button id="restartBtn">RESTART</button>
+  </div>
+  <div id="levelUp" class="screen hidden">
+    <h1>LEVEL COMPLETE!</h1>
+    <button id="nextLevelBtn">NEXT LEVEL</button>
+  </div>
+  <div id="controls">
+    <button class="btn" id="upBtn">&#9650;</button>
+    <button class="btn" id="leftBtn">&#9664;</button>
+    <button class="btn" id="downBtn">&#9660;</button>
+    <button class="btn" id="rightBtn">&#9654;</button>
+    <button class="btn" id="fireBtn">&#9899;</button>
+  </div>
   <script src="game.js"></script>
 </body>
 </html>
