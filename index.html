@@ -346,26 +346,7 @@
 <body>
   <div class="container">
     <!-- Start Screen -->
-    <div id="startScreen" class="screen">
-      <h1>MODERN DIGGER</h1>
-      <div class="subtitle">
-        Dig through the terrain, collect treasures, and defeat enemies in this modern twist on the classic digger game!
-      </div>
-      <button id="startButton" class="btn floating">START GAME</button>
-      
-      <div class="instructions">
-        <h3>How to Play:</h3>
-        <ul>
-          <li><strong>Arrow Keys</strong> or <strong>Touch Controls</strong> to move your character</li>
-          <li><strong>Spacebar</strong> or <strong>Fire Button</strong> to shoot</li>
-          <li>Collect <strong>Emeralds</strong> and <strong>Gold Bags</strong> for points</li>
-          <li>Use <strong>Power-ups</strong> to gain special abilities</li>
-          <li>Avoid enemies or destroy them with your bullets</li>
-          <li>Complete each level by collecting all emeralds</li>
-        </ul>
-      </div>
-    </div>
-    
+   
     <!-- Game Screen -->
     <div id="gameScreen" class="screen hidden">
       <h2>MODERN DIGGER</h2>
@@ -503,8 +484,7 @@
     }
     
     function startGame() {
-      startScreen.classList.add('hidden');
-      gameScreen.classList.remove('hidden');
+     
       restartButton.classList.add('hidden');
       
       // Reset game state
