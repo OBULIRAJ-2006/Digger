@@ -1,4 +1,6 @@
 body {
+ 
+  background-image: url("dug-sand.png");
   margin: 0;
   padding: 0;
   background: #000;
@@ -6,6 +8,8 @@ body {
   font-family: 'Press Start 2P', monospace;
 }
 .screen {
+  width:200px;
+  height : 200px;
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
