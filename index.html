@@ -1,46 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Digger Game</title>
-  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retro Digger</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <!-- Start Screen -->
   <div id="startScreen" class="screen">
-    <h1>DIGGER</h1>
-    <button id="startBtn" class="main-btn">START GAME</button>
+    <h1>Retro Digger</h1>
+    <button id="startButton" class="main-btn">START</button>
   </div>
 
-  <!-- Game Over Screen -->
-  <div id="gameOverScreen" class="screen hidden">
-    <h1>GAME OVER</h1>
-    <p id="overScore"></p>
-    <button id="restartBtn" class="main-btn">RESTART</button>
-  </div>
-
-  <!-- Level Complete Screen -->
-  <div id="levelUpScreen" class="screen hidden">
-    <h1>LEVEL COMPLETE!</h1>
-    <button id="nextLevelBtn" class="main-btn">NEXT LEVEL</button>
-  </div>
-
-  <!-- Canvas & HUD Container -->
-  <div id="gameContainer" class="hidden">
+  <!-- Game Screen -->
+  <div id="gameScreen" class="screen" style="display: none;">
     <header>
-      <div id="scoreDisplay">Score: 0</div>
-      <div id="livesDisplay">Lives: 3</div>
+      <h2>Digger Game</h2>
+      <p id="scoreDisplay">Score: 0</p>
       <div id="powerupDisplay"></div>
     </header>
-    <canvas id="gameCanvas"></canvas>
-    <!-- Touch Controls -->
+    <!-- The game container has a plain black background for clarity -->
+    <div id="gameContainer">
+      <canvas id="gameCanvas" width="800" height="600"></canvas>
+    </div>
     <div id="controls">
-      <div id="fireControl">
-        <button id="fireBtn" class="control-btn fire">FIRE</button>
+      <div id="fireContainer">
+        <button id="fireButton" class="control-btn fire">FIRE</button>
       </div>
-      <div id="joystickControl">
+      <div id="joystickContainer">
         <div id="joystick">
           <button id="upBtn" class="arrow-btn">▲</button>
           <div class="horizontal">
@@ -51,6 +39,7 @@
         </div>
       </div>
     </div>
+    <button id="restartButton" class="main-btn" style="display: none;">RESTART</button>
   </div>
 
   <script src="game.js"></script>
