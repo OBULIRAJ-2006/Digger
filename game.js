@@ -1,412 +1,626 @@
-// ===============================
-// Initialization & Asset Loading
-// ===============================
+// ==================================================================
+// Initialization and Asset Loading
+// ==================================================================
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 600;
-canvas.width = CANVAS_WIDTH;
-canvas.height = CANVAS_HEIGHT;
-ctx.imageSmoothingEnabled = false;
+canvas.width = 800;
+canvas.height = 600;
 
-// DOM elements
 const startScreen = document.getElementById("startScreen");
-const startBtn = document.getElementById("startBtn");
-const gameOverScreen = document.getElementById("gameOver");
-const restartBtn = document.getElementById("restartBtn");
-const levelUpScreen = document.getElementById("levelUp");
-const nextLevelBtn = document.getElementById("nextLevelBtn");
-const hud = document.getElementById("hud");
-const scoreDisplay = document.getElementById("score");
-const livesDisplay = document.getElementById("lives");
-const finalScoreDisplay = document.getElementById("finalScore");
+const startButton = document.getElementById("startButton");
+const gameScreen = document.getElementById("gameScreen");
+const scoreDisplay = document.getElementById("scoreDisplay");
+const restartButton = document.getElementById("restartButton");
+const powerupDisplay = document.getElementById("powerupDisplay");
 
 // Load Images
-const images = {
-  player: new Image(),
-  enemy: new Image(),
-  gold: new Image(),
-  emerald: new Image(),
-  dugSand: new Image()
-};
-images.player.src = "digger.png";
-images.enemy.src = "enemy.png";
-images.gold.src = "gold.png";
-images.emerald.src = "emerald.png";
-images.dugSand.src = "dug-sand.png";
+const diggerImg = new Image();
+diggerImg.src = "digger.png";
+const enemyImg = new Image();
+enemyImg.src = "enemy.png";
+const goldImg = new Image();
+goldImg.src = "gold.png";
+const emeraldImg = new Image();
+emeraldImg.src = "emerald.png";
+const dugSandImg = new Image();
+dugSandImg.src = "dug-sand.png";
 
-// Load Sounds (Web Audio API)
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-const sounds = {};
-function loadSound(name, url) {
-  fetch(url).then(res => res.arrayBuffer())
-    .then(data => audioCtx.decodeAudioData(data, buffer => sounds[name] = buffer));
-}
-function playSound(name) {
-  let buffer = sounds[name];
-  if (!buffer) return;
-  let src = audioCtx.createBufferSource();
-  src.buffer = buffer;
-  src.connect(audioCtx.destination);
-  src.start(0);
-}
-loadSound('move', 'move.mp3');
-loadSound('coin', 'coin.mp3');
-loadSound('fire', 'fire.mp3');
-loadSound('boom', 'boom.mp3');
-loadSound('powerup', 'powerup.mp3');
+// Load Sounds
+const soundMove = new Audio("move.mp3");
+const soundCollect = new Audio("collect.mp3");
+const soundEnemyHit = new Audio("hit.mp3");
+const soundFire = new Audio("fire.mp3");
+const soundPowerUp = new Audio("powerup.mp3");
 
-// ===============================
-// Game State Variables
-// ===============================
+// ==================================================================
+// Game State and Terrain Setup
+// ==================================================================
+let score = 0;
+let gameOver = false;
+let bulletCooldown = 0;
+let shootSlowTimer = 0;
+
 const cellSize = 40;
-let currentLevel, score, lives, gameState, lastTime;
-let map = [], coinMap = [], enemies = [], bullets = [], powerUps = [], player;
-const STATE_MENU = 0, STATE_PLAY = 1, STATE_LEVELUP = 2, STATE_GAMEOVER = 3;
+const cols = canvas.width / cellSize;
+const rows = canvas.height / cellSize;
+let terrain = [];
+let tunnelRow = 0;
 
-// ===============================
-// Player Class
-// ===============================
-class Player {
-  constructor(x, y) {
-    this.x = x; this.y = y;
-    this.size = 32;
-    this.speed = 150;
-    this.baseSpeed = 150;
-    this.direction = 'right';
-    this.fireCooldown = 0;
-    this.shield = false;
-    this.multiFire = false;
-    this.speedBoost = false;
+function initTerrain() {
+  terrain = [];
+  for (let r = 0; r < rows; r++) {
+    terrain[r] = [];
+    for (let c = 0; c < cols; c++) {
+      terrain[r][c] = true; // true indicates undug dirt
+    }
   }
-  update(dt) {
-    let moveX = 0, moveY = 0;
-    if (keys['ArrowUp'] || touchDir === 'up') { moveY = -1; this.direction = 'up'; }
-    if (keys['ArrowDown'] || touchDir === 'down') { moveY = 1; this.direction = 'down'; }
-    if (keys['ArrowLeft'] || touchDir === 'left') { moveX = -1; this.direction = 'left'; }
-    if (keys['ArrowRight'] || touchDir === 'right') { moveX = 1; this.direction = 'right'; }
-    if (moveX !== 0 && moveY !== 0) { moveX *= 0.7071; moveY *= 0.7071; }
-    let vel = this.speed * (this.speedBoost ? 1.5 : 1);
-    this.x += moveX * vel * dt;
-    this.y += moveY * vel * dt;
-    this.x = Math.max(0, Math.min(CANVAS_WIDTH - this.size, this.x));
-    this.y = Math.max(0, Math.min(CANVAS_HEIGHT - this.size, this.y));
-    // Dig tile under player
-    let tileX = Math.floor((this.x + this.size/2) / cellSize);
-    let tileY = Math.floor((this.y + this.size/2) / cellSize);
-    if (map[tileY] && map[tileY][tileX] === 1) {
-      map[tileY][tileX] = 0;
-      if (coinMap[tileY][tileX]) {
-        score += 100;
-        playSound('coin');
-        coinMap[tileY][tileX] = 0;
+}
+
+function generateTunnel() {
+  let currentRow = Math.floor(Math.random() * rows);
+  for (let c = 0; c < cols; c++) {
+    terrain[currentRow][c] = false;
+    if (Math.random() < 0.3) {
+      if (currentRow > 0 && Math.random() < 0.5) currentRow--;
+      else if (currentRow < rows - 1) currentRow++;
+      terrain[currentRow][c] = false;
+    }
+  }
+  tunnelRow = currentRow;
+}
+
+// ==================================================================
+// A* Pathfinding Helper Functions
+// ==================================================================
+function heuristic(a, b) {
+  return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+}
+
+function findPath(start, goal) {
+  function key(node) { return `${node.x},${node.y}`; }
+  let openSet = [start], cameFrom = {}, gScore = {}, fScore = {};
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      let k = `${c},${r}`;
+      gScore[k] = Infinity;
+      fScore[k] = Infinity;
+    }
+  }
+
+  gScore[key(start)] = 0;
+  fScore[key(start)] = heuristic(start, goal);
+  while (openSet.length > 0) {
+    let current = openSet.reduce((a, b) => fScore[key(a)] < fScore[key(b)] ? a : b);
+    if (current.x === goal.x && current.y === goal.y) {
+      let path = [current];
+      while (key(current) in cameFrom) {
+        current = cameFrom[key(current)];
+        path.push(current);
+      }
+      return path.reverse();
+    }
+    openSet = openSet.filter(n => !(n.x === current.x && n.y === current.y));
+    let neighbors = [
+      { x: current.x, y: current.y - 1 },
+      { x: current.x, y: current.y + 1 },
+      { x: current.x - 1, y: current.y },
+      { x: current.x + 1, y: current.y }
+    ];
+    for (let neighbor of neighbors) {
+      if (neighbor.x < 0 || neighbor.x >= cols || neighbor.y < 0 || neighbor.y >= rows) continue;
+      if (terrain[neighbor.y][neighbor.x] === true) continue; // Walk only on dug cells
+      let tentativeG = gScore[key(current)] + 1;
+      if (tentativeG < gScore[key(neighbor)]) {
+        cameFrom[key(neighbor)] = current;
+        gScore[key(neighbor)] = tentativeG;
+        fScore[key(neighbor)] = tentativeG + heuristic(neighbor, goal);
+        if (!openSet.find(n => n.x === neighbor.x && n.y === neighbor.y)) {
+          openSet.push(neighbor);
+        }
       }
     }
-    // Shooting
-    if ((keys[' '] || touchFire) && this.fireCooldown <= 0) {
-      this.shoot();
-      this.fireCooldown = this.multiFire ? 0.2 : 0.5;
-    }
-    if (this.fireCooldown > 0) this.fireCooldown -= dt;
   }
-  draw() {
-    if (images.player && images.player.complete) {
-      ctx.drawImage(images.player, this.x, this.y, this.size, this.size);
+  return [];
+}
+
+// ==================================================================
+// Game Objects
+// ==================================================================
+let player = {
+  x: 50,
+  y: 50,
+  width: 32,
+  height: 32,
+  speed: 1,
+  baseSpeed: 1,
+  dx: 0,
+  dy: 0,
+  sprite: diggerImg,
+  powerupTime: 0,
+  shieldTime: 0,
+  firepowerTime: 0,
+  lastDirection: { x: 1, y: 0 }
+};
+
+let enemies = [];
+let emeralds = [];
+let goldBags = [];
+let powerups = [];
+let bullets = [];
+
+// ==================================================================
+// Spawning Functions
+// ==================================================================
+function spawnEmeralds() {
+  emeralds = [];
+  let count = 0;
+  while (count < 10) {
+    let col = Math.floor(Math.random() * cols);
+    let row = Math.floor(Math.random() * rows);
+    emeralds.push({
+      x: col * cellSize + (cellSize - 16) / 2,
+      y: row * cellSize + (cellSize - 16) / 2,
+      width: 16,
+      height: 16,
+      collected: false
+    });
+    count++;
+  }
+}
+
+function spawnGoldBags() {
+  goldBags = [];
+  let count = 0;
+  while (count < 3) {
+    let col = Math.floor(Math.random() * cols);
+    let row = Math.floor(Math.random() * rows);
+    goldBags.push({
+      x: col * cellSize,
+      y: row * cellSize,
+      width: cellSize,
+      height: cellSize,
+      falling: false,
+      vy: 0,
+      startFallY: null
+    });
+    count++;
+  }
+}
+
+function spawnEnemy() {
+  if (enemies.length >= 3) return;
+  let spawnX = canvas.width - cellSize - 10;
+  let spawnY = tunnelRow * cellSize + (cellSize - 32) / 2;
+  let col = Math.floor(spawnX / cellSize);
+  let row = Math.floor(spawnY / cellSize);
+  if (terrain[row][col]) terrain[row][col] = false;
+  enemies.push({
+    x: spawnX,
+    y: spawnY,
+    width: 32,
+    height: 32,
+    speed: 1,
+    dx: 0,
+    dy: 0
+  });
+}
+
+function spawnPowerups() {
+  powerups = [];
+  if (Math.random() < 0.5) {
+    let col = Math.floor(Math.random() * cols);
+    let row = Math.floor(Math.random() * rows);
+    const types = ["speed", "shield", "firepower"];
+    const type = types[Math.floor(Math.random() * types.length)];
+    powerups.push({
+      x: col * cellSize + (cellSize - 16) / 2,
+      y: row * cellSize + (cellSize - 16) / 2,
+      width: 16,
+      height: 16,
+      type: type
+    });
+  }
+}
+
+// ==================================================================
+// Drawing Functions
+// ==================================================================
+function drawTerrain() {
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (terrain[r][c]) {
+        ctx.fillStyle = "#8B4513"; // Brown dirt
+        ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+      } else {
+        ctx.drawImage(dugSandImg, c * cellSize, r * cellSize, cellSize, cellSize);
+      }
+    }
+  }
+}
+
+function drawPlayer() {
+  ctx.drawImage(player.sprite, player.x, player.y, player.width, player.height);
+}
+
+function drawEnemies() {
+  enemies.forEach(enemy => {
+    ctx.drawImage(enemyImg, enemy.x, enemy.y, enemy.width, enemy.height);
+  });
+}
+
+function drawEmeralds() {
+  emeralds.forEach(e => {
+    if (!e.collected) {
+      ctx.save();
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = "lime";
+      ctx.drawImage(emeraldImg, e.x, e.y, e.width, e.height);
+      ctx.restore();
+    }
+  });
+}
+
+function drawGoldBags() {
+  goldBags.forEach(bag => {
+    ctx.save();
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = "gold";
+    ctx.drawImage(goldImg, bag.x, bag.y, bag.width, bag.height);
+    ctx.restore();
+  });
+}
+
+function drawPowerups() {
+  powerups.forEach(pu => {
+    ctx.save();
+    if (pu.type === "speed") ctx.fillStyle = "orange";
+    else if (pu.type === "shield") ctx.fillStyle = "lightblue";
+    else if (pu.type === "firepower") ctx.fillStyle = "purple";
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = ctx.fillStyle;
+    ctx.fillRect(pu.x, pu.y, pu.width, pu.height);
+    ctx.restore();
+  });
+}
+
+function drawBullets() {
+  ctx.fillStyle = "white";
+  bullets.forEach(b => {
+    ctx.fillRect(b.x, b.y, b.width, b.height);
+  });
+}
+
+// ==================================================================
+// Update Functions
+// ==================================================================
+function updatePlayer() {
+  player.x += player.dx;
+  player.y += player.dy;
+  if (player.x < 0) player.x = 0;
+  if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+  if (player.y < 0) player.y = 0;
+  if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
+  
+  if (shootSlowTimer > 0) {
+    player.speed = player.baseSpeed * 0.5;
+    shootSlowTimer--;
+  } else {
+    player.speed = player.baseSpeed;
+  }
+  
+  if (player.dx !== 0 || player.dy !== 0) {
+    player.lastDirection = {
+      x: player.dx !== 0 ? player.dx / Math.abs(player.dx) : 0,
+      y: player.dy !== 0 ? player.dy / Math.abs(player.dy) : 0
+    };
+  }
+  
+  let col = Math.floor((player.x + player.width / 2) / cellSize);
+  let row = Math.floor((player.y + player.height / 2) / cellSize);
+  if (row >= 0 && row < rows && col >= 0 && col < cols) {
+    terrain[row][col] = false;
+    emeralds.forEach(e => {
+      let eCol = Math.floor(e.x / cellSize);
+      let eRow = Math.floor(e.y / cellSize);
+      if (eRow === row && eCol === col && !e.collected) {
+        e.collected = true;
+        score += 10;
+        scoreDisplay.innerText = "Score: " + score;
+        soundCollect.play();
+      }
+    });
+  }
+}
+
+// -------------------- Enhanced Enemy AI --------------------
+// This version predicts the player's future position based on current velocity,
+// computes an A* path toward that predicted cell, and moves along the path.
+// If no path is found, it defaults to random movement.
+function updateEnemies() {
+  enemies.forEach(enemy => {
+    let predictionFactor = 40;
+    let predictedX = player.x + player.dx * predictionFactor;
+    let predictedY = player.y + player.dy * predictionFactor;
+    predictedX = Math.max(0, Math.min(canvas.width - player.width, predictedX));
+    predictedY = Math.max(0, Math.min(canvas.height - player.height, predictedY));
+    
+    let start = { x: Math.floor(enemy.x / cellSize), y: Math.floor(enemy.y / cellSize) };
+    let goal = { x: Math.floor((predictedX + player.width / 2) / cellSize), y: Math.floor((predictedY + player.height / 2) / cellSize) };
+    let path = findPath(start, goal);
+    
+    if (path.length > 1) {
+      let nextStep = path[1];
+      let targetX = nextStep.x * cellSize;
+      let targetY = nextStep.y * cellSize;
+      let dx = targetX - enemy.x;
+      let dy = targetY - enemy.y;
+      let dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist > 0) {
+        enemy.x += (dx / dist) * enemy.speed;
+        enemy.y += (dy / dist) * enemy.speed;
+      }
     } else {
-      ctx.fillStyle = 'yellow';
-      ctx.fillRect(this.x, this.y, this.size, this.size);
+      enemy.dx = (Math.random() * 2 - 1) * enemy.speed;
+      enemy.dy = (Math.random() * 2 - 1) * enemy.speed;
+      let newX = enemy.x + enemy.dx;
+      let newY = enemy.y + enemy.dy;
+      if (!cellBlocked(newX, enemy.y)) enemy.x = newX;
+      if (!cellBlocked(enemy.x, newY)) enemy.y = newY;
     }
-    if (this.shield) {
-      ctx.strokeStyle = 'cyan';
-      ctx.lineWidth = 3;
-      ctx.strokeRect(this.x-2, this.y-2, this.size+4, this.size+4);
-    }
-  }
-  shoot() {
-    let bx = this.x + this.size/2, by = this.y + this.size/2, speed = 450;
-    let dx = 0, dy = 0;
-    if (this.direction === 'up') dy = -1;
-    if (this.direction === 'down') dy = 1;
-    if (this.direction === 'left') dx = -1;
-    if (this.direction === 'right') dx = 1;
-    if (dx !== 0 || dy !== 0) {
-      bullets.push(new Bullet(bx, by, dx*speed, dy*speed));
-      if (this.multiFire) {
-        bullets.push(new Bullet(bx, by, dx*speed - dy*speed, dy*speed + dx*speed));
-        bullets.push(new Bullet(bx, by, dx*speed + dy*speed, dy*speed - dx*speed));
-      }
-      playSound('fire');
-    }
-  }
-}
-
-// ===============================
-// Enemy, Bullet, PowerUp Classes
-// ===============================
-class Enemy {
-  constructor(x, y) {
-    this.x = x; this.y = y; this.size = 32;
-    this.speed = 70 + currentLevel*10;
-    this.dirX = 0; this.dirY = 0;
-  }
-  update(dt) {
-    let angle = Math.atan2(player.y - this.y, player.x - this.x);
-    this.dirX = Math.cos(angle);
-    this.dirY = Math.sin(angle);
-    this.x += this.dirX * this.speed * dt;
-    this.y += this.dirY * this.speed * dt;
-    this.x = Math.max(0, Math.min(CANVAS_WIDTH - this.size, this.x));
-    this.y = Math.max(0, Math.min(CANVAS_HEIGHT - this.size, this.y));
-    // Dig tile
-    let tileX = Math.floor((this.x + this.size/2) / cellSize);
-    let tileY = Math.floor((this.y + this.size/2) / cellSize);
-    if (map[tileY] && map[tileY][tileX] === 1) map[tileY][tileX] = 0;
-    // Collision with player
-    if (!player.shield && Math.abs(this.x - player.x) < this.size && Math.abs(this.y - player.y) < this.size) {
-      lives--;
-      playSound('boom');
-      if (lives <= 0) showGameOver();
-      else spawnPlayer();
-    }
-  }
-  draw() {
-    if (images.enemy && images.enemy.complete) {
-      ctx.drawImage(images.enemy, this.x, this.y, this.size, this.size);
-    } else {
-      ctx.fillStyle = 'red';
-      ctx.fillRect(this.x, this.y, this.size, this.size);
-    }
-  }
-}
-class Bullet {
-  constructor(x, y, vx, vy) {
-    this.x = x; this.y = y;
-    this.vx = vx; this.vy = vy; this.size = 8; this.dead = false;
-  }
-  update(dt) {
-    this.x += this.vx * dt;
-    this.y += this.vy * dt;
-    if (this.x < 0 || this.y < 0 || this.x > CANVAS_WIDTH || this.y > CANVAS_HEIGHT) this.dead = true;
-    for (let i = enemies.length - 1; i >= 0; i--) {
-      let e = enemies[i];
-      if (Math.abs(this.x - e.x) < e.size && Math.abs(this.y - e.y) < e.size) {
-        enemies.splice(i, 1);
-        this.dead = true;
-        playSound('boom');
-        score += 500;
-        break;
+    
+    if (isColliding(player, enemy)) {
+      if (player.shieldTime <= 0) {
+        gameOver = true;
+        soundEnemyHit.play();
       }
     }
-  }
-  draw() {
-    ctx.fillStyle = 'orange';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, 2*Math.PI);
-    ctx.fill();
-  }
+  });
 }
-class PowerUp {
-  constructor(x, y, type) {
-    this.x = x; this.y = y; this.type = type; this.size = 24; this.collected = false;
-  }
-  update(dt) {
-    if (Math.abs(player.x - this.x) < player.size && Math.abs(player.y - this.y) < player.size) {
-      this.apply();
-      this.collected = true;
-    }
-  }
-  apply() {
-    playSound('powerup');
-    if (this.type === 'speed') {
-      player.speedBoost = true; setTimeout(() => player.speedBoost = false, 5000);
-    } else if (this.type === 'shield') {
-      player.shield = true; setTimeout(() => player.shield = false, 5000);
-    } else if (this.type === 'fire') {
-      player.multiFire = true; setTimeout(() => player.multiFire = false, 5000);
-    }
-  }
-  draw() {
-    ctx.fillStyle = (this.type === 'speed' ? 'blue' : (this.type === 'shield' ? 'cyan' : 'magenta'));
-    ctx.fillRect(this.x, this.y, this.size, this.size);
-  }
+// -------------------------------------------------------------
+
+function cellBlocked(x, y) {
+  let col = Math.floor(x / cellSize);
+  let row = Math.floor(y / cellSize);
+  if (row < 0 || row >= rows || col < 0 || col >= cols) return true;
+  return terrain[row][col];
 }
 
-// ===============================
-// Input Handling
-// ===============================
-let keys = {}, touchDir = null, touchFire = false;
-window.addEventListener('keydown', e => keys[e.key] = true);
-window.addEventListener('keyup', e => keys[e.key] = false);
-document.getElementById('upBtn').addEventListener('touchstart', () => { touchDir = 'up'; });
-document.getElementById('upBtn').addEventListener('touchend', () => { touchDir = null; });
-document.getElementById('downBtn').addEventListener('touchstart', () => { touchDir = 'down'; });
-document.getElementById('downBtn').addEventListener('touchend', () => { touchDir = null; });
-document.getElementById('leftBtn').addEventListener('touchstart', () => { touchDir = 'left'; });
-document.getElementById('leftBtn').addEventListener('touchend', () => { touchDir = null; });
-document.getElementById('rightBtn').addEventListener('touchstart', () => { touchDir = 'right'; });
-document.getElementById('rightBtn').addEventListener('touchend', () => { touchDir = null; });
-document.getElementById('fireBtn').addEventListener('touchstart', () => { touchFire = true; });
-document.getElementById('fireBtn').addEventListener('touchend', () => { touchFire = false; });
-
-// ===============================
-// Level & Map Initialization
-// ===============================
-function initLevel() {
-  let cols = 15 + (currentLevel-1)*3;
-  let rows = 12 + (currentLevel-1)*2;
-  map = []; coinMap = []; enemies = []; bullets = []; powerUps = [];
-  for (let y = 0; y < rows; y++) {
-    map[y] = []; coinMap[y] = [];
-    for (let x = 0; x < cols; x++) {
-      map[y][x] = (x === 0 || y === 0 || x === cols-1 || y === rows-1) ? 0 : 1;
-      coinMap[y][x] = 0;
-    }
-  }
-  // Carve spawn areas
-  map[1][1] = 0; map[1][2] = 0; map[2][1] = 0; map[2][2] = 0;
-  map[rows-2][cols-2] = 0; map[rows-3][cols-2] = 0; map[rows-2][cols-3] = 0;
-  // Place coins
-  let coinCount = 5 + currentLevel*2;
-  while (coinCount > 0) {
-    let x = Math.floor(Math.random() * (cols-2)) + 1;
-    let y = Math.floor(Math.random() * (rows-2)) + 1;
-    if (map[y][x] === 1 && coinMap[y][x] === 0) {
-      coinMap[y][x] = 1; coinCount--;
-    }
-  }
-  spawnPlayer();
-  for (let i = 0; i < currentLevel; i++) {
-    let ex = (cols-2)*cellSize;
-    let ey = (rows-2)*cellSize;
-    enemies.push(new Enemy(ex, ey));
-  }
-  setTimeout(() => spawnPowerUp('speed'), 10000);
-  setTimeout(() => spawnPowerUp('shield'), 20000);
-  setTimeout(() => spawnPowerUp('fire'), 30000);
-  updateHUD();
-}
-function spawnPlayer() {
-  player = new Player(cellSize, cellSize);
-}
-function spawnPowerUp(type) {
-  let rows = map.length, cols = map[0].length, x, y;
-  do {
-    x = Math.floor(Math.random()*(cols-2))+1;
-    y = Math.floor(Math.random()*(rows-2))+1;
-  } while (map[y][x] !== 0 || coinMap[y][x] !== 0);
-  powerUps.push(new PowerUp(x*cellSize, y*cellSize, type));
-}
-
-// ===============================
-// HUD & Screen Management
-// ===============================
-function updateHUD() {
-  scoreDisplay.textContent = 'Score: ' + score;
-  livesDisplay.textContent = 'Lives: ' + lives;
-}
-function showGameOver() {
-  gameState = STATE_GAMEOVER;
-  gameOverScreen.style.display = 'block';
-  finalScoreDisplay.textContent = 'Final Score: ' + score;
-  canvas.style.display = 'none';
-  hud.style.display = 'none';
-}
-function allCoinsCollected() {
-  for (let y = 0; y < coinMap.length; y++)
-    for (let x = 0; x < coinMap[y].length; x++)
-      if (coinMap[y][x] > 0) return false;
-  return true;
-}
-
-// ===============================
-// Drawing
-// ===============================
-function drawGame() {
-  ctx.fillStyle = 'black';
-  ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  for (let y = 0; y < map.length; y++) {
-    for (let x = 0; x < map[y].length; x++) {
-      if (map[y][x] === 1) {
-        ctx.fillStyle = '#8B4513';
-        ctx.fillRect(x*cellSize, y*cellSize, cellSize, cellSize);
-      }
-      if (coinMap[y][x] > 0) {
-        ctx.fillStyle = 'gold';
-        ctx.fillRect(x*cellSize+10, y*cellSize+10, 12, 12);
-      }
-    }
-  }
-  powerUps.forEach(p => p.draw());
-  player.draw();
-  enemies.forEach(e => e.draw());
-  bullets.forEach(b => b.draw());
-}
-
-// ===============================
-// Main Game Loop
-// ===============================
-function gameLoop() {
-  if (gameState === STATE_PLAY) {
-    let now = Date.now(), dt = (now - lastTime) / 1000;
-    lastTime = now;
-    player.update(dt);
-    enemies.forEach(e => e.update(dt));
-    bullets.forEach(b => b.update(dt));
-    bullets = bullets.filter(b => !b.dead);
-    powerUps.forEach(p => p.update(dt));
-    powerUps = powerUps.filter(p => !p.collected);
-    if (allCoinsCollected()) {
-      gameState = STATE_LEVELUP;
-      levelUpScreen.style.display = 'block';
+function updateBullets() {
+  bullets.forEach((bullet, index) => {
+    let nextX = bullet.x + bullet.dx;
+    let nextY = bullet.y + bullet.dy;
+    let col = Math.floor(nextX / cellSize);
+    let row = Math.floor(nextY / cellSize);
+    if (row >= 0 && row < rows && col >= 0 && col < cols && terrain[row][col]) {
+      bullets.splice(index, 1);
       return;
     }
-    drawGame();
-    updateHUD();
-    requestAnimationFrame(gameLoop);
-  }
+    bullet.x = nextX;
+    bullet.y = nextY;
+    if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
+      bullets.splice(index, 1);
+    }
+    enemies.forEach((enemy, eIndex) => {
+      if (isColliding(bullet, enemy)) {
+        enemies.splice(eIndex, 1);
+        bullets.splice(index, 1);
+        score += 20;
+        scoreDisplay.innerText = "Score: " + score;
+        soundEnemyHit.play();
+      }
+    });
+  });
 }
 
-// ===============================
-// Game Start & UI Events
-// ===============================
-function startLevel() {
-  startScreen.style.display = 'none';
-  gameOverScreen.style.display = 'none';
-  levelUpScreen.style.display = 'none';
-  canvas.style.display = 'block';
-  hud.style.display = 'block';
-  initLevel();
-  gameState = STATE_PLAY;
-  lastTime = Date.now();
+function updateGoldBags() {
+  goldBags.forEach(bag => {
+    let col = Math.floor(bag.x / cellSize);
+    let rowBelow = Math.floor((bag.y + bag.height) / cellSize);
+    if (rowBelow < rows && terrain[rowBelow][col] === true) {
+      bag.falling = false;
+      bag.vy = 0;
+      bag.startFallY = null;
+    } else {
+      if (!bag.falling) {
+        bag.falling = true;
+        bag.startFallY = bag.y;
+      }
+      bag.vy += 0.2;
+      bag.y += bag.vy;
+      if (bag.y + bag.height >= canvas.height) {
+        bag.y = canvas.height - bag.height;
+        bag.vy = 0;
+        bag.falling = false;
+      }
+      if (bag.startFallY !== null && (bag.y - bag.startFallY > 80)) {
+        enemies.forEach((enemy, idx) => {
+          if (isColliding(bag, enemy)) {
+            enemies.splice(idx, 1);
+            score += 20;
+            scoreDisplay.innerText = "Score: " + score;
+            soundEnemyHit.play();
+          }
+        });
+        if (isColliding(bag, player) && player.shieldTime <= 0) {
+          gameOver = true;
+          soundEnemyHit.play();
+        }
+      }
+    }
+  });
+}
+
+function updatePowerups() {
+  powerups.forEach((pu, index) => {
+    if (isColliding(player, pu)) {
+      powerups.splice(index, 1);
+      if (pu.type === "speed") {
+        player.speed = player.baseSpeed * 1.5;
+        player.powerupTime = 300;
+      } else if (pu.type === "shield") {
+        player.shieldTime = 300;
+      } else if (pu.type === "firepower") {
+        player.firepowerTime = 300;
+      }
+      soundPowerUp.play();
+    }
+  });
+  let displayText = "";
+  if (player.powerupTime > 0) {
+    player.powerupTime--;
+    displayText += "Speed: " + Math.ceil(player.powerupTime/60) + "s ";
+    if (player.powerupTime === 0) player.speed = player.baseSpeed;
+  }
+  if (player.shieldTime > 0) {
+    player.shieldTime--;
+    displayText += "Shield: " + Math.ceil(player.shieldTime/60) + "s ";
+  }
+  if (player.firepowerTime > 0) {
+    player.firepowerTime--;
+    displayText += "Firepower: " + Math.ceil(player.firepowerTime/60) + "s";
+  }
+  powerupDisplay.innerText = displayText;
+}
+
+function isColliding(a, b) {
+  return (a.x < b.x + b.width &&
+          a.x + a.width > b.x &&
+          a.y < b.y + b.height &&
+          a.y + a.height > b.y);
+}
+
+function updateBulletCooldown() {
+  if (bulletCooldown > 0) bulletCooldown--;
+}
+
+function gameLoop() {
+  if (gameOver) { endGame(); return; }
+  updatePlayer();
+  updateEnemies();
+  updateBullets();
+  updateGoldBags();
+  updatePowerups();
+  updateBulletCooldown();
+  
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawTerrain();
+  drawEmeralds();
+  drawGoldBags();
+  drawPowerups();
+  drawEnemies();
+  drawBullets();
+  drawPlayer();
+  
+  let win = emeralds.every(e => e.collected);
+  if (win) {
+    gameOver = true;
+    alert("You Won! All emeralds collected.");
+    endGame();
+    return;
+  }
+  
   requestAnimationFrame(gameLoop);
 }
-function initGame() {
-  startScreen.style.display = 'block';
-  gameOverScreen.style.display = 'none';
-  levelUpScreen.style.display = 'none';
-  canvas.style.display = 'none';
-  hud.style.display = 'none';
-  startBtn.addEventListener('click', () => {
-    currentLevel = 1;
-    score = 0;
-    lives = 3;
-    startLevel();
+
+function drawEmeralds() {
+  emeralds.forEach(e => {
+    if (!e.collected) {
+      ctx.save();
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = "lime";
+      ctx.drawImage(emeraldImg, e.x, e.y, e.width, e.height);
+      ctx.restore();
+    }
   });
-  nextLevelBtn.addEventListener('click', () => {
-    levelUpScreen.style.display = 'none';
-    if (currentLevel < 3) {
-      currentLevel++;
-      startLevel();
-    } else showGameOver();
-  });
-  restartBtn.addEventListener('click', () => {
-    gameOverScreen.style.display = 'none';
-    startScreen.style.display = 'block';
-  });
-  updateHUD();
 }
 
-// ===============================
-// Start the Game
-// ===============================
-window.onload = () => { initGame(); };
+function fireBullet() {
+  if (bulletCooldown > 0) return;
+  let direction = { x: player.lastDirection.x, y: player.lastDirection.y };
+  if (direction.x === 0 && direction.y === 0) { direction.x = -1; direction.y = 0; }
+  let speedMultiplier = (player.firepowerTime > 0) ? 16 : 8;
+  let bullet = {
+    x: player.x + player.width / 2 - 4,
+    y: player.y + player.height / 2 - 4,
+    width: 8,
+    height: 8,
+    dx: direction.x * speedMultiplier,
+    dy: direction.y * speedMultiplier
+  };
+  bullets.push(bullet);
+  bulletCooldown = 60;
+  shootSlowTimer = 30;
+  soundFire.play();
+}
+
+function endGame() {
+  if (!emeralds.every(e => e.collected)) { alert("Game Over! Digger was caught."); }
+  restartButton.style.display = "block";
+  gameScreen.style.display = "none";
+}
+
+function resetGame() {
+  score = 0;
+  scoreDisplay.innerText = "Score: " + score;
+  gameOver = false;
+  bulletCooldown = 0;
+  shootSlowTimer = 0;
+  player.x = 50;
+  player.y = 50;
+  player.dx = 0;
+  player.dy = 0;
+  player.speed = player.baseSpeed;
+  player.powerupTime = 0;
+  player.shieldTime = 0;
+  player.firepowerTime = 0;
+  initTerrain();
+  generateTunnel();
+  spawnEmeralds();
+  spawnGoldBags();
+  spawnPowerups();
+  enemies = [];
+  bullets = [];
+  spawnEnemy();
+  restartButton.style.display = "none";
+  gameScreen.style.display = "block";
+  gameLoop();
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowUp") { player.dy = -player.speed; soundMove.play(); }
+  if (e.key === "ArrowDown") { player.dy = player.speed; soundMove.play(); }
+  if (e.key === "ArrowLeft") { player.dx = -player.speed; soundMove.play(); }
+  if (e.key === "ArrowRight") { player.dx = player.speed; soundMove.play(); }
+  if (e.key === " " || e.key.toLowerCase() === "f") { fireBullet(); }
+});
+
+document.addEventListener("keyup", (e) => {
+  if (["ArrowUp", "ArrowDown"].includes(e.key)) player.dy = 0;
+  if (["ArrowLeft", "ArrowRight"].includes(e.key)) player.dx = 0;
+});
+
+document.getElementById("upBtn").addEventListener("touchstart", () => { player.dy = -player.speed; });
+document.getElementById("upBtn").addEventListener("touchend", () => { player.dy = 0; });
+document.getElementById("downBtn").addEventListener("touchstart", () => { player.dy = player.speed; });
+document.getElementById("downBtn").addEventListener("touchend", () => { player.dy = 0; });
+document.getElementById("leftBtn").addEventListener("touchstart", () => { player.dx = -player.speed; });
+document.getElementById("leftBtn").addEventListener("touchend", () => { player.dx = 0; });
+document.getElementById("rightBtn").addEventListener("touchstart", () => { player.dx = player.speed; });
+document.getElementById("rightBtn").addEventListener("touchend", () => { player.dx = 0; });
+document.getElementById("fireButton").addEventListener("touchstart", () => { fireBullet(); });
+
+startButton.addEventListener("click", () => {
+  startScreen.style.display = "none";
+  gameScreen.style.display = "block";
+  initTerrain();
+  generateTunnel();
+  spawnEmeralds();
+  spawnGoldBags();
+  spawnPowerups();
+  spawnEnemy();
+  gameLoop();
+});
+
+restartButton.addEventListener("click", resetGame);
+
+setInterval(() => { if (!gameOver && enemies.length < 3) { spawnEnemy(); } }, 15000);
