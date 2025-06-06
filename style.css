@@ -1,35 +1,284 @@
-/* Reset & Base */
-* { margin:0; padding:0; box-sizing:border-box; }
-html, body { width:100%; height:100%; overflow:hidden; background:#000; font-family:'Press Start 2P', monospace; color:#0f0; }
-.screen { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center; background:rgba(0,0,0,0.85); text-align:center; }
-.hidden { display:none; }
-@keyframes pulse { 0%,100%{transform:scale(1);}50%{transform:scale(1.05);} }
-.main-btn { padding:1vw 2vw; font-size:1.5vw; border:3px solid #0f0; border-radius:1vw; background:#111; color:#0f0; cursor:pointer; transition:0.3s; }
-.main-btn:hover { background:#222; }
-.screen h1 { font-size:4vw; color:gold; text-shadow:2px2px8px#000; animation:pulse 2s infinite; }
-
-/* Game Container & HUD */
-#gameContainer { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-header { position:absolute; top:0; width:100%; padding:1vw; display:flex; justify-content:space-between; font-size:1.2vw; }
-#powerupDisplay { font-size:1vw; color:lightgreen; }
-#gameCanvas { background:#111; image-rendering:pixelated; }
-
-/* Controls Layout */
-#controls { position:absolute; bottom:2vw; width:100%; display:flex; justify-content:space-between; padding:0 5vw; }
-/* Fire on Left */
-#fireControl { display:flex; align-items:center; }
-.control-btn.fire { width:6vw; height:6vw; border-radius:50%; background:#e91e63; border:2px solid #fff; font-size:2vw; }
-/* Joystick on Right */
-#joystick { width:10vw; display:flex; flex-direction:column; align-items:center; }
-.arrow-btn { width:3vw; height:3vw; margin:0.5vw; border:2px solid #fff; border-radius:0.5vw; background:rgba(255,255,255,0.1); font-size:1.5vw; }
-.arrow-btn:hover { background:rgba(255,255,255,0.2); }
-.horizontal { display:flex; }
-
-/* Responsive */
-@media (max-width:768px) {
-  .main-btn { font-size:3vw; padding:2vw 4vw; }
-  #controls { bottom:5vw; padding:0 10vw; }
-  .control-btn.fire { width:12vw; height:12vw; font-size:4vw; }
-  .arrow-btn { width:6vw; height:6vw; font-size:3vw; }
-  header { font-size:3vw; }
+/* ================================================================== */
+/* Global Reset and Base Styles */
+/* ================================================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* No scrollbars */
+  background: linear-gradient(135deg, #1a1a1a, #3a3a3a);
+  font-family: 'Press Start 2P', cursive, sans-serif;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* ================================================================== */
+/* Screen Containers */
+/* ================================================================== */
+.screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  animation: fadeIn 1s forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ================================================================== */
+/* Start Screen */
+/* ================================================================== */
+#startScreen {
+  background: url('classic-bg.png') no-repeat center;
+  background-size: cover;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+#startScreen h1 {
+  font-size: 40px;
+  margin-bottom: 20px;
+  color: gold;
+  text-shadow: 3px 3px 8px #000;
+}
+
+/* ================================================================== */
+/* Buttons */
+/* ================================================================== */
+.main-btn {
+  padding: 15px 30px;
+  font-size: 24px;
+  border: 3px solid gold;
+  border-radius: 10px;
+  background-color: gold;
+  color: #000;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+}
+.main-btn:hover {
+  background-color: #ffd633;
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(255,204,0,0.8);
+}
+
+/* ================================================================== */
+/* Game Screen */
+/* ================================================================== */
+#gameScreen {
+  display: none;
+  background-color: #000;
+}
+header {
+  margin: 10px;
+  animation: slideDown 0.5s forwards;
+}
+@keyframes slideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+header h2 {
+  font-size: 2em;
+  color: gold;
+  text-shadow: 2px 2px 6px #000;
+}
+#scoreDisplay {
+  font-size: 1.2em;
+  margin-top: 5px;
+}
+#powerupDisplay {
+  margin-top: 5px;
+  font-size: 1em;
+  color: lightgreen;
+  text-shadow: 1px 1px 4px #000;
+}
+
+/* ================================================================== */
+/* Game Container and Canvas */
+/* ================================================================== */
+#gameContainer {
+  position: relative;
+  width: 800px;
+  height: 600px;
+  margin: 20px auto;
+  background-color: #000;  /* Black background for clarity */
+  border: 8px solid gold;
+  box-shadow: 0 0 20px rgba(255,204,0,0.8);
+  border-radius: 15px;
+  overflow: hidden;
+  animation: slideIn 1s forwards;
+}
+@keyframes slideIn {
+  from { transform: translateY(-50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+canvas {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+/* ================================================================== */
+/* Controls Section */
+/* ================================================================== */
+#controls {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+  animation: fadeIn 0.5s forwards;
+}
+
+/* Fire Button */
+#fireContainer {
+  position: relative;
+  left: 20px;
+}
+.control-btn.fire {
+  width: 90px;
+  height: 90px;
+  background-color: #e91e63;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+.control-btn.fire:hover {
+  background-color: #d50000;
+  transform: scale(1.1);
+}
+
+/* Joystick */
+#joystickContainer {
+  position: relative;
+  right: 20px;
+}
+#joystick {
+  width: 120px;
+  height: 120px;
+  background-color: rgba(68,68,68,0.8);
+  border: 3px solid #fff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  transition: transform 0.3s;
+}
+#joystick:hover {
+  transform: scale(1.05);
+}
+#joystick .horizontal {
+  display: flex;
+  justify-content: center;
+  margin: 5px 0;
+}
+.arrow-btn {
+  width: 50px;
+  height: 50px;
+  background-color: #00bcd4;
+  border: 3px solid #fff;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  margin: 3px;
+  transition: background 0.3s, transform 0.2s;
+}
+.arrow-btn:hover {
+  background-color: #008ba3;
+  transform: scale(1.1);
+}
+
+/* ================================================================== */
+/* Restart Button */
+/* ================================================================== */
+#restartButton {
+  margin-top: 20px;
+  padding: 12px 24px;
+  font-size: 24px;
+  background-color: gold;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: none;
+  transition: background 0.3s;
+}
+#restartButton:hover {
+  background-color: #ffd633;
+}
+
+/* ================================================================== */
+/* Responsive Design */
+/* ================================================================== */
+@media screen and (max-width: 1024px) {
+  #gameContainer {
+    width: 90vw;
+    height: 70vh;
+    border-width: 6px;
+  }
+  header h2 { font-size: 1.8em; }
+  #restartButton { font-size: 22px; padding: 10px 20px; }
+  .arrow-btn { width: 45px; height: 45px; font-size: 22px; }
+  .control-btn.fire { width: 80px; height: 80px; font-size: 22px; }
+}
+
+@media screen and (max-width: 768px) {
+  #gameContainer {
+    width: 95vw;
+    height: 75vh;
+    border-width: 4px;
+  }
+  header h2 { font-size: 1.6em; }
+  #restartButton { font-size: 20px; padding: 8px 18px; }
+  .arrow-btn { width: 40px; height: 40px; font-size: 20px; }
+  .control-btn.fire { width: 70px; height: 70px; font-size: 20px; }
+  #controls { flex-direction: column; }
+}
+
+@media screen and (max-width: 480px) {
+  #gameContainer {
+    width: 100vw;
+    height: 90vh;
+    border-width: 4px;
+  }
+  header h2 { font-size: 1.4em; }
+  #restartButton { font-size: 18px; padding: 8px 16px; }
+  .arrow-btn { width: 35px; height: 35px; font-size: 18px; }
+  .control-btn.fire { width: 65px; height: 65px; font-size: 18px; }
+}
+
+.margin-top-10 { margin-top: 10px; }
+.margin-top-20 { margin-top: 20px; }
+.margin-bottom-10 { margin-bottom: 10px; }
+.margin-bottom-20 { margin-bottom: 20px; }
+.padding-10 { padding: 10px; }
+.padding-20 { padding: 20px; }
+.flex-center { display: flex; justify-content: center; align-items: center; }
+.flex-column { display: flex; flex-direction: column; }
+.full-width { width: 100%; }
+.rounded { border-radius: 10px; }
+.box-shadow { box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-pulse { animation: pulse 2s infinite; }
+.text-shadow { text-shadow: 2px 2px 4px #000; }
