@@ -10,6 +10,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            user-select: none;
         }
         
         body {
@@ -142,9 +143,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            user-select: none;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
             transition: all 0.1s;
+            touch-action: manipulation;
         }
         
         .btn:active {
@@ -330,7 +331,7 @@
                     <li>Shoot enemies with the FIRE button</li>
                     <li>Avoid enemies or you'll lose a life</li>
                     <li>Collect power-ups for special abilities</li>
-                    <li>Collect all coins to complete the level</li>
+                    <li>Collect gold bags to complete levels</li>
                     <li>Complete all 3 levels to win!</li>
                 </ul>
             </div>
@@ -388,6 +389,8 @@
         let score = 0;
         let lives = 3;
         let levelStartTime = 0;
+        let goldBags = [];
+        let levelGoldBag = null;
 
         // Game entities
         let map = [];
@@ -397,79 +400,15 @@
         let powerUps = [];
         let player;
         let lastTime = 0;
-
-        // Audio context
+// Audio context
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const sounds = {
             fire: null,
             boom: null,
             powerup: null,
-            coin: null
+            coin: null,
+            gold: null
         };
-// Load sounds
-        function loadSounds() {
-            // Fire sound
-            const fireOscillator = audioContext.createOscillator();
-            const fireGain = audioContext.createGain();
-            fireOscillator.connect(fireGain);
-            fireGain.connect(audioContext.destination);
-            fireOscillator.type = 'sawtooth';
-            fireOscillator.frequency.setValueAtTime(100, audioContext.currentTime);
-            fireGain.gain.setValueAtTime(0.3, audioContext.currentTime);
-            fireOscillator.start();
-            fireOscillator.stop(audioContext.currentTime + 0.1);
-            sounds.fire = fireOscillator;
-
-            // Boom sound
-            const boomOscillator = audioContext.createOscillator();
-            const boomGain = audioContext.createGain();
-            boomOscillator.connect(boomGain);
-            boomGain.connect(audioContext.destination);
-            boomOscillator.type = 'sine';
-            boomOscillator.frequency.setValueAtTime(50, audioContext.currentTime);
-            boomOscillator.frequency.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-            boomGain.gain.setValueAtTime(0.5, audioContext.currentTime);
-            boomGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-            boomOscillator.start();
-            boomOscillator.stop(audioContext.currentTime + 0.5);
-            sounds.boom = boomOscillator;
-
-            // Powerup sound
-            const powerupOscillator = audioContext.createOscillator();
-            const powerupGain = audioContext.createGain();
-            powerupOscillator.connect(powerupGain);
-            powerupGain.connect(audioContext.destination);
-            powerupOscillator.type = 'sine';
-            powerupOscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
-            powerupOscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
-            powerupOscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
-            powerupGain.gain.setValueAtTime(0.3, audioContext.currentTime);
-            powerupOscillator.start();
-            powerupOscillator.stop(audioContext.currentTime + 0.3);
-            sounds.powerup = powerupOscillator;
-
-            // Coin sound
-            const coinOscillator = audioContext.createOscillator();
-            const coinGain = audioContext.createGain();
-            coinOscillator.connect(coinGain);
-            coinGain.connect(audioContext.destination);
-            coinOscillator.type = 'triangle';
-            coinOscillator.frequency.setValueAtTime(1046.5, audioContext.currentTime);
-            coinOscillator.frequency.exponentialRampToValueAtTime(1567.98, audioContext.currentTime + 0.1);
-            coinGain.gain.setValueAtTime(0.3, audioContext.currentTime);
-            coinGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
-            coinOscillator.start();
-            coinOscillator.stop(audioContext.currentTime + 0.1);
-            sounds.coin = coinOscillator;
-        }
-
-        // Play sound
-        function playSound(name) {
-            if (sounds[name]) {
-                sounds[name].start();
-                sounds[name].stop(audioContext.currentTime + 0.5);
-            }
-        }
 
         // Player class
         class Player {
@@ -616,6 +555,48 @@
             }
         }
 
+        // Gold Bag class
+        class GoldBag {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = 32;
+                this.collected = false;
+            }
+            
+            update(dt) {
+                if (!this.collected && player) {
+                    // Check collision with player
+                    if (Math.abs(this.x + this.size/2 - (player.x + player.size/2)) < player.size/2 + this.size/2 &&
+                        Math.abs(this.y + this.size/2 - (player.y + player.size/2)) < player.size/2 + this.size/2) {
+                        this.collected = true;
+                        playSound('gold');
+                        score += 1000;
+                        levelComplete();
+                    }
+                }
+            }
+            
+            draw() {
+                if (this.collected) return;
+                
+                // Draw gold bag
+                ctx.fillStyle = '#ffcc00';
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+                
+                // Draw bag details
+                ctx.fillStyle = '#d4af37';
+                ctx.fillRect(this.x + 8, this.y + 8, this.size - 16, this.size - 16);
+                
+                // Draw dollar sign
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 20px "Press Start 2P"';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('$', this.x + this.size/2, this.y + this.size/2);
+            }
+        }
+
         // Enemy class
         class Enemy {
             constructor(x, y, type = 1) {
@@ -750,8 +731,7 @@
                     case 3: color = 'orange'; break;
                     default: color = 'red';
                 }
-                
-                ctx.fillStyle = color;
+ctx.fillStyle = color;
                 ctx.fillRect(this.x, this.y, this.size, this.size);
                 
                 // Draw eyes
@@ -898,7 +878,6 @@
                 );
                 
                 // Draw symbol inside
-// Draw symbol inside
                 ctx.fillStyle = 'white';
                 ctx.font = '16px "Press Start 2P"';
                 ctx.textAlign = 'center';
@@ -914,6 +893,85 @@
             }
         }
 
+        // Load sounds
+        function loadSounds() {
+            // Fire sound
+            const fireOscillator = audioContext.createOscillator();
+            const fireGain = audioContext.createGain();
+            fireOscillator.connect(fireGain);
+            fireGain.connect(audioContext.destination);
+            fireOscillator.type = 'sawtooth';
+            fireOscillator.frequency.setValueAtTime(100, audioContext.currentTime);
+            fireGain.gain.setValueAtTime(0.3, audioContext.currentTime);
+            fireOscillator.start();
+            fireOscillator.stop(audioContext.currentTime + 0.1);
+            sounds.fire = fireOscillator;
+
+            // Boom sound
+            const boomOscillator = audioContext.createOscillator();
+            const boomGain = audioContext.createGain();
+            boomOscillator.connect(boomGain);
+            boomGain.connect(audioContext.destination);
+            boomOscillator.type = 'sine';
+            boomOscillator.frequency.setValueAtTime(50, audioContext.currentTime);
+            boomOscillator.frequency.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+            boomGain.gain.setValueAtTime(0.5, audioContext.currentTime);
+            boomGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+            boomOscillator.start();
+            boomOscillator.stop(audioContext.currentTime + 0.5);
+            sounds.boom = boomOscillator;
+
+            // Powerup sound
+            const powerupOscillator = audioContext.createOscillator();
+            const powerupGain = audioContext.createGain();
+            powerupOscillator.connect(powerupGain);
+            powerupGain.connect(audioContext.destination);
+            powerupOscillator.type = 'sine';
+            powerupOscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+            powerupOscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+            powerupOscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+            powerupGain.gain.setValueAtTime(0.3, audioContext.currentTime);
+            powerupOscillator.start();
+            powerupOscillator.stop(audioContext.currentTime + 0.3);
+            sounds.powerup = powerupOscillator;
+
+            // Coin sound
+            const coinOscillator = audioContext.createOscillator();
+            const coinGain = audioContext.createGain();
+            coinOscillator.connect(coinGain);
+            coinGain.connect(audioContext.destination);
+            coinOscillator.type = 'triangle';
+            coinOscillator.frequency.setValueAtTime(1046.5, audioContext.currentTime);
+            coinOscillator.frequency.exponentialRampToValueAtTime(1567.98, audioContext.currentTime + 0.1);
+            coinGain.gain.setValueAtTime(0.3, audioContext.currentTime);
+            coinGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+            coinOscillator.start();
+            coinOscillator.stop(audioContext.currentTime + 0.1);
+            sounds.coin = coinOscillator;
+
+            // Gold bag sound
+            const goldOscillator = audioContext.createOscillator();
+            const goldGain = audioContext.createGain();
+            goldOscillator.connect(goldGain);
+            goldGain.connect(audioContext.destination);
+            goldOscillator.type = 'sine';
+            goldOscillator.frequency.setValueAtTime(261.63, audioContext.currentTime);
+            goldOscillator.frequency.setValueAtTime(392.00, audioContext.currentTime + 0.1);
+            goldOscillator.frequency.setValueAtTime(523.25, audioContext.currentTime + 0.2);
+            goldGain.gain.setValueAtTime(0.4, audioContext.currentTime);
+            goldOscillator.start();
+            goldOscillator.stop(audioContext.currentTime + 0.3);
+            sounds.gold = goldOscillator;
+        }
+
+        // Play sound
+        function playSound(name) {
+            if (sounds[name]) {
+                sounds[name].start();
+                sounds[name].stop(audioContext.currentTime + 0.5);
+            }
+        }
+
         // Input handling
         let keys = {};
         let touchDir = null;
@@ -922,57 +980,43 @@
         window.addEventListener('keydown', e => keys[e.key] = true);
         window.addEventListener('keyup', e => keys[e.key] = false);
         
-        // Touch controls
-        document.getElementById('upBtn').addEventListener('touchstart', (e) => { 
-            e.preventDefault();
-            touchDir = 'up'; 
-        });
-        document.getElementById('upBtn').addEventListener('touchend', () => { touchDir = null; });
+        // Touch controls with pointer events
+        function setupButton(element, dir) {
+            // Pointer events (works for both mouse and touch)
+            element.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                if (dir) {
+                    touchDir = dir;
+                } else {
+                    touchFire = true;
+                }
+            });
+            
+            element.addEventListener('pointerup', (e) => {
+                e.preventDefault();
+                if (dir) {
+                    touchDir = null;
+                } else {
+                    touchFire = false;
+                }
+            });
+            
+            element.addEventListener('pointerleave', (e) => {
+                e.preventDefault();
+                if (dir) {
+                    touchDir = null;
+                } else {
+                    touchFire = false;
+                }
+            });
+        }
         
-        document.getElementById('downBtn').addEventListener('touchstart', (e) => { 
-            e.preventDefault();
-            touchDir = 'down'; 
-        });
-        document.getElementById('downBtn').addEventListener('touchend', () => { touchDir = null; });
-        
-        document.getElementById('leftBtn').addEventListener('touchstart', (e) => { 
-            e.preventDefault();
-            touchDir = 'left'; 
-        });
-        document.getElementById('leftBtn').addEventListener('touchend', () => { touchDir = null; });
-        
-        document.getElementById('rightBtn').addEventListener('touchstart', (e) => { 
-            e.preventDefault();
-            touchDir = 'right'; 
-        });
-        document.getElementById('rightBtn').addEventListener('touchend', () => { touchDir = null; });
-        
-        document.getElementById('fireBtn').addEventListener('touchstart', (e) => { 
-            e.preventDefault();
-            touchFire = true; 
-        });
-        document.getElementById('fireBtn').addEventListener('touchend', () => { touchFire = false; });
-        
-        // Mouse controls for testing on desktop
-        document.getElementById('upBtn').addEventListener('mousedown', () => { touchDir = 'up'; });
-        document.getElementById('upBtn').addEventListener('mouseup', () => { touchDir = null; });
-        document.getElementById('upBtn').addEventListener('mouseleave', () => { touchDir = null; });
-        
-        document.getElementById('downBtn').addEventListener('mousedown', () => { touchDir = 'down'; });
-        document.getElementById('downBtn').addEventListener('mouseup', () => { touchDir = null; });
-        document.getElementById('downBtn').addEventListener('mouseleave', () => { touchDir = null; });
-        
-        document.getElementById('leftBtn').addEventListener('mousedown', () => { touchDir = 'left'; });
-        document.getElementById('leftBtn').addEventListener('mouseup', () => { touchDir = null; });
-        document.getElementById('leftBtn').addEventListener('mouseleave', () => { touchDir = null; });
-        
-        document.getElementById('rightBtn').addEventListener('mousedown', () => { touchDir = 'right'; });
-        document.getElementById('rightBtn').addEventListener('mouseup', () => { touchDir = null; });
-        document.getElementById('rightBtn').addEventListener('mouseleave', () => { touchDir = null; });
-        
-        document.getElementById('fireBtn').addEventListener('mousedown', () => { touchFire = true; });
-        document.getElementById('fireBtn').addEventListener('mouseup', () => { touchFire = false; });
-        document.getElementById('fireBtn').addEventListener('mouseleave', () => { touchFire = false; });
+        // Setup control buttons
+        setupButton(document.getElementById('upBtn'), 'up');
+        setupButton(document.getElementById('downBtn'), 'down');
+        setupButton(document.getElementById('leftBtn'), 'left');
+        setupButton(document.getElementById('rightBtn'), 'right');
+        setupButton(document.getElementById('fireBtn'));
 
         // Game initialization
         function initGame() {
@@ -1031,6 +1075,7 @@
             enemies = [];
             bullets = [];
             powerUps = [];
+            levelGoldBag = null;
             
             // Create map with borders
             for (let y = 0; y < rows; y++) {
@@ -1041,8 +1086,8 @@
                     if (x === 0 || y === 0 || x === cols-1 || y === rows-1) {
                         map[y][x] = 2; // Indestructible wall
                     } else {
-                        // Fill with dirt, but leave some open spaces for paths
-                        if (Math.random() > 0.2) {
+                        // Fill with dirt, but leave paths to ensure connectivity
+                        if (Math.random() > 0.3) {
                             map[y][x] = 1; // Dirt
                         } else {
                             map[y][x] = 0; // Path
@@ -1066,6 +1111,9 @@
                 }
             }
             
+            // Ensure path between player and enemy areas
+            createPath(3, 3, cols-4, rows-4);
+            
             // Place coins
             let coinCount = 10 + currentLevel * 3;
             while (coinCount > 0) {
@@ -1076,6 +1124,11 @@
                     coinCount--;
                 }
             }
+            
+            // Place gold bag in enemy area
+            let gbX = cols - 4 + Math.floor(Math.random() * 2);
+            let gbY = rows - 4 + Math.floor(Math.random() * 2);
+            levelGoldBag = new GoldBag(gbX * 32, gbY * 32);
             
             spawnPlayer();
             
@@ -1099,6 +1152,24 @@
             setTimeout(() => spawnPowerUp('fire'), 20000);
             
             updateHUD();
+        }
+        
+        // Create a path between two points
+        function createPath(startX, startY, endX, endY) {
+            let x = startX;
+            let y = startY;
+            
+            while (x !== endX || y !== endY) {
+                map[y][x] = 0; // Clear the path
+                
+                if (x < endX) x++;
+                else if (x > endX) x--;
+                
+                if (y < endY) y++;
+                else if (y > endY) y--;
+            }
+            
+            map[y][x] = 0; // Clear the endpoint
         }
 
         // Spawn player at start
@@ -1145,38 +1216,20 @@
                 powerUps.forEach(p => p.update(dt));
                 powerUps = powerUps.filter(p => !p.collected);
                 
-                // Spawn more enemies occasionally
+                if (levelGoldBag) {
+                    levelGoldBag.update(dt);
+                }
+// Spawn more enemies occasionally
                 if (Math.random() < 0.01 && enemies.length < 3 + currentLevel * 2) {
                     let ex = (map[0].length - 4) * 32 + Math.random() * 64;
                     let ey = (map.length - 4) * 32 + Math.random() * 64;
                     enemies.push(new Enemy(ex, ey, Math.min(3, currentLevel)));
                 }
                 
-                if (allCoinsCollected()) {
-                    // Add level completion bonus
-                    let timeBonus = Math.max(0, 30 - (Date.now() - levelStartTime) / 1000) * 100;
-                    score += Math.floor(timeBonus);
-                    
-                    gameState = STATE_LEVELUP;
-                    document.getElementById('levelScore').textContent = score;
-                    document.getElementById('levelUp').classList.remove('hidden');
-                    return;
-                }
-                
                 drawGame();
                 updateHUD();
                 requestAnimationFrame(gameLoop);
             }
-        }
-
-        // Check if level complete
-        function allCoinsCollected() {
-            for (let y = 0; y < coinMap.length; y++) {
-                for (let x = 0; x < coinMap[y].length; x++) {
-                    if (coinMap[y][x] > 0) return false;
-                }
-            }
-            return true;
         }
 
         // Draw everything
@@ -1239,6 +1292,12 @@
             powerUps.forEach(p => p.draw());
             bullets.forEach(b => b.draw());
             enemies.forEach(e => e.draw());
+            
+            // Draw gold bag if not collected
+            if (levelGoldBag) {
+                levelGoldBag.draw();
+            }
+            
             player.draw();
             
             // Draw power-up timers
@@ -1254,6 +1313,17 @@
                 ctx.fillStyle = 'magenta';
                 ctx.fillRect(230, CANVAS_HEIGHT - 20, (player.fireTimer / 5) * 100, 10);
             }
+        }
+        
+        // Level complete
+        function levelComplete() {
+            // Add level completion bonus
+            let timeBonus = Math.max(0, 30 - (Date.now() - levelStartTime) / 1000) * 100;
+            score += Math.floor(timeBonus);
+            
+            gameState = STATE_LEVELUP;
+            document.getElementById('levelScore').textContent = score;
+            document.getElementById('levelUp').classList.remove('hidden');
         }
 
         // Show game over screen
