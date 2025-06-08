@@ -364,6 +364,26 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
         
+        .path-error {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 0, 0, 0.7);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            animation: fadeOut 3s forwards;
+            z-index: 20;
+        }
+        
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; display: none; }
+        }
+        
         @media (max-width: 768px) {
             h1 {
                 font-size: 1.8rem;
@@ -528,8 +548,7 @@
             </div>
         </div>
     </div>
-
-    <script>
+<script>
         // Canvas setup
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -558,7 +577,6 @@
         let bonusMode = false;
         let bonusEndTime = 0;
         let monstersEaten = 0;
-        let cherry = null;
         let powerUps = [];
         let playerSpeed = 100;
         let playerShield = false;
@@ -566,6 +584,7 @@
         let shieldTimer = 0;
         let speedTimer = 0;
         let fireTimer = 0;
+        let lastTime = Date.now();
 
         // Tile types
         const TILE_EMPTY = 0;
@@ -631,7 +650,8 @@
                 if (!isBlocked(this.x, newY, this.size)) {
                     this.y = newY;
                 }
-// Boundary checks
+                
+                // Boundary checks
                 this.x = Math.max(0, Math.min(CANVAS_WIDTH - this.size, this.x));
                 this.y = Math.max(0, Math.min(CANVAS_HEIGHT - this.size, this.y));
                 
@@ -944,8 +964,7 @@
                         break;
                 }
             }
-            
-            draw() {
+       draw() {
                 if (this.collected) return;
                 
                 let color, symbol;
@@ -1039,6 +1058,13 @@
                         this.dirX = dx / distance;
                         this.dirY = dy / distance;
                     }
+                } else {
+                    // If no path, move randomly
+                    if (this.moveTimer <= 0) {
+                        this.dirX = Math.random() * 2 - 1;
+                        this.dirY = Math.random() * 2 - 1;
+                        this.moveTimer = Math.random() * 2 + 1;
+                    }
                 }
                 
                 // Calculate new position
@@ -1112,7 +1138,6 @@
                         const ny = current.y + dir.dy;
                         
                         // Skip if out of bounds
-// Skip if out of bounds
                         if (ny < 0 || ny >= map.length || nx < 0 || nx >= map[0].length) continue;
                         
                         // Skip if not a path and enemy can't dig
@@ -1132,7 +1157,7 @@
                     }
                 }
                 
-                // If no path found
+                // If no path found, use fallback random movement
                 this.path = [];
             }
             
@@ -1376,7 +1401,6 @@
             maxEnemies = 3 + currentLevel * 2; // Fewer enemies in level 1
             bonusMode = false;
             monstersEaten = 0;
-            cherry = null;
             
             // Create map with borders
             for (let y = 0; y < rows; y++) {
@@ -1413,13 +1437,18 @@
             
             // Place emeralds
             totalEmeralds = 10 + currentLevel * 5; // Fewer emeralds in level 1
-            for (let i = 0; i < totalEmeralds; i++) {
+            let placedEmeralds = 0;
+            let attempts = 0;
+            while (placedEmeralds < totalEmeralds && attempts < 1000) {
                 let x = Math.floor(Math.random() * (cols - 4)) + 2;
                 let y = Math.floor(Math.random() * (rows - 4)) + 2;
                 if (map[y][x] === TILE_DIRT) {
                     emeraldMap[y][x] = true;
+                    placedEmeralds++;
                 }
+                attempts++;
             }
+            totalEmeralds = placedEmeralds; // Update to actual placed count
             
             // Place gold bags
             for (let i = 0; i < 6; i++) {
@@ -1454,8 +1483,7 @@
             updateHUD();
             updateEmeraldStatus();
         }
-        
-        // Create a path between two points
+// Create a path between two points
         function createPath(startX, startY, endX, endY) {
             let x = startX;
             let y = startY;
@@ -1498,9 +1526,6 @@
                 
                 enemies.push(new Enemy(ex, ey));
                 enemiesCreated++;
-            } else if (!cherry) {
-                // Spawn cherry at top-right
-                cherry = new Cherry(CANVAS_WIDTH - 50, 20);
             }
         }
 
@@ -1526,55 +1551,57 @@
         // Game loop
         function gameLoop() {
             if (gameState === STATE_PLAY) {
-                let now = Date.now();
-                let dt = (now - lastTime) / 1000;
-                lastTime = now;
-                
-                // Update power-up timers
-                if (speedTimer > 0) {
-                    speedTimer -= dt;
-                    if (speedTimer <= 0) playerSpeed = 100;
+                try {
+                    let now = Date.now();
+                    let dt = (now - lastTime) / 1000;
+                    lastTime = now;
+                    
+                    // Update power-up timers
+                    if (speedTimer > 0) {
+                        speedTimer -= dt;
+                        if (speedTimer <= 0) playerSpeed = 100;
+                    }
+                    if (shieldTimer > 0) {
+                        shieldTimer -= dt;
+                        if (shieldTimer <= 0) playerShield = false;
+                    }
+                    if (fireTimer > 0) {
+                        fireTimer -= dt;
+                        if (fireTimer <= 0) playerFirePower = false;
+                    }
+                    
+                    // Update entities
+                    player.update(dt);
+                    enemies.forEach(e => e.update(dt));
+                    bullets.forEach(b => b.update(dt));
+                    bullets = bullets.filter(b => !b.dead);
+                    goldBags.forEach(gb => gb.update(dt));
+                    powerUps.forEach(pu => pu.update(dt));
+                    powerUps = powerUps.filter(pu => !pu.collected);
+                    
+                    // Spawn more enemies occasionally
+                    if (Math.random() < 0.01 && enemies.length < maxEnemies) {
+                        spawnEnemy();
+                    }
+                    
+                    // Check if bonus mode ended
+                    if (bonusMode && Date.now() > bonusEndTime) {
+                        bonusMode = false;
+                    }
+                    
+                    // Check if level is complete
+                    if (emeraldsCollected >= totalEmeralds) {
+                        levelComplete();
+                        return;
+                    }
+                    
+                    drawGame();
+                    updateHUD();
+                    requestAnimationFrame(gameLoop);
+                } catch (e) {
+                    console.error("Game error:", e);
+                    requestAnimationFrame(gameLoop);
                 }
-                if (shieldTimer > 0) {
-                    shieldTimer -= dt;
-                    if (shieldTimer <= 0) playerShield = false;
-                }
-                if (fireTimer > 0) {
-                    fireTimer -= dt;
-                    if (fireTimer <= 0) playerFirePower = false;
-                }
-                
-                // Update entities
-                player.update(dt);
-                enemies.forEach(e => e.update(dt));
-                bullets.forEach(b => b.update(dt));
-                bullets = bullets.filter(b => !b.dead);
-                goldBags.forEach(gb => gb.update(dt));
-                powerUps.forEach(pu => pu.update(dt));
-                powerUps = powerUps.filter(pu => !pu.collected);
-                
-                // Update cherry
-                if (cherry) cherry.update(dt);
-                
-                // Spawn more enemies occasionally
-                if (Math.random() < 0.01 && enemies.length < maxEnemies) {
-                    spawnEnemy();
-                }
-                
-                // Check if bonus mode ended
-                if (bonusMode && Date.now() > bonusEndTime) {
-                    bonusMode = false;
-                }
-                
-                // Check if level is complete
-                if (emeraldsCollected >= totalEmeralds) {
-                    levelComplete();
-                    return;
-                }
-                
-                drawGame();
-                updateHUD();
-                requestAnimationFrame(gameLoop);
             }
         }
 
@@ -1642,9 +1669,9 @@
             bullets.forEach(b => b.draw());
             enemies.forEach(e => e.draw());
             powerUps.forEach(pu => pu.draw());
-            if (cherry) cherry.draw();
             player.draw();
-// Draw bonus mode indicator
+            
+            // Draw bonus mode indicator
             if (bonusMode) {
                 ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
                 ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
