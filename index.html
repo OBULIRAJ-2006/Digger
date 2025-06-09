@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Digger Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Modern Digger - Enhanced</title>
     <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
     <style>
         * {
@@ -11,6 +11,7 @@
             padding: 0;
             box-sizing: border-box;
             user-select: none;
+            touch-action: manipulation;
         }
         
         body {
@@ -22,7 +23,8 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            padding: 20px;
+            padding: 10px;
+            touch-action: none;
         }
         
         .container {
@@ -30,23 +32,24 @@
             width: 100%;
             max-width: 800px;
             text-align: center;
+            padding: 10px;
         }
         
         .game-header {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 15px;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 12px;
             border: 3px solid #4a4a8a;
-            box-shadow: 0 0 15px rgba(106, 90, 205, 0.5);
+            box-shadow: 0 0 12px rgba(106, 90, 205, 0.5);
         }
         
         h1 {
             color: #ffcc00;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             text-shadow: 0 0 10px rgba(255, 204, 0, 0.7);
-            margin-bottom: 15px;
-            letter-spacing: 3px;
+            margin-bottom: 12px;
+            letter-spacing: 2px;
             background: linear-gradient(to right, #ffcc00, #ff9900);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -66,7 +69,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             color: #0f0;
             display: flex;
             flex-direction: column;
@@ -82,9 +85,10 @@
         
         .screen h2 {
             color: #ffcc00;
-            font-size: 2rem;
-            margin-bottom: 20px;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
             text-shadow: 0 0 10px rgba(255, 204, 0, 0.7);
+            line-height: 1.4;
         }
         
         .hidden {
@@ -95,29 +99,30 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
-            padding: 12px 25px;
+            padding: 10px 20px;
             background: rgba(30, 30, 60, 0.8);
-            border-radius: 12px;
-            margin-bottom: 15px;
+            border-radius: 10px;
+            margin-bottom: 12px;
             border: 2px solid #5a5aaa;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            font-size: 0.9rem;
         }
         
         #hud span {
-            font-size: 1rem;
+            font-size: 0.9rem;
             color: #ffcc00;
             text-shadow: 0 0 5px rgba(255, 204, 0, 0.7);
         }
         
         .level-indicator {
             background: rgba(30, 30, 60, 0.8);
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 15px;
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 12px;
             border: 2px solid #5a5aaa;
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: #4a9af5;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
         
         #gameCanvas {
@@ -125,17 +130,18 @@
             display: block;
             margin: 0 auto;
             border: 4px solid #5a5aaa;
-            border-radius: 15px;
-            box-shadow: 0 0 25px rgba(106, 90, 205, 0.7);
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(106, 90, 205, 0.7);
             image-rendering: pixelated;
+            max-width: 100%;
         }
         
         .controls-container {
             display: flex;
             justify-content: space-between;
-            margin-top: 25px;
+            margin-top: 20px;
             width: 100%;
-            gap: 20px;
+            gap: 15px;
         }
         
         .fire-controls {
@@ -156,15 +162,15 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 10px;
-            width: 180px;
-            height: 180px;
+            gap: 8px;
+            width: 160px;
+            height: 160px;
         }
         
         .btn {
-            width: 60px;
-            height: 60px;
-            font-size: 28px;
+            width: 55px;
+            height: 55px;
+            font-size: 24px;
             color: #fff;
             background: linear-gradient(145deg, #4a4a8a, #3a3a7a);
             border: 3px solid #6a6acf;
@@ -173,7 +179,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             transition: all 0.1s;
             touch-action: manipulation;
         }
@@ -181,15 +187,16 @@
         .btn:active {
             transform: scale(0.85);
             background: linear-gradient(145deg, #5a5a9a, #4a4a8a);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
         }
         
         #fireBtn {
-            width: 80px;
-            height: 80px;
-            font-size: 32px;
+            width: 75px;
+            height: 75px;
+            font-size: 28px;
             background: linear-gradient(145deg, #cc5555, #aa4444);
             border-color: #ff7777;
-            box-shadow: 0 6px 16px rgba(255, 0, 0, 0.4);
+            box-shadow: 0 5px 14px rgba(255, 0, 0, 0.4);
         }
         
         #upBtn {
@@ -215,11 +222,11 @@
         .powerup-indicators {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin-top: 15px;
-            padding: 10px;
+            gap: 12px;
+            margin-top: 12px;
+            padding: 8px;
             background: rgba(30, 30, 60, 0.6);
-            border-radius: 10px;
+            border-radius: 8px;
             border: 2px solid #5a5aaa;
         }
         
@@ -227,73 +234,76 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
         }
         
         .powerup-icon {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 18px;
             background: rgba(0, 0, 0, 0.3);
             border: 2px solid #fff;
         }
         
         button {
             font-family: 'Press Start 2P', monospace;
-            font-size: 1rem;
-            padding: 15px 30px;
-            margin-top: 25px;
+            font-size: 0.9rem;
+            padding: 12px 25px;
+            margin-top: 20px;
             background: linear-gradient(145deg, #4a4a8a, #3a3a7a);
             color: #ffcc00;
             border: 3px solid #6a6acf;
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.5);
         }
         
-        button:hover {
+        button:hover, button:focus {
             background: linear-gradient(145deg, #5a5a9a, #4a4a8a);
             transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(0, 0, 0, 0.6);
         }
         
         button:active {
             transform: translateY(1px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
         }
         
         .instructions {
             background: rgba(30, 30, 60, 0.6);
-            padding: 20px;
-            border-radius: 15px;
-            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
             border: 2px solid #5a5aaa;
             text-align: left;
-            max-width: 600px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            max-width: 100%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
         
         .instructions h3 {
             color: #4a9af5;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             text-align: center;
             text-shadow: 0 0 5px rgba(74, 154, 245, 0.7);
+            font-size: 1rem;
         }
         
         .instructions ul {
             list-style-type: none;
-            padding-left: 20px;
+            padding-left: 15px;
         }
         
         .instructions li {
-            margin: 12px 0;
-            font-size: 0.85rem;
+            margin: 10px 0;
+            font-size: 0.8rem;
             color: #e0e0ff;
-            line-height: 1.6;
+            line-height: 1.5;
         }
         
         .instructions li::before {
@@ -308,29 +318,32 @@
         .game-status {
             display: flex;
             justify-content: space-around;
-            margin-top: 15px;
+            margin-top: 12px;
             width: 100%;
+            gap: 10px;
         }
         
         .status-item {
             background: rgba(30, 30, 60, 0.6);
-            padding: 10px 15px;
-            border-radius: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
             border: 2px solid #5a5aaa;
-            font-size: 0.9rem;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            font-size: 0.8rem;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            flex: 1;
+            text-align: center;
         }
         
         .screen-image {
-            width: 200px;
-            height: 150px;
-            margin: 20px auto;
+            width: 180px;
+            height: 135px;
+            margin: 15px auto;
             background: linear-gradient(145deg, #3a3a7a, #2a2a6a);
             border: 3px solid #6a6acf;
-            border-radius: 15px;
+            border-radius: 12px;
             overflow: hidden;
             position: relative;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
         }
         
         .pixel-art {
@@ -354,44 +367,64 @@
         
         .emerald {
             position: absolute;
-            width: 20px;
-            height: 30px;
+            width: 18px;
+            height: 25px;
             background: linear-gradient(145deg, #00cc66, #00aa55);
-            top: 30px;
-            left: 90px;
+            top: 25px;
+            left: 85px;
             transform: rotate(45deg);
             border: 2px solid #00aa55;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
         
-        .path-error {
+        .touch-joystick {
             position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 0, 0, 0.7);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-size: 0.8rem;
-            animation: fadeOut 3s forwards;
-            z-index: 20;
+            bottom: 20px;
+            left: 20px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(100, 100, 180, 0.3);
+            border: 3px solid rgba(150, 150, 220, 0.6);
+            display: none;
+            z-index: 5;
+            touch-action: none;
         }
         
-        @keyframes fadeOut {
-            0% { opacity: 1; }
-            70% { opacity: 1; }
-            100% { opacity: 0; display: none; }
+        .touch-joystick-handle {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(200, 200, 255, 0.8);
+            top: 35px;
+            left: 35px;
+            box-shadow: 0 0 10px rgba(100, 100, 255, 0.7);
+            touch-action: none;
         }
         
+        .touch-shoot {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(200, 80, 80, 0.3);
+            border: 3px solid rgba(255, 100, 100, 0.6);
+            display: none;
+            z-index: 5;
+            touch-action: none;
+        }
+        
+        /* Mobile specific styles */
         @media (max-width: 768px) {
             h1 {
                 font-size: 1.8rem;
             }
             
-            #gameCanvas {
-                width: 100%;
-                height: auto;
+            .screen h2 {
+                font-size: 1.5rem;
             }
             
             .btn {
@@ -403,12 +436,24 @@
             #fireBtn {
                 width: 70px;
                 height: 70px;
-                font-size: 28px;
+                font-size: 26px;
             }
             
             button {
                 font-size: 0.8rem;
-                padding: 12px 20px;
+                padding: 10px 20px;
+            }
+            
+            .touch-joystick, .touch-shoot {
+                display: block;
+            }
+            
+            .directional-controls {
+                display: none;
+            }
+            
+            .fire-controls {
+                display: none;
             }
         }
         
@@ -418,7 +463,16 @@
             }
             
             .screen h2 {
-                font-size: 1.5rem;
+                font-size: 1.2rem;
+            }
+            
+            #hud {
+                padding: 8px 15px;
+                font-size: 0.8rem;
+            }
+            
+            #hud span {
+                font-size: 0.8rem;
             }
             
             .btn {
@@ -430,15 +484,37 @@
             #fireBtn {
                 width: 60px;
                 height: 60px;
-                font-size: 24px;
-            }
-            
-            #hud span {
-                font-size: 0.8rem;
+                font-size: 22px;
             }
             
             .instructions li {
                 font-size: 0.7rem;
+            }
+            
+            .plus-grid {
+                width: 140px;
+                height: 140px;
+            }
+            
+            .touch-joystick {
+                width: 100px;
+                height: 100px;
+                bottom: 15px;
+                left: 15px;
+            }
+            
+            .touch-joystick-handle {
+                width: 40px;
+                height: 40px;
+                top: 30px;
+                left: 30px;
+            }
+            
+            .touch-shoot {
+                width: 70px;
+                height: 70px;
+                bottom: 25px;
+                right: 25px;
             }
         }
     </style>
@@ -470,9 +546,8 @@
                     <li>Shoot enemies with the FIRE button</li>
                     <li>Avoid enemies and falling gold bags</li>
                     <li>Collect power-ups for special abilities</li>
-                    <li>Level 1 is easier - no enemy evolution</li>
-                    <li>Level 3 is more challenging</li>
                     <li>Complete all 3 levels to win!</li>
+                    <li>Move to next level when all emeralds collected</li>
                 </ul>
             </div>
         </div>
@@ -547,14 +622,93 @@
                 <div style="margin-top: 10px; font-size: 0.8rem;">MOVEMENT</div>
             </div>
         </div>
+        
+        <div class="touch-joystick" id="touchJoystick">
+            <div class="touch-joystick-handle" id="joystickHandle"></div>
+        </div>
+        
+        <div class="touch-shoot" id="touchShoot"></div>
     </div>
-<script>
+
+    <script>
+        // Enhanced Modern Digger Game
+        
         // Canvas setup
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const CANVAS_WIDTH = canvas.width;
         const CANVAS_HEIGHT = canvas.height;
         ctx.imageSmoothingEnabled = false;
+        
+        // Mobile touch controls
+        const touchJoystick = document.getElementById('touchJoystick');
+        const joystickHandle = document.getElementById('joystickHandle');
+        const touchShoot = document.getElementById('touchShoot');
+        let joystickActive = false;
+        let joystickBaseX = 0;
+        let joystickBaseY = 0;
+        let joystickRadius = 50;
+        let touchDir = null;
+        let touchFire = false;
+// Setup touch controls
+        function setupTouchControls() {
+            touchJoystick.addEventListener('touchstart', handleTouchStart);
+            document.addEventListener('touchmove', handleTouchMove);
+            document.addEventListener('touchend', handleTouchEnd);
+            
+            touchShoot.addEventListener('touchstart', () => touchFire = true);
+            touchShoot.addEventListener('touchend', () => touchFire = false);
+            touchShoot.addEventListener('touchcancel', () => touchFire = false);
+        }
+        
+        function handleTouchStart(e) {
+            const touch = e.touches[0];
+            const rect = touchJoystick.getBoundingClientRect();
+            joystickBaseX = rect.left + rect.width / 2;
+            joystickBaseY = rect.top + rect.height / 2;
+            joystickActive = true;
+            updateJoystick(touch.clientX, touch.clientY);
+            e.preventDefault();
+        }
+        
+        function handleTouchMove(e) {
+            if (!joystickActive) return;
+            const touch = e.touches[0];
+            updateJoystick(touch.clientX, touch.clientY);
+            e.preventDefault();
+        }
+        
+        function handleTouchEnd() {
+            joystickActive = false;
+            touchDir = null;
+            joystickHandle.style.transform = 'translate(35px, 35px)';
+        }
+        
+        function updateJoystick(x, y) {
+            const dx = x - joystickBaseX;
+            const dy = y - joystickBaseY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx);
+            
+            const maxDistance = joystickRadius;
+            const limitedDistance = Math.min(distance, maxDistance);
+            
+            const newX = Math.cos(angle) * limitedDistance;
+            const newY = Math.sin(angle) * limitedDistance;
+            
+            joystickHandle.style.transform = `translate(${35 + newX}px, ${35 + newY}px)`;
+            
+            // Determine direction
+            if (limitedDistance > 10) {
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    touchDir = dx > 0 ? 'right' : 'left';
+                } else {
+                    touchDir = dy > 0 ? 'down' : 'up';
+                }
+            } else {
+                touchDir = null;
+            }
+        }
 
         // Game states
         const STATE_MENU = 0;
@@ -585,6 +739,14 @@
         let speedTimer = 0;
         let fireTimer = 0;
         let lastTime = Date.now();
+        
+        // Game entities
+        let player = null;
+        let enemies = [];
+        let bullets = [];
+        let goldBags = [];
+        let map = [];
+        let emeraldMap = [];
 
         // Tile types
         const TILE_EMPTY = 0;
@@ -964,7 +1126,8 @@
                         break;
                 }
             }
-       draw() {
+            
+            draw() {
                 if (this.collected) return;
                 
                 let color, symbol;
@@ -989,8 +1152,7 @@
                 ctx.beginPath();
                 ctx.arc(this.x + this.size/2, this.y + this.size/2, this.size/2 + pulseSize, 0, Math.PI * 2);
                 ctx.fill();
-                
-                // Draw symbol inside
+// Draw symbol inside
                 ctx.fillStyle = 'white';
                 ctx.font = '16px "Press Start 2P"';
                 ctx.textAlign = 'center';
@@ -1008,30 +1170,13 @@
                 this.speed = 40 + currentLevel*10; // Level-based speed
                 this.dirX = 0; 
                 this.dirY = 0;
-                this.type = type; // 1 = Nobbin, 2 = Hobbin
+                this.type = type;
                 this.moveTimer = Math.random() * 2;
                 this.path = [];
                 this.pathUpdateTimer = 0;
-                this.isHobbin = false;
             }
             
             update(dt) {
-                // Only evolve to Hobbin in level 2 and above
-                if (currentLevel >= 2 && !this.isHobbin && Math.random() < 0.005 * currentLevel) {
-                    this.isHobbin = true;
-                }
-                
-                // Hobbin can dig through dirt
-                if (this.isHobbin) {
-                    // Check current tile and dig if it's dirt
-                    let tileX = Math.floor((this.x + this.size/2) / 32);
-                    let tileY = Math.floor((this.y + this.size/2) / 32);
-                    
-                    if (map[tileY] && map[tileY][tileX] === TILE_DIRT) {
-                        map[tileY][tileX] = TILE_EMPTY;
-                    }
-                }
-                
                 this.moveTimer -= dt;
                 this.pathUpdateTimer -= dt;
                 
@@ -1057,13 +1202,6 @@
                         // Move toward the target node
                         this.dirX = dx / distance;
                         this.dirY = dy / distance;
-                    }
-                } else {
-                    // If no path, move randomly
-                    if (this.moveTimer <= 0) {
-                        this.dirX = Math.random() * 2 - 1;
-                        this.dirY = Math.random() * 2 - 1;
-                        this.moveTimer = Math.random() * 2 + 1;
                     }
                 }
                 
@@ -1140,8 +1278,8 @@
                         // Skip if out of bounds
                         if (ny < 0 || ny >= map.length || nx < 0 || nx >= map[0].length) continue;
                         
-                        // Skip if not a path and enemy can't dig
-                        if (map[ny][nx] === TILE_DIRT && !this.isHobbin) continue;
+                        // Skip if wall
+                        if (map[ny][nx] === TILE_WALL) continue;
                         
                         if (visited.has(`${nx},${ny}`)) continue;
                         
@@ -1157,16 +1295,20 @@
                     }
                 }
                 
-                // If no path found, use fallback random movement
+                // If no path found, use direct movement as fallback
                 this.path = [];
+                let dx = player.x - this.x;
+                let dy = player.y - this.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist > 0) {
+                    this.dirX = dx / dist;
+                    this.dirY = dy / dist;
+                }
             }
             
             draw() {
-                // Draw enemy based on type
-                let color = this.isHobbin ? '#b19cd9' : '#ff6b6b';
-                
-                // Draw enemy body
-                ctx.fillStyle = color;
+                // Draw enemy
+                ctx.fillStyle = '#ff6b6b';
                 ctx.beginPath();
                 ctx.arc(this.x + this.size/2, this.y + this.size/2, this.size/2, 0, Math.PI * 2);
                 ctx.fill();
@@ -1290,49 +1432,36 @@
 
         // Input handling
         let keys = {};
-        let touchDir = null;
-        let touchFire = false;
         
         window.addEventListener('keydown', e => keys[e.key] = true);
         window.addEventListener('keyup', e => keys[e.key] = false);
         
-        // Touch controls with pointer events
-        function setupButton(element, dir) {
-            // Pointer events (works for both mouse and touch)
-            element.addEventListener('pointerdown', (e) => {
-                e.preventDefault();
-                if (dir) {
-                    touchDir = dir;
-                } else {
-                    touchFire = true;
-                }
-            });
-            
-            element.addEventListener('pointerup', (e) => {
-                e.preventDefault();
-                if (dir) {
-                    touchDir = null;
-                } else {
-                    touchFire = false;
-                }
-            });
-            
-            element.addEventListener('pointerleave', (e) => {
-                e.preventDefault();
-                if (dir) {
-                    touchDir = null;
-                } else {
-                    touchFire = false;
-                }
-            });
-        }
-        
         // Setup control buttons
-        setupButton(document.getElementById('upBtn'), 'up');
-        setupButton(document.getElementById('downBtn'), 'down');
-        setupButton(document.getElementById('leftBtn'), 'left');
-        setupButton(document.getElementById('rightBtn'), 'right');
-        setupButton(document.getElementById('fireBtn'));
+        document.getElementById('upBtn').addEventListener('pointerdown', (e) => {
+            touchDir = 'up';
+            e.preventDefault();
+        });
+        document.getElementById('downBtn').addEventListener('pointerdown', (e) => {
+            touchDir = 'down';
+            e.preventDefault();
+        });
+        document.getElementById('leftBtn').addEventListener('pointerdown', (e) => {
+            touchDir = 'left';
+            e.preventDefault();
+        });
+        document.getElementById('rightBtn').addEventListener('pointerdown', (e) => {
+            touchDir = 'right';
+            e.preventDefault();
+        });
+        
+        document.getElementById('upBtn').addEventListener('pointerup', () => touchDir = null);
+        document.getElementById('downBtn').addEventListener('pointerup', () => touchDir = null);
+        document.getElementById('leftBtn').addEventListener('pointerup', () => touchDir = null);
+        document.getElementById('rightBtn').addEventListener('pointerup', () => touchDir = null);
+        
+        document.getElementById('fireBtn').addEventListener('pointerdown', () => touchFire = true);
+        document.getElementById('fireBtn').addEventListener('pointerup', () => touchFire = false);
+        document.getElementById('fireBtn').addEventListener('pointerleave', () => touchFire = false);
 
         // Game initialization
         function initGame() {
@@ -1365,6 +1494,7 @@
                 document.getElementById('menu').classList.remove('hidden');
             });
             
+            setupTouchControls();
             updateHUD();
         }
 
@@ -1398,7 +1528,19 @@
             goldCollected = 0;
             consecutiveEmeralds = 0;
             enemiesCreated = 0;
-            maxEnemies = 3 + currentLevel * 2; // Fewer enemies in level 1
+            
+            // Adjust difficulty based on level
+            if (currentLevel === 1) {
+                maxEnemies = 4;
+                playerSpeed = 110;
+            } else if (currentLevel === 2) {
+                maxEnemies = 5;
+                playerSpeed = 100;
+            } else {
+                maxEnemies = 6;
+                playerSpeed = 90;
+            }
+            
             bonusMode = false;
             monstersEaten = 0;
             
@@ -1432,23 +1574,18 @@
                 }
             }
             
-            // Create a path from player to enemy area
-            createPath(2, 2, cols-3, rows-3);
+            // Create connected paths
+            createConnectedPaths(cols, rows);
             
             // Place emeralds
-            totalEmeralds = 10 + currentLevel * 5; // Fewer emeralds in level 1
-            let placedEmeralds = 0;
-            let attempts = 0;
-            while (placedEmeralds < totalEmeralds && attempts < 1000) {
+            totalEmeralds = 10 + currentLevel * 3; 
+            for (let i = 0; i < totalEmeralds; i++) {
                 let x = Math.floor(Math.random() * (cols - 4)) + 2;
                 let y = Math.floor(Math.random() * (rows - 4)) + 2;
                 if (map[y][x] === TILE_DIRT) {
                     emeraldMap[y][x] = true;
-                    placedEmeralds++;
                 }
-                attempts++;
             }
-            totalEmeralds = placedEmeralds; // Update to actual placed count
             
             // Place gold bags
             for (let i = 0; i < 6; i++) {
@@ -1483,30 +1620,36 @@
             updateHUD();
             updateEmeraldStatus();
         }
-// Create a path between two points
-        function createPath(startX, startY, endX, endY) {
-            let x = startX;
-            let y = startY;
-            
-            while (x !== endX || y !== endY) {
-                map[y][x] = TILE_EMPTY; // Clear the path
-                
-                if (x < endX) x++;
-                else if (x > endX) x--;
-                
-                if (y < endY) y++;
-                else if (y > endY) y--;
+        
+        // Create connected paths
+        function createConnectedPaths(cols, rows) {
+            // Create main path from player to enemy base
+            for (let x = 3; x < cols - 4; x++) {
+                map[3][x] = TILE_EMPTY;
+            }
+            for (let y = 3; y < rows - 4; y++) {
+                map[y][cols - 4] = TILE_EMPTY;
             }
             
-            map[y][x] = TILE_EMPTY; // Clear the endpoint
-            
-            // Create some branches for exploration
-            for (let i = 0; i < 8; i++) {
-                let branchX = startX + Math.floor(Math.random() * (endX - startX));
-                let branchY = startY + Math.floor(Math.random() * (endY - startY));
+            // Create additional connecting paths
+            for (let i = 0; i < 10; i++) {
+                const x = Math.floor(Math.random() * (cols - 8)) + 4;
+                const y = Math.floor(Math.random() * (rows - 8)) + 4;
                 
-                if (map[branchY][branchX] === TILE_DIRT) {
-                    map[branchY][branchX] = TILE_EMPTY;
+                // Create horizontal path
+                for (let dx = -3; dx <= 3; dx++) {
+                    const tx = x + dx;
+                    if (tx > 0 && tx < cols-1) {
+                        map[y][tx] = TILE_EMPTY;
+                    }
+                }
+                
+                // Create vertical path
+                for (let dy = -3; dy <= 3; dy++) {
+                    const ty = y + dy;
+                    if (ty > 0 && ty < rows-1) {
+                        map[ty][x] = TILE_EMPTY;
+                    }
                 }
             }
         }
@@ -1534,8 +1677,7 @@
             document.getElementById('score').textContent = 'Score: ' + score;
             document.getElementById('lives').textContent = 'Lives: ' + lives;
         }
-        
-        // Update emerald status
+// Update emerald status
         function updateEmeraldStatus() {
             document.getElementById('emeraldsCollected').textContent = emeraldsCollected;
             document.getElementById('totalEmeralds').textContent = totalEmeralds;
@@ -1544,64 +1686,59 @@
         // Start bonus mode
         function startBonusMode() {
             bonusMode = true;
-            bonusEndTime = Date.now() + 15000 - currentLevel * 1000; // Less time at higher levels
+            bonusEndTime = Date.now() + 15000 - currentLevel * 1000;
             monstersEaten = 0;
         }
 
         // Game loop
         function gameLoop() {
             if (gameState === STATE_PLAY) {
-                try {
-                    let now = Date.now();
-                    let dt = (now - lastTime) / 1000;
-                    lastTime = now;
-                    
-                    // Update power-up timers
-                    if (speedTimer > 0) {
-                        speedTimer -= dt;
-                        if (speedTimer <= 0) playerSpeed = 100;
-                    }
-                    if (shieldTimer > 0) {
-                        shieldTimer -= dt;
-                        if (shieldTimer <= 0) playerShield = false;
-                    }
-                    if (fireTimer > 0) {
-                        fireTimer -= dt;
-                        if (fireTimer <= 0) playerFirePower = false;
-                    }
-                    
-                    // Update entities
-                    player.update(dt);
-                    enemies.forEach(e => e.update(dt));
-                    bullets.forEach(b => b.update(dt));
-                    bullets = bullets.filter(b => !b.dead);
-                    goldBags.forEach(gb => gb.update(dt));
-                    powerUps.forEach(pu => pu.update(dt));
-                    powerUps = powerUps.filter(pu => !pu.collected);
-                    
-                    // Spawn more enemies occasionally
-                    if (Math.random() < 0.01 && enemies.length < maxEnemies) {
-                        spawnEnemy();
-                    }
-                    
-                    // Check if bonus mode ended
-                    if (bonusMode && Date.now() > bonusEndTime) {
-                        bonusMode = false;
-                    }
-                    
-                    // Check if level is complete
-                    if (emeraldsCollected >= totalEmeralds) {
-                        levelComplete();
-                        return;
-                    }
-                    
-                    drawGame();
-                    updateHUD();
-                    requestAnimationFrame(gameLoop);
-                } catch (e) {
-                    console.error("Game error:", e);
-                    requestAnimationFrame(gameLoop);
+                let now = Date.now();
+                let dt = (now - lastTime) / 1000;
+                lastTime = now;
+                
+                // Update power-up timers
+                if (speedTimer > 0) {
+                    speedTimer -= dt;
+                    if (speedTimer <= 0) playerSpeed = 100;
                 }
+                if (shieldTimer > 0) {
+                    shieldTimer -= dt;
+                    if (shieldTimer <= 0) playerShield = false;
+                }
+                if (fireTimer > 0) {
+                    fireTimer -= dt;
+                    if (fireTimer <= 0) playerFirePower = false;
+                }
+                
+                // Update entities
+                player.update(dt);
+                enemies.forEach(e => e.update(dt));
+                bullets.forEach(b => b.update(dt));
+                bullets = bullets.filter(b => !b.dead);
+                goldBags.forEach(gb => gb.update(dt));
+                powerUps.forEach(pu => pu.update(dt));
+                powerUps = powerUps.filter(pu => !pu.collected);
+                
+                // Spawn more enemies occasionally
+                if (Math.random() < 0.01 && enemies.length < maxEnemies) {
+                    spawnEnemy();
+                }
+                
+                // Check if bonus mode ended
+                if (bonusMode && Date.now() > bonusEndTime) {
+                    bonusMode = false;
+                }
+                
+                // Check if level is complete
+                if (emeraldsCollected >= totalEmeralds) {
+                    levelComplete();
+                    return;
+                }
+                
+                drawGame();
+                updateHUD();
+                requestAnimationFrame(gameLoop);
             }
         }
 
@@ -1617,7 +1754,7 @@
                     let screenX = x * 32;
                     let screenY = y * 32;
                     
-                    if (map[y][x] === TILE_DIRT) { // Dirt
+                    if (map[y][x] === TILE_DIRT) {
                         ctx.fillStyle = '#8B4513';
                         ctx.fillRect(screenX, screenY, 32, 32);
                         
@@ -1650,7 +1787,7 @@
                             ctx.fill();
                         }
                     } 
-                    else if (map[y][x] === TILE_WALL) { // Indestructible wall
+                    else if (map[y][x] === TILE_WALL) {
                         ctx.fillStyle = '#555577';
                         ctx.fillRect(screenX, screenY, 32, 32);
                         
