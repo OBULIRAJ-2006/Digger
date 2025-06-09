@@ -136,87 +136,21 @@
             max-width: 100%;
         }
         
-        .controls-container {
+        .game-status {
             display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-            width: 100%;
-            gap: 15px;
-        }
-        
-        .fire-controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex: 1;
-        }
-        
-        .directional-controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex: 2;
-        }
-        
-        .plus-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 8px;
-            width: 160px;
-            height: 160px;
-        }
-        
-        .btn {
-            width: 55px;
-            height: 55px;
-            font-size: 24px;
-            color: #fff;
-            background: linear-gradient(145deg, #4a4a8a, #3a3a7a);
-            border: 3px solid #6a6acf;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-            transition: all 0.1s;
-            touch-action: manipulation;
+            margin-top: 12px;
+            width: 100%;
         }
         
-        .btn:active {
-            transform: scale(0.85);
-            background: linear-gradient(145deg, #5a5a9a, #4a4a8a);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-        }
-        
-        #fireBtn {
-            width: 75px;
-            height: 75px;
-            font-size: 28px;
-            background: linear-gradient(145deg, #cc5555, #aa4444);
-            border-color: #ff7777;
-            box-shadow: 0 5px 14px rgba(255, 0, 0, 0.4);
-        }
-        
-        #upBtn {
-            grid-column: 2;
-            grid-row: 1;
-        }
-        
-        #leftBtn {
-            grid-column: 1;
-            grid-row: 2;
-        }
-        
-        #downBtn {
-            grid-column: 2;
-            grid-row: 3;
-        }
-        
-        #rightBtn {
-            grid-column: 3;
-            grid-row: 2;
+        .status-item {
+            background: rgba(30, 30, 60, 0.6);
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 2px solid #5a5aaa;
+            font-size: 0.8rem;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            text-align: center;
         }
         
         .powerup-indicators {
@@ -315,25 +249,6 @@
             text-shadow: 0 0 5px rgba(255, 204, 0, 0.7);
         }
         
-        .game-status {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 12px;
-            width: 100%;
-            gap: 10px;
-        }
-        
-        .status-item {
-            background: rgba(30, 30, 60, 0.6);
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: 2px solid #5a5aaa;
-            font-size: 0.8rem;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-            flex: 1;
-            text-align: center;
-        }
-        
         .screen-image {
             width: 180px;
             height: 135px;
@@ -386,7 +301,6 @@
             border-radius: 50%;
             background: rgba(100, 100, 180, 0.3);
             border: 3px solid rgba(150, 150, 220, 0.6);
-            display: none;
             z-index: 5;
             touch-action: none;
         }
@@ -412,7 +326,6 @@
             border-radius: 50%;
             background: rgba(200, 80, 80, 0.3);
             border: 3px solid rgba(255, 100, 100, 0.6);
-            display: none;
             z-index: 5;
             touch-action: none;
         }
@@ -427,18 +340,6 @@
                 font-size: 1.5rem;
             }
             
-            .btn {
-                width: 50px;
-                height: 50px;
-                font-size: 22px;
-            }
-            
-            #fireBtn {
-                width: 70px;
-                height: 70px;
-                font-size: 26px;
-            }
-            
             button {
                 font-size: 0.8rem;
                 padding: 10px 20px;
@@ -446,14 +347,6 @@
             
             .touch-joystick, .touch-shoot {
                 display: block;
-            }
-            
-            .directional-controls {
-                display: none;
-            }
-            
-            .fire-controls {
-                display: none;
             }
         }
         
@@ -475,25 +368,8 @@
                 font-size: 0.8rem;
             }
             
-            .btn {
-                width: 45px;
-                height: 45px;
-                font-size: 18px;
-            }
-            
-            #fireBtn {
-                width: 60px;
-                height: 60px;
-                font-size: 22px;
-            }
-            
             .instructions li {
                 font-size: 0.7rem;
-            }
-            
-            .plus-grid {
-                width: 140px;
-                height: 140px;
             }
             
             .touch-joystick {
@@ -547,7 +423,6 @@
                     <li>Avoid enemies and falling gold bags</li>
                     <li>Collect power-ups for special abilities</li>
                     <li>Complete all 3 levels to win!</li>
-                    <li>Move to next level when all emeralds collected</li>
                 </ul>
             </div>
         </div>
@@ -562,7 +437,6 @@
         <canvas id="gameCanvas" width="640" height="480"></canvas>
         
         <div class="game-status">
-            <div class="status-item">Emeralds: <span id="emeraldsCollected">0</span>/<span id="totalEmeralds">0</span></div>
             <div class="status-item">Gold: <span id="goldCollected">0</span></div>
         </div>
         
@@ -606,31 +480,13 @@
             <button id="nextLevelBtn">NEXT LEVEL</button>
         </div>
         
-        <div class="controls-container">
-            <div class="fire-controls">
-                <button class="btn" id="fireBtn">●</button>
-                <div style="margin-top: 10px; font-size: 0.8rem;">FIRE</div>
-            </div>
-            
-            <div class="directional-controls">
-                <div class="plus-grid">
-                    <div class="btn" id="upBtn">▲</div>
-                    <div class="btn" id="leftBtn">◀</div>
-                    <div class="btn" id="downBtn">▼</div>
-                    <div class="btn" id="rightBtn">▶</div>
-                </div>
-                <div style="margin-top: 10px; font-size: 0.8rem;">MOVEMENT</div>
-            </div>
-        </div>
-        
         <div class="touch-joystick" id="touchJoystick">
             <div class="touch-joystick-handle" id="joystickHandle"></div>
         </div>
         
         <div class="touch-shoot" id="touchShoot"></div>
     </div>
-
-    <script>
+<script>
         // Enhanced Modern Digger Game
         
         // Canvas setup
@@ -648,9 +504,10 @@
         let joystickBaseX = 0;
         let joystickBaseY = 0;
         let joystickRadius = 50;
-        let touchDir = null;
+        let touchVector = { x: 0, y: 0 };
         let touchFire = false;
-// Setup touch controls
+        
+        // Setup touch controls
         function setupTouchControls() {
             touchJoystick.addEventListener('touchstart', handleTouchStart);
             document.addEventListener('touchmove', handleTouchMove);
@@ -680,7 +537,8 @@
         
         function handleTouchEnd() {
             joystickActive = false;
-            touchDir = null;
+            touchVector.x = 0;
+            touchVector.y = 0;
             joystickHandle.style.transform = 'translate(35px, 35px)';
         }
         
@@ -698,16 +556,9 @@
             
             joystickHandle.style.transform = `translate(${35 + newX}px, ${35 + newY}px)`;
             
-            // Determine direction
-            if (limitedDistance > 10) {
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    touchDir = dx > 0 ? 'right' : 'left';
-                } else {
-                    touchDir = dy > 0 ? 'down' : 'up';
-                }
-            } else {
-                touchDir = null;
-            }
+            // Set touch vector for smooth movement
+            touchVector.x = newX / maxDistance;
+            touchVector.y = newY / maxDistance;
         }
 
         // Game states
@@ -778,21 +629,17 @@
                 
                 // Movement
                 let moveX = 0, moveY = 0;
-                if (keys['ArrowUp'] || keys['w'] || touchDir === 'up') { 
-                    moveY = -1; 
-                    this.direction = 'up'; 
+                
+                // Use touch vector for movement if joystick is active
+                if (joystickActive) {
+                    moveX = touchVector.x;
+                    moveY = touchVector.y;
                 }
-                if (keys['ArrowDown'] || keys['s'] || touchDir === 'down') { 
-                    moveY = 1; 
-                    this.direction = 'down'; 
-                }
-                if (keys['ArrowLeft'] || keys['a'] || touchDir === 'left') { 
-                    moveX = -1; 
-                    this.direction = 'left'; 
-                }
-                if (keys['ArrowRight'] || keys['d'] || touchDir === 'right') { 
-                    moveX = 1; 
-                    this.direction = 'right'; 
+                else {
+                    if (keys['ArrowUp'] || keys['w']) moveY = -1; 
+                    if (keys['ArrowDown'] || keys['s']) moveY = 1; 
+                    if (keys['ArrowLeft'] || keys['a']) moveX = -1; 
+                    if (keys['ArrowRight'] || keys['d']) moveX = 1; 
                 }
                 
                 // Diagonal movement normalization
@@ -834,9 +681,16 @@
                             score += 250;
                             consecutiveEmeralds = 0;
                         }
-                        
-                        updateEmeraldStatus();
                         emeraldMap[tileY][tileX] = false;
+                    }
+                }
+                
+                // Set direction based on movement
+                if (moveX !== 0 || moveY !== 0) {
+                    if (Math.abs(moveX) > Math.abs(moveY)) {
+                        this.direction = moveX > 0 ? 'right' : 'left';
+                    } else {
+                        this.direction = moveY > 0 ? 'down' : 'up';
                     }
                 }
                 
@@ -1152,7 +1006,8 @@
                 ctx.beginPath();
                 ctx.arc(this.x + this.size/2, this.y + this.size/2, this.size/2 + pulseSize, 0, Math.PI * 2);
                 ctx.fill();
-// Draw symbol inside
+                
+                // Draw symbol inside
                 ctx.fillStyle = 'white';
                 ctx.font = '16px "Press Start 2P"';
                 ctx.textAlign = 'center';
@@ -1278,7 +1133,7 @@
                         // Skip if out of bounds
                         if (ny < 0 || ny >= map.length || nx < 0 || nx >= map[0].length) continue;
                         
-                        // Skip if wall
+                        // Skip if not a path
                         if (map[ny][nx] === TILE_WALL) continue;
                         
                         if (visited.has(`${nx},${ny}`)) continue;
@@ -1436,33 +1291,6 @@
         window.addEventListener('keydown', e => keys[e.key] = true);
         window.addEventListener('keyup', e => keys[e.key] = false);
         
-        // Setup control buttons
-        document.getElementById('upBtn').addEventListener('pointerdown', (e) => {
-            touchDir = 'up';
-            e.preventDefault();
-        });
-        document.getElementById('downBtn').addEventListener('pointerdown', (e) => {
-            touchDir = 'down';
-            e.preventDefault();
-        });
-        document.getElementById('leftBtn').addEventListener('pointerdown', (e) => {
-            touchDir = 'left';
-            e.preventDefault();
-        });
-        document.getElementById('rightBtn').addEventListener('pointerdown', (e) => {
-            touchDir = 'right';
-            e.preventDefault();
-        });
-        
-        document.getElementById('upBtn').addEventListener('pointerup', () => touchDir = null);
-        document.getElementById('downBtn').addEventListener('pointerup', () => touchDir = null);
-        document.getElementById('leftBtn').addEventListener('pointerup', () => touchDir = null);
-        document.getElementById('rightBtn').addEventListener('pointerup', () => touchDir = null);
-        
-        document.getElementById('fireBtn').addEventListener('pointerdown', () => touchFire = true);
-        document.getElementById('fireBtn').addEventListener('pointerup', () => touchFire = false);
-        document.getElementById('fireBtn').addEventListener('pointerleave', () => touchFire = false);
-
         // Game initialization
         function initGame() {
             document.getElementById('menu').classList.remove('hidden');
@@ -1533,12 +1361,15 @@
             if (currentLevel === 1) {
                 maxEnemies = 4;
                 playerSpeed = 110;
+                totalEmeralds = 12;
             } else if (currentLevel === 2) {
                 maxEnemies = 5;
                 playerSpeed = 100;
+                totalEmeralds = 15;
             } else {
                 maxEnemies = 6;
                 playerSpeed = 90;
+                totalEmeralds = 18;
             }
             
             bonusMode = false;
@@ -1578,7 +1409,6 @@
             createConnectedPaths(cols, rows);
             
             // Place emeralds
-            totalEmeralds = 10 + currentLevel * 3; 
             for (let i = 0; i < totalEmeralds; i++) {
                 let x = Math.floor(Math.random() * (cols - 4)) + 2;
                 let y = Math.floor(Math.random() * (rows - 4)) + 2;
@@ -1618,7 +1448,6 @@
             }
             
             updateHUD();
-            updateEmeraldStatus();
         }
         
         // Create connected paths
@@ -1676,11 +1505,7 @@
         function updateHUD() {
             document.getElementById('score').textContent = 'Score: ' + score;
             document.getElementById('lives').textContent = 'Lives: ' + lives;
-        }
-// Update emerald status
-        function updateEmeraldStatus() {
-            document.getElementById('emeraldsCollected').textContent = emeraldsCollected;
-            document.getElementById('totalEmeralds').textContent = totalEmeralds;
+            document.getElementById('goldCollected').textContent = goldCollected;
         }
 
         // Start bonus mode
@@ -1696,8 +1521,7 @@
                 let now = Date.now();
                 let dt = (now - lastTime) / 1000;
                 lastTime = now;
-                
-                // Update power-up timers
+// Update power-up timers
                 if (speedTimer > 0) {
                     speedTimer -= dt;
                     if (speedTimer <= 0) playerSpeed = 100;
