@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Modern Digger - Enhanced</title>
+    <title>Modern Digger</title>
     <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
     <style>
         * {
@@ -486,7 +486,8 @@
         
         <div class="touch-shoot" id="touchShoot"></div>
     </div>
-<script>
+
+    <script>
         // Enhanced Modern Digger Game
         
         // Canvas setup
@@ -1018,21 +1019,18 @@
 
         // Enemy class
         class Enemy {
-            constructor(x, y, type = 1) {
+            constructor(x, y) {
                 this.x = x; 
                 this.y = y;
                 this.size = 32;
                 this.speed = 40 + currentLevel*10; // Level-based speed
                 this.dirX = 0; 
                 this.dirY = 0;
-                this.type = type;
-                this.moveTimer = Math.random() * 2;
                 this.path = [];
                 this.pathUpdateTimer = 0;
             }
             
             update(dt) {
-                this.moveTimer -= dt;
                 this.pathUpdateTimer -= dt;
                 
                 // Update path to player periodically
@@ -1133,7 +1131,7 @@
                         // Skip if out of bounds
                         if (ny < 0 || ny >= map.length || nx < 0 || nx >= map[0].length) continue;
                         
-                        // Skip if not a path
+                        // Skip if wall
                         if (map[ny][nx] === TILE_WALL) continue;
                         
                         if (visited.has(`${nx},${ny}`)) continue;
@@ -1405,8 +1403,8 @@
                 }
             }
             
-            // Create connected paths
-            createConnectedPaths(cols, rows);
+            // Create clear path from enemy base to player base
+            createDirectPath(cols, rows);
             
             // Place emeralds
             for (let i = 0; i < totalEmeralds; i++) {
@@ -1450,36 +1448,29 @@
             updateHUD();
         }
         
-        // Create connected paths
-        function createConnectedPaths(cols, rows) {
-            // Create main path from player to enemy base
-            for (let x = 3; x < cols - 4; x++) {
-                map[3][x] = TILE_EMPTY;
-            }
-            for (let y = 3; y < rows - 4; y++) {
-                map[y][cols - 4] = TILE_EMPTY;
+        // Create direct path from enemy base to player base
+        function createDirectPath(cols, rows) {
+            // Player base center
+            let playerBaseX = 2;
+            let playerBaseY = 2;
+            
+            // Enemy base center
+            let enemyBaseX = cols - 3;
+            let enemyBaseY = rows - 3;
+            
+            // Create vertical path from player base to center
+            for (let y = playerBaseY; y <= Math.floor(rows/2); y++) {
+                map[y][playerBaseX] = TILE_EMPTY;
             }
             
-            // Create additional connecting paths
-            for (let i = 0; i < 10; i++) {
-                const x = Math.floor(Math.random() * (cols - 8)) + 4;
-                const y = Math.floor(Math.random() * (rows - 8)) + 4;
-                
-                // Create horizontal path
-                for (let dx = -3; dx <= 3; dx++) {
-                    const tx = x + dx;
-                    if (tx > 0 && tx < cols-1) {
-                        map[y][tx] = TILE_EMPTY;
-                    }
-                }
-                
-                // Create vertical path
-                for (let dy = -3; dy <= 3; dy++) {
-                    const ty = y + dy;
-                    if (ty > 0 && ty < rows-1) {
-                        map[ty][x] = TILE_EMPTY;
-                    }
-                }
+            // Create horizontal path across the center
+            for (let x = playerBaseX; x <= enemyBaseX; x++) {
+                map[Math.floor(rows/2)][x] = TILE_EMPTY;
+            }
+            
+            // Create vertical path from center to enemy base
+            for (let y = Math.floor(rows/2); y <= enemyBaseY; y++) {
+                map[y][enemyBaseX] = TILE_EMPTY;
             }
         }
 
@@ -1521,7 +1512,8 @@
                 let now = Date.now();
                 let dt = (now - lastTime) / 1000;
                 lastTime = now;
-// Update power-up timers
+                
+                // Update power-up timers
                 if (speedTimer > 0) {
                     speedTimer -= dt;
                     if (speedTimer <= 0) playerSpeed = 100;
